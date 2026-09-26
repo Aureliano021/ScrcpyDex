@@ -1,0 +1,19 @@
+# Java e Android
+*.class
+build/
+bin/
+.gradle/
+
+# IDE e Editor
+.idea/
+*.iml
+.vscode/
+
+# .NET / C#
+client/obj/
+client/bin/
+client/.vs/
+
+# Logs e temporários
+*.log
+*.tmp
