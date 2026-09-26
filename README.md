@@ -11,6 +11,12 @@ Developed and validated on a **Samsung Galaxy S23 (`SM-S911B`)** running **Andro
 
 ---
 
+## ✍️ Author's Note
+
+> *"Hey! Aureliano here. I want to make it crystal clear that my direct participation in this codebase was roughly, let's say, 10%. I simply brought the original idea to the table and actively guided the autonomous AI coding agents step-by-step. There might be grotesque bugs, or there might be none at all—what truly matters to me is that this project completely solved my real-world need!"*
+
+---
+
 ## ⚡ Key Features
 
 * **Zero Wi-Fi Latency over USB:** Eliminates wireless stutter, packet drops, and local network congestion by looping Miracast through `127.0.0.1` and streaming over high-speed USB via ADB.
@@ -101,8 +107,8 @@ This immediately terminates any hanging host processes (`scrcpy.exe`, `ffplay.ex
 * [Report 03: Unified Client, Linux Kernel UHID Mouse & Lifecycle Orchestration](docs/reports/03_unified_client_and_uhid_mouse.md)
 * [Protocol Specification: Binary Control & Communication Contract (SSOT)](docs/PROTOCOL.md)
 
-### Portuguese Historical Archive (`pt-br`)
-* [Arquivo de Relatórios Originais e Engenharia Reversa (pt-br)](relatórios/pt-br/)
+### Historical Research & Discovery Archive (`pt-br`)
+* [Original Development & Discovery Reports (pt-br)](relatórios/pt-br/)
 
 ---
 
