@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "display": {
+    "resolution": "1920x1080",
+    "fps": 60,
+    "bitrate": 8000000,
+    "codec": "h264",
+    "windowMode": "normal"
+  },
+  "audio": {
+    "enabled": true,
+    "bufferMs": 50
+  },
+  "input": {
+    "mouseDriver": "uhid",
+    "releaseKey": "LeftAlt"
+  },
+  "device": {
+    "turnScreenOff": true,
+    "stayAwake": true,
+    "autoConnect": false
+  },
+  "ui": {
+    "theme": "dark",
+    "showLogPanel": true
+  }
+}

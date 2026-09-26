@@ -1,0 +1,19 @@
+<Application x:Class="ScrcpyDex.WinUI.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ui:ThemesDictionary Theme="Dark" />
+                <ui:ControlsDictionary />
+            </ResourceDictionary.MergedDictionaries>
+
+            <SolidColorBrush x:Key="DexAccentBrush" Color="#0078D4" />
+            <SolidColorBrush x:Key="DexAccentHoverBrush" Color="#1984D8" />
+            <SolidColorBrush x:Key="DexCardBackgroundBrush" Color="#202020" />
+            <SolidColorBrush x:Key="DexCardBorderBrush" Color="#333333" />
+            <SolidColorBrush x:Key="DexSubtextBrush" Color="#A0A0A0" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
