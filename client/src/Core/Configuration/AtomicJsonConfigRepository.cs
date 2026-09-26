@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
+// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,9 +20,8 @@ using System.Threading.Tasks;
 namespace ScrcpyDex.Core.Configuration
 {
     /// <summary>
-    /// Implements a strictly ACID-compliant, two-phase atomic configuration store for Windows NTFS.
-    /// Uses FileOptions.WriteThrough to bypass OS buffer caches and File.Replace (NTFS ReplaceFileW)
-    /// to guarantee that settings.json is never corrupted into a 0-byte file during sudden process termination.
+    /// Configuration repository that saves settings to JSON using atomic file replacement.
+    /// Writes to a temporary file before replacing the target file to prevent file corruption.
     /// </summary>
     public sealed class AtomicJsonConfigRepository<T> where T : class, new()
     {

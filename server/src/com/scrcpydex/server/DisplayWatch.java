@@ -150,7 +150,7 @@ public class DisplayWatch {
                     this.dpi = dpiField.getInt(displayInfo);
                 } catch (Throwable ignored) {}
 
-                Ln.i("Samsung DeX display detected successfully: ID=" + displayId + 
+                Ln.i("Samsung DeX display detected: ID=" + displayId + 
                      " (" + width + "x" + height + " @ " + dpi + "dpi)");
                 detectedDisplayId.set(displayId);
                 displayLatch.countDown();

@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
+// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ using System.Windows.Threading;
 namespace ScrcpyDex.Core.Collections
 {
     /// <summary>
-    /// Fixed-capacity observable circular collection designed for virtualized diagnostic telemetry.
-    /// Drops the oldest entries when capacity is exceeded to prevent memory bloat and UI Dispatcher lag.
+    /// Fixed-capacity observable circular collection for log entries.
+    /// Drops the oldest entries when capacity is exceeded to prevent excessive memory usage.
     /// </summary>
     public sealed class BoundedRingBuffer<T> : ObservableCollection<T>
     {

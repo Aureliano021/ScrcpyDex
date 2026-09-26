@@ -39,8 +39,7 @@ namespace ScrcpyDex.Services
     }
 
     /// <summary>
-    /// Production-grade ADB service providing asynchronous, non-blocking execution,
-    /// device discovery, property queries, Samsung DeX display detection, and atomic Job Object process management.
+    /// Service for managing ADB communication, device discovery, DeX display detection, and process management.
     /// </summary>
     public class AdbService : IAdbService
     {

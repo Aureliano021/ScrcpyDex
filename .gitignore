@@ -35,3 +35,4 @@ decompiled/
 decompiled_*/
 live_dumpsys_*.txt
 dex_capture.log
+*.zip

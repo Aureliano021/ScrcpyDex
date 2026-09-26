@@ -38,8 +38,7 @@ namespace ScrcpyDex.Core.Adb
     }
 
     /// <summary>
-    /// Resilient executor for ADB commands with circuit-breaker protection,
-    /// exponential backoff retry with jitter, and guaranteed Job Object containment.
+    /// Executes ADB commands with retry logic, circuit-breaker protection, and process tracking.
     /// </summary>
     public sealed class AdbResilienceService
     {

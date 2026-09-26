@@ -4,7 +4,7 @@ echo =================================================
 echo        Disconnecting ScrcpyDeX Session           
 echo =================================================
 echo [1/3] Terminating local client processes (scrcpy, ffplay)...
-REM Note: Emergency kill switch terminates running scrcpy.exe and ffplay.exe instances on host PC.
+REM Terminates running scrcpy.exe and ffplay.exe instances on host PC.
 taskkill /F /IM scrcpy.exe 2>nul
 taskkill /F /IM ffplay.exe 2>nul
 

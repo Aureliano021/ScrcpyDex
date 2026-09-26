@@ -48,7 +48,7 @@ public final class InputManager {
      * 
      * @param event Instance of MotionEvent or KeyEvent
      * @param displayId Display ID (e.g., DeX display)
-     * @param mode Injection mode (0 = ASYNC for maximum fluidity)
+     * @param mode Injection mode (0 = ASYNC)
      * @return true if the event was accepted by WindowManager
      */
     public static boolean injectInputEvent(InputEvent event, int displayId, int mode) {

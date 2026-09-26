@@ -34,7 +34,7 @@ if ($ConfigFile -and (Test-Path $ConfigFile)) {
 
 Write-Host "=================================================" -ForegroundColor Cyan
 Write-Host "   ScrcpyDeX — Samsung DeX Compatible Client    " -ForegroundColor Cyan
-Write-Host "   Single Native Window via USB (Zero Wi-Fi)     " -ForegroundColor Cyan
+Write-Host "   Single Window via USB Connection              " -ForegroundColor Cyan
 Write-Host "=================================================" -ForegroundColor Cyan
 
 # 1. Locate ADB executable and check for Galaxy device
@@ -91,7 +91,7 @@ Write-Host "[2/4] Preparing device..." -ForegroundColor Green
 & "$adbExe" push $serverJar /data/local/tmp/scrcpydex-server.jar | Out-Null
 
 # 4. Start DeX activator in background on device with output streaming
-Write-Host "[3/4] Activating Samsung DeX display via Miracast loopback..." -ForegroundColor Cyan
+Write-Host "[3/4] Activating Samsung DeX display via loopback..." -ForegroundColor Cyan
 $serverLog = Join-Path $env:TEMP "scrcpydex_server.log"
 $serverErrLog = Join-Path $env:TEMP "scrcpydex_server_err.log"
 if (Test-Path $serverLog) { Remove-Item $serverLog -Force -ErrorAction SilentlyContinue }
@@ -152,12 +152,12 @@ if (-not $dexId) {
 Write-Host "=================================================" -ForegroundColor Green
 Write-Host "  Samsung DeX Activated! Display ID: $dexId      " -ForegroundColor Green
 Write-Host "=================================================" -ForegroundColor Green
-Write-Host "[4/4] Opening native Samsung DeX display window..." -ForegroundColor Cyan
+Write-Host "[4/4] Opening Samsung DeX display window..." -ForegroundColor Cyan
 Write-Host ""
 Write-Host "---------------- CONTROL CHEAT SHEET ----------------" -ForegroundColor Yellow
 Write-Host "  • [Left Alt]    Release mouse cursor back to Windows" -ForegroundColor Yellow
 Write-Host "  • [Alt + F]     Toggle Fullscreen borderless mode" -ForegroundColor Yellow
-Write-Host "  • [Right-Click] Open native Samsung DeX context menus" -ForegroundColor Yellow
+Write-Host "  • [Right-Click] Open Samsung DeX context menus" -ForegroundColor Yellow
 Write-Host "  • [Closing Win] Automatically terminates DeX & saves phone battery" -ForegroundColor Yellow
 Write-Host "-----------------------------------------------------" -ForegroundColor Yellow
 Write-Host ""
@@ -192,6 +192,6 @@ finally {
     if ($serverProc -and -not $serverProc.HasExited) {
         Stop-Process -Id $serverProc.Id -Force -ErrorAction SilentlyContinue
     }
-    Write-Host "DeX session disconnected successfully! Device restored." -ForegroundColor Green
+    Write-Host "DeX session disconnected. Device restored." -ForegroundColor Green
     Write-Host "=================================================" -ForegroundColor Gray
 }

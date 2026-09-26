@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
+// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ namespace ScrcpyDex.WinUI.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
-    /// Modern Fluent Design window hosting the ScrcpyDeX Control Center.
+    /// Main application window hosting ScrcpyDeX settings and session controls.
     /// </summary>
     public partial class MainWindow : FluentWindow
     {

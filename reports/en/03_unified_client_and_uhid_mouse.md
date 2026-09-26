@@ -13,7 +13,7 @@ The initial proof-of-concept stages established that Samsung DeX could be trigge
 1. **Window Management:** Eliminating dual-window setups (rendering video in an external media player while overlaying an invisible input-capture window), which suffered from focus conflicts, window resizing lag, and DPI scaling mismatches.
 2. **Desktop Cursor Physics:** Moving beyond software touch emulation (`--mouse=sdk`) to provide a true hardware cursor with persistent pointer visibility, hover highlights, and native context menus.
 
-The definitive **ScrcpyDeX Stage 3 architecture** unifies GPU-accelerated Direct3D11 rendering, low-latency audio forwarding, Linux kernel `/dev/uhid` hardware mouse injection, dynamic display resolution, and fail-safe automated teardown into a seamless single-window client.
+The **ScrcpyDeX Stage 3 architecture** unifies GPU-accelerated Direct3D11 rendering, low-latency audio forwarding, Linux kernel `/dev/uhid` hardware mouse injection, dynamic display resolution, and fail-safe automated teardown into a single-window client.
 
 ```mermaid
 graph TD
@@ -92,7 +92,7 @@ When ScrcpyDeX launches with `--mouse=uhid`:
 
 ---
 
-## 3. Surgical Display ID Auto-Detection
+## 3. Specific Display ID Auto-Detection
 
 When Samsung DeX is initialized via loopback RTSP, Android dynamically allocates a new virtual display ID. The assigned ID can vary between sessions (e.g., `Display 13`, `Display 44`, `Display 52`) depending on the device's current power state, connected peripherals, or background services.
 
