@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.scrcpydex.server.wrappers.DisplayManager;
 
 /**
- * Native Samsung DeX Activator via Miracast Loopback (127.0.0.1).
+ * Samsung DeX Activator via Loopback (127.0.0.1).
  * 
  * This module executes the core interoperability mechanism of this project:
  * instructs Samsung's WiFi Display subsystem to connect to the device itself
@@ -48,13 +48,13 @@ public class DexActivator {
     }
 
     /**
-     * Initiates full Samsung DeX activation.
+     * Initiates Samsung DeX activation.
      * 
      * @return true if RTSP handshake completed with PLAY OK
      * @throws Exception if an unrecoverable failure occurs
      */
     public boolean activate() throws Exception {
-        Ln.i("Starting Samsung DeX engine activation via local loopback...");
+        Ln.i("Starting Samsung DeX activation via local loopback...");
 
         // 1. Clean up previous sessions and ensure socket release
         displayManager.disconnectWifiDisplay();
@@ -81,7 +81,7 @@ public class DexActivator {
         // 6. Connect to RTSP socket opened by RemoteDisplay at 127.0.0.1:7236
         this.rtspSocket = connectRtspLoopback(RTSP_PORT, 6000);
         if (rtspSocket == null) {
-            Ln.e("Critical failure: Android RemoteDisplay did not open port " + RTSP_PORT);
+            Ln.e("Error: Android RemoteDisplay did not open port " + RTSP_PORT);
             displayManager.disconnectWifiDisplay();
             return false;
         }
@@ -96,7 +96,7 @@ public class DexActivator {
         // 8. Wait for PLAY completion signal (DeX active)
         boolean ready = rtspPlayCompleted.await(15, TimeUnit.SECONDS);
         if (ready) {
-            Ln.i("RTSP handshake successfully completed! Native Samsung DeX active in memory.");
+            Ln.i("RTSP handshake completed. Samsung DeX active.");
             return true;
         } else {
             Ln.e("Timeout waiting for RTSP handshake completion (15s).");
@@ -130,7 +130,7 @@ public class DexActivator {
         Ln.d("Waiting for port " + port + " to be released...");
         while (System.currentTimeMillis() < deadline) {
             try (ServerSocket ss = new ServerSocket(port, 1, InetAddress.getByName("127.0.0.1"))) {
-                // If bind succeeds, the port is completely free
+                // If bind succeeds, the port is free
                 Ln.d("Port " + port + " confirmed free.");
                 return;
             } catch (IOException e) {
@@ -192,7 +192,7 @@ public class DexActivator {
                     public Object invoke(Object proxy, Method method, Object[] args) {
                         String name = method.getName();
                         if ("onSuccess".equals(name)) {
-                            Ln.i("IWifiDisplayConnectionCallback: Connection accepted by system_server (onSuccess)!");
+                            Ln.i("IWifiDisplayConnectionCallback: Connection accepted by system_server (onSuccess).");
                         } else if ("onFailure".equals(name)) {
                             int reason = args != null && args.length > 0 ? (int) args[0] : -1;
                             Ln.e("IWifiDisplayConnectionCallback: Connection failed with code: " + reason);
@@ -341,7 +341,7 @@ public class DexActivator {
                                          "Session: " + sessionId + "\r\n\r\n";
                         sendRtsp(out, playReq);
                     } else if (sessionId != null) {
-                        Ln.i(">>> Received 200 OK response for PLAY! Native DeX activated. <<<");
+                        Ln.i("Received 200 OK response for PLAY. Samsung DeX activated.");
                         rtspPlayCompleted.countDown();
                     }
                 }

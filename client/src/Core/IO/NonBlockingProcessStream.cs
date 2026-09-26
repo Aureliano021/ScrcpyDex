@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
+// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,10 +21,8 @@ using System.Threading.Tasks;
 namespace ScrcpyDex.Core.IO
 {
     /// <summary>
-    /// Connects to a running Process's StandardOutput and StandardError streams,
-    /// draining both concurrently via System.Threading.Channels.
-    /// Completely prevents the classic Windows pipe buffer deadlock where child processes
-    /// block indefinitely on unconsumed stderr while parent blocks on stdout.
+    /// Reads standard output and standard error streams asynchronously using Channels
+    /// to avoid pipe buffer deadlocks.
     /// </summary>
     public sealed class NonBlockingProcessStream : IAsyncDisposable
     {

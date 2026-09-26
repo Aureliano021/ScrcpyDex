@@ -16,9 +16,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Real-Time Video Capture and Encoding Module (H.264 / MediaCodec).
  * 
- * Uses the native DisplayManager.createVirtualDisplay(name, w, h, displayIdToMirror, surface)
- * API introduced in Android 14+ to mirror the DeX display directly to the
- * MediaCodec hardware encoder with minimum latency, streaming Annex B frames over TCP socket.
+ * Uses DisplayManager.createVirtualDisplay(name, w, h, displayIdToMirror, surface)
+ * to mirror the DeX display to the MediaCodec encoder,
+ * streaming Annex B frames over TCP socket.
  */
 public class VideoCapture {
     private static final String MIME_TYPE = "video/avc"; // H.264
@@ -56,9 +56,9 @@ public class VideoCapture {
      * Initializes MediaCodec and projects the DeX display to the encoder.
      */
     public void start() throws Exception {
-        Ln.i("Initializing H.264 hardware encoder (" + width + "x" + height + " @ " + fps + "fps, " + (bitrate / 1_000_000) + " Mbps)...");
+        Ln.i("Initializing H.264 encoder (" + width + "x" + height + " @ " + fps + "fps, " + (bitrate / 1_000_000) + " Mbps)...");
 
-        // 1. Configure MediaFormat with required width and height for minimum latency
+        // 1. Configure MediaFormat with required width and height
         MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, width, height);
         format.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
         format.setInteger(MediaFormat.KEY_FRAME_RATE, fps);
@@ -82,7 +82,7 @@ public class VideoCapture {
             "createVirtualDisplay", String.class, int.class, int.class, int.class, Surface.class);
         this.virtualDisplay = (VirtualDisplay) createVirtualDisplayMethod.invoke(
             null, "scrcpydex", width, height, displayId, inputSurface);
-        Ln.i("Mirroring pipeline DisplayManager -> MediaCodec connected successfully!");
+        Ln.i("Mirroring pipeline DisplayManager -> MediaCodec connected.");
 
         running.set(true);
 
@@ -113,7 +113,7 @@ public class VideoCapture {
 
                         if (!firstFrameLogged) {
                             firstFrameLogged = true;
-                            Ln.i(">>> First H.264 video frame successfully transmitted to client! <<<");
+                            Ln.i("First H.264 video frame transmitted to client.");
                         }
                     }
                     codec.releaseOutputBuffer(outputBufferIndex, false);

@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
+// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,9 +23,8 @@ using ScrcpyDex.Models;
 namespace ScrcpyDex.Core.Adb
 {
     /// <summary>
-    /// Connects directly to the local ADB daemon wire protocol on TCP 127.0.0.1:5037.
-    /// Issues 'host:track-devices' to receive instantaneous, push-based device status updates
-    /// without incurring CPU spikes, disk thrashing, or subprocess fork overhead.
+    /// Connects to the local ADB daemon on TCP 127.0.0.1:5037.
+    /// Uses 'host:track-devices' to monitor connected device status changes.
     /// </summary>
     public sealed class AdbDeviceTracker : IAsyncDisposable
     {

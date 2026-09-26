@@ -44,9 +44,8 @@ namespace ScrcpyDex.Services
     }
 
     /// <summary>
-    /// Production-grade execution engine for scrcpy.exe.
-    /// Directly spawns the native scrcpy process without any PowerShell or batch script indirection.
-    /// Assigns all processes to Windows Job Objects for zero-orphan containment and streams I/O asynchronously.
+    /// Service for launching and managing the scrcpy process.
+    /// Spawns the scrcpy process, assigns it to a Windows Job Object for process cleanup, and streams I/O asynchronously.
     /// </summary>
     public sealed class ScrcpyExecutionService : IScrcpyExecutionService
     {
@@ -415,7 +414,7 @@ namespace ScrcpyDex.Services
                 args.Add(serial);
             }
 
-            // Direct3D 11 rendering for zero-latency D3D11 swapchain flip model
+            // Direct3D 11 rendering driver
             args.Add("--render-driver=direct3d11");
 
             // Hardware UHID mouse injection

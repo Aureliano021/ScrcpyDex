@@ -227,4 +227,4 @@ adb shell "pkill -f com.scrcpydex.server.Server" 2>$null
 if ($serverProc -and -not $serverProc.HasExited) {
     Stop-Process -Id $serverProc.Id -Force -ErrorAction SilentlyContinue
 }
-Write-Host "DeX session terminated successfully." -ForegroundColor Green
+Write-Host "DeX session terminated." -ForegroundColor Green

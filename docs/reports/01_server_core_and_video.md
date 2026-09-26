@@ -7,16 +7,16 @@
 
 ---
 
-## 1. Executive Summary & Architectural Breakthrough
+## 1. Executive Summary & Technical Architecture
 
 Samsung DeX (Desktop Experience) transforms flagship Galaxy smartphones and tablets into a full-featured desktop environment with windowed multitasking, a taskbar, an application launcher, and multi-display support. Historically, Samsung constrained DeX on PC to two execution models:
 1. **Physical HDMI/DisplayPort Docking:** Requires external hardware dongles or dedicated monitors, precluding a native PC window.
 2. **Legacy "Samsung DeX for PC" Windows App:** Discontinued by Samsung, prone to high latency, stutter, Wi-Fi interference, heavy CPU overhead, and closed-source dependencies.
 
-**The ScrcpyDeX Breakthrough:**  
+**The ScrcpyDeX Approach:**  
 Samsung's `system_server` contains hidden display capabilities implemented inside proprietary classes: `com.samsung.android.hardware.display.SemWifiDisplayParameter` and `SemWifiDisplayConfig`. By orchestrating a **Miracast loopback connection directed strictly to `127.0.0.1` (localhost)**, the internal Samsung display engine can be initialized to activate a full desktop session without connecting to an external Wi-Fi network or requiring Android root permissions. 
 
-Executing inside Android's native `app_process` under the `shell` identity (UID 2000), ScrcpyDeX acts simultaneously as a loopback RTSP sink and a high-performance H.264 video streamer over USB.
+Executing inside Android's native `app_process` under the `shell` identity (UID 2000), ScrcpyDeX acts simultaneously as a loopback RTSP sink and an H.264 video streamer over USB.
 
 ```mermaid
 graph TD
@@ -177,7 +177,7 @@ public static VirtualDisplay createVirtualDisplay(
 ```
 This atomic call binds the internal rendering pipeline of `displayIdToMirror` (the DeX display) directly to the input `Surface` of the hardware video encoder, achieving zero-copy GPU buffer routing.
 
-### 5.2. Ultra-Low Latency MediaCodec Configuration
+### 5.2. Low-Latency MediaCodec Configuration
 `VideoCapture.java` configures the device's hardware H.264 encoder (`video/avc`):
 
 | MediaFormat Parameter | Value | Rationale |

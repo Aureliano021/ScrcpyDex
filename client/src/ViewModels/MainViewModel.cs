@@ -30,9 +30,8 @@ using ScrcpyDex.Services;
 namespace ScrcpyDex.ViewModels
 {
     /// <summary>
-    /// Master MVVM ViewModel for the ScrcpyDeX modern client.
-    /// Orchestrates the session finite state machine, raw ADB daemon event stream,
-    /// atomic NTFS configuration repository, and native scrcpy streaming engine.
+    /// ViewModel for the ScrcpyDeX client.
+    /// Manages session state, ADB device events, configuration storage, and scrcpy execution.
     /// </summary>
     public partial class MainViewModel : ObservableObject, IDisposable
     {
@@ -266,7 +265,7 @@ namespace ScrcpyDex.ViewModels
 
         private async void InitializeAsync()
         {
-            Log("ScrcpyDeX Presentation Layer initialized.");
+            Log("ScrcpyDeX UI initialized.");
 
             try
             {
@@ -281,11 +280,11 @@ namespace ScrcpyDex.ViewModels
             try
             {
                 _deviceTracker.Start();
-                Log("ADB Device Tracker active on TCP 127.0.0.1:5037 (Zero-Polling Push Protocol).");
+                Log("ADB Device Tracker active on 127.0.0.1:5037.");
             }
             catch (Exception ex)
             {
-                Log($"Could not start ADB wire protocol tracker: {ex.Message}", "WARN");
+                Log($"Could not start ADB tracker: {ex.Message}", "WARN");
             }
 
             // Initial device discovery probe
@@ -419,7 +418,7 @@ namespace ScrcpyDex.ViewModels
                     await _stateMachine.FireAsync(SessionTrigger.ServerDeployed, "Server deployed");
                 }
 
-                StatusMessage = "Launching hardware-accelerated Direct3D11 streaming engine...";
+                StatusMessage = "Starting scrcpy streaming session...";
                 if (_executionService != null)
                 {
                     bool started = await _executionService.StartAsync(Settings, CurrentDevice.Serial, dexDisplayId);
@@ -492,9 +491,9 @@ namespace ScrcpyDex.ViewModels
         {
             try
             {
-                Log("FORÇAR FECHAMENTO / KILL SWITCH ATIVADO! Encerrando todos os processos...", "CRIT");
+                Log("Forçar fechamento acionado. Encerrando processos...", "WARN");
                 StatusMessage = "Forçar fechamento acionado!";
-                await _stateMachine.EmergencyHaltAsync("Emergency kill switch activated");
+                await _stateMachine.EmergencyHaltAsync("Force close activated");
 
                 if (_executionService != null)
                 {
@@ -506,7 +505,7 @@ namespace ScrcpyDex.ViewModels
                     await _adbService.StopDeXSessionAsync(CurrentDevice.Serial);
                 }
 
-                await _stateMachine.FireAsync(SessionTrigger.Reset, "Emergency kill reset");
+                await _stateMachine.FireAsync(SessionTrigger.Reset, "Force close reset");
                 StatusMessage = "Todos os processos finalizados. Pronto.";
                 Log("Forçar fechamento concluído.");
             }
@@ -528,7 +527,7 @@ namespace ScrcpyDex.ViewModels
             {
                 await _configRepo.SaveAsync(Settings);
                 StatusMessage = "Configuration saved successfully.";
-                Log("Settings successfully committed to settings.json via two-phase atomic write.");
+                Log("Settings saved to settings.json.");
             }
             catch (Exception ex)
             {
@@ -545,7 +544,7 @@ namespace ScrcpyDex.ViewModels
                 Settings = new ScrcpyDeXSettings();
                 await _configRepo.SaveAsync(Settings);
                 StatusMessage = "Configuration reset to defaults.";
-                Log("Settings reset to factory defaults and saved to settings.json.");
+                Log("Settings reset to default values and saved to settings.json.");
             }
             catch (Exception ex)
             {

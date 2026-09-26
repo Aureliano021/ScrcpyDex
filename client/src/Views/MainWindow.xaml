@@ -6,7 +6,7 @@
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:local="clr-namespace:ScrcpyDex.WinUI.Views"
         mc:Ignorable="d"
-        Title="ScrcpyDeX — Samsung DeX Control Center"
+        Title="ScrcpyDeX — Settings"
         Height="760" Width="1040"
         MinHeight="680" MinWidth="940"
         WindowStartupLocation="CenterScreen"
@@ -80,7 +80,7 @@
 
         <!-- TitleBar with Window Controls -->
         <ui:TitleBar Grid.Row="0"
-                     Title="ScrcpyDeX — Samsung DeX Control Center"
+                     Title="ScrcpyDeX — Settings"
                      Icon="/icon.ico"
                      ShowMaximize="True"
                      ShowMinimize="True"
@@ -107,7 +107,7 @@
                         <TextBlock Text="Samsung DeX" FontSize="20" FontWeight="Bold" Foreground="#FFFFFF" />
                         <TextBlock Text="Direct PC Streaming" FontSize="20" FontWeight="Light" Foreground="#84B8F0" Margin="8,0,0,0" />
                     </StackPanel>
-                    <TextBlock Text="Zero-latency hardware-accelerated desktop surface with Linux /dev/uhid mouse capture"
+                    <TextBlock Text="Direct USB desktop session with Linux /dev/uhid mouse capture"
                                FontSize="12" Foreground="#8C8C8C" Margin="0,3,0,0" />
                 </StackPanel>
 
@@ -116,7 +116,7 @@
                     <ui:Button Appearance="Secondary"
                                Command="{Binding ResetDefaultsCommand}"
                                Height="34" Padding="12,0" Margin="0,0,8,0"
-                               ToolTip="Reset all configuration values to factory defaults">
+                               ToolTip="Reset all configuration values to default settings">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="ArrowReset24" Margin="0,0,6,0" FontSize="14" />
                             <TextBlock Text="Reset Defaults" VerticalAlignment="Center" FontSize="12" />
@@ -126,7 +126,7 @@
                     <ui:Button Appearance="Primary"
                                Command="{Binding SaveSettingsCommand}"
                                Height="34" Padding="14,0"
-                               ToolTip="Persist configuration changes to settings.json via atomic write">
+                               ToolTip="Save configuration changes to settings.json">
                         <StackPanel Orientation="Horizontal">
                             <ui:SymbolIcon Symbol="Save24" Margin="0,0,6,0" FontSize="14" />
                             <TextBlock Text="Save Settings" VerticalAlignment="Center" FontSize="12" />
@@ -166,7 +166,7 @@
                             <ui:CardControl.Header>
                                 <StackPanel Margin="0,2">
                                     <TextBlock Text="Target Refresh Rate (FPS)" FontWeight="SemiBold" FontSize="13.5" />
-                                    <TextBlock Text="Frame rate cap for Qualcomm Adreno hardware video encoder (60 FPS default, 120 FPS high refresh)" Foreground="#9E9E9E" FontSize="12" Margin="0,2,0,0" />
+                                    <TextBlock Text="Frame rate cap for video stream (60 FPS default, 120 FPS high refresh)" Foreground="#9E9E9E" FontSize="12" Margin="0,2,0,0" />
                                 </StackPanel>
                             </ui:CardControl.Header>
                             <ComboBox Width="180" ItemsSource="{Binding FpsOptions}" SelectedItem="{Binding Settings.Display.Fps}" />
@@ -194,7 +194,7 @@
                             <ui:CardControl.Header>
                                 <StackPanel Margin="0,2">
                                     <TextBlock Text="Hardware Video Codec" FontWeight="SemiBold" FontSize="13.5" />
-                                    <TextBlock Text="Compression format (H.264 offers lowest latency; H.265 provides superior compression at low bitrates)" Foreground="#9E9E9E" FontSize="12" Margin="0,2,0,0" />
+                                    <TextBlock Text="Compression format (H.264 offers low latency; H.265 provides higher compression)" Foreground="#9E9E9E" FontSize="12" Margin="0,2,0,0" />
                                 </StackPanel>
                             </ui:CardControl.Header>
                             <ComboBox Width="180" ItemsSource="{Binding CodecOptions}" SelectedItem="{Binding Settings.Display.Codec}" />
@@ -224,7 +224,7 @@
                 </TabItem.Header>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,12,12,0">
                     <StackPanel MaxWidth="880" HorizontalAlignment="Left">
-                        <TextBlock Text="Audio Forwarding &amp; Linux UHID Hardware Capture" Style="{StaticResource SectionHeaderStyle}" />
+                        <TextBlock Text="Audio Forwarding &amp; Input Capture" Style="{StaticResource SectionHeaderStyle}" />
 
                         <!-- Audio Toggle Card -->
                         <ui:CardControl Margin="0,0,0,8">
@@ -258,8 +258,8 @@
                         <ui:CardControl Margin="0,0,0,8">
                             <ui:CardControl.Header>
                                 <StackPanel Margin="0,2">
-                                    <TextBlock Text="Mouse Driver Injection Subsystem" FontWeight="SemiBold" FontSize="13.5" />
-                                    <TextBlock Text="uhid: Virtual USB hardware mouse via Linux /dev/uhid (recommended). sdk: Android InputManager injection." Foreground="#9E9E9E" FontSize="12" Margin="0,2,0,0" />
+                                    <TextBlock Text="Mouse Driver Subsystem" FontWeight="SemiBold" FontSize="13.5" />
+                                    <TextBlock Text="uhid: Linux /dev/uhid mode (recommended). sdk: Android injection mode." Foreground="#9E9E9E" FontSize="12" Margin="0,2,0,0" />
                                 </StackPanel>
                             </ui:CardControl.Header>
                             <ComboBox Width="180" ItemsSource="{Binding MouseDriverOptions}" SelectedItem="{Binding Settings.Input.MouseDriver}" />
@@ -300,7 +300,7 @@
                 </TabItem.Header>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,12,12,0">
                     <StackPanel MaxWidth="880" HorizontalAlignment="Left">
-                        <TextBlock Text="Device Energy Policies &amp; Samsung Hardware Telemetry" Style="{StaticResource SectionHeaderStyle}" />
+                        <TextBlock Text="Device Power &amp; System Information" Style="{StaticResource SectionHeaderStyle}" />
 
                         <!-- Turn Screen Off Card -->
                         <ui:CardControl Margin="0,0,0,8">
@@ -336,7 +336,7 @@
                         </ui:CardControl>
 
                         <!-- Telemetry Specs Box -->
-                        <TextBlock Text="Connected Device Hardware Telemetry" Style="{StaticResource SectionHeaderStyle}" Margin="0,18,0,12" />
+                        <TextBlock Text="Connected Device Information" Style="{StaticResource SectionHeaderStyle}" Margin="0,18,0,12" />
 
                         <Border Background="#202020" BorderBrush="#333333" BorderThickness="1" CornerRadius="8" Padding="20">
                             <Grid>
@@ -360,7 +360,7 @@
                                 </StackPanel>
 
                                 <!-- Serial Number -->
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Hardware Serial Number" Foreground="#9E9E9E" FontSize="13" Margin="0,0,0,10" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Serial Number" Foreground="#9E9E9E" FontSize="13" Margin="0,0,0,10" />
                                 <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentDevice.Serial, TargetNullValue='Disconnected'}" FontFamily="Consolas" FontSize="13" Foreground="#B0B0B0" Margin="0,0,0,10" />
 
                                 <!-- One UI & Android Version -->
@@ -372,7 +372,7 @@
                                 </StackPanel>
 
                                 <!-- DeX Virtual Display ID -->
-                                <TextBlock Grid.Row="3" Grid.Column="0" Text="DeX Virtual Display Surface" Foreground="#9E9E9E" FontSize="13" />
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="DeX Virtual Display" Foreground="#9E9E9E" FontSize="13" />
                                 <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
                                     <Border Background="#1C3820" BorderBrush="#2E6B30" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
                                         <TextBlock Text="{Binding CurrentDevice.DeXDisplayId, StringFormat='Surface ID #{0}', TargetNullValue='Surface Pending'}" FontSize="11" FontWeight="Bold" Foreground="#84E184" />
@@ -390,7 +390,7 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <ui:SymbolIcon Symbol="SlideText24" Margin="0,0,8,0" FontSize="16" />
-                        <TextBlock Text="Telemetry &amp; Logs" VerticalAlignment="Center" />
+                        <TextBlock Text="Logs" VerticalAlignment="Center" />
                     </StackPanel>
                 </TabItem.Header>
                 <Grid Margin="0,8,0,0">
@@ -408,7 +408,7 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="Live Diagnostic Stream" FontWeight="SemiBold" FontSize="13" Foreground="#FFFFFF" VerticalAlignment="Center" />
+                                <TextBlock Text="Live Diagnostic Logs" FontWeight="SemiBold" FontSize="13" Foreground="#FFFFFF" VerticalAlignment="Center" />
                                 <Border Background="#2E2E2E" CornerRadius="10" Padding="8,2" Margin="10,0,0,0">
                                     <TextBlock Text="{Binding DiagnosticLogs.Count, StringFormat='{}{0} entries'}" FontSize="11" Foreground="#A0A0A0" />
                                 </Border>
@@ -436,7 +436,7 @@
                                 <ui:Button Appearance="Secondary"
                                            Command="{Binding ClearLogsCommand}"
                                            Height="30" Padding="10,0"
-                                           ToolTip="Flush diagnostic ring buffer">
+                                           ToolTip="Clear log buffer">
                                     <StackPanel Orientation="Horizontal">
                                         <ui:SymbolIcon Symbol="Delete24" Margin="0,0,4,0" FontSize="13" />
                                         <TextBlock Text="Clear" FontSize="11.5" />
@@ -482,7 +482,7 @@
                 </TabItem.Header>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,12,12,0">
                     <StackPanel MaxWidth="880" HorizontalAlignment="Left">
-                        <TextBlock Text="Legal, Licensing &amp; Interoperability Compliance" Style="{StaticResource SectionHeaderStyle}" />
+                        <TextBlock Text="Legal Notices &amp; Licensing" Style="{StaticResource SectionHeaderStyle}" />
 
                         <!-- Project Identity Card -->
                         <ui:CardControl Margin="0,0,0,10">
@@ -517,7 +517,7 @@
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                     <ui:SymbolIcon Symbol="DocumentBulletList24" Margin="0,0,8,0" FontSize="16" Foreground="#0078D4" />
-                                    <TextBlock Text="Statutory Interoperability &amp; Clean-Room Protections" FontWeight="SemiBold" FontSize="13.5" Foreground="#FFFFFF" />
+                                    <TextBlock Text="Interoperability Information" FontWeight="SemiBold" FontSize="13.5" Foreground="#FFFFFF" />
                                 </StackPanel>
                                 <TextBlock TextWrapping="Wrap" Foreground="#B0B0B0" FontSize="12" LineHeight="18">
                                     <Run Text="This software operates within established legal exemptions for software interoperability and clean-room implementation:" /><LineBreak />
@@ -595,7 +595,7 @@
                                Visibility="{Binding IsIdle, Converter={StaticResource BoolToVisConverter}}"
                                Height="42" Padding="22,0" Margin="0,0,10,0"
                                FontSize="13.5" FontWeight="SemiBold"
-                               ToolTip="Initialize DeX desktop session on secondary virtual display via scrcpy">
+                               ToolTip="Start DeX desktop session on virtual display via scrcpy">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <ui:SymbolIcon Symbol="Play24" Margin="0,0,8,0" FontSize="16" />
                             <TextBlock Text="Start DeX Session" VerticalAlignment="Center" />
@@ -608,7 +608,7 @@
                                Visibility="{Binding CanStop, Converter={StaticResource BoolToVisConverter}}"
                                Height="42" Padding="18,0" Margin="0,0,10,0"
                                FontSize="13" FontWeight="Medium"
-                               ToolTip="Gracefully stop streaming and release DeX virtual display">
+                               ToolTip="Stop streaming and release DeX display">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <ui:SymbolIcon Symbol="Stop24" Margin="0,0,6,0" FontSize="16" />
                             <TextBlock Text="Disconnect" VerticalAlignment="Center" />
@@ -621,7 +621,7 @@
                                Visibility="{Binding ShowForceCloseButton, Converter={StaticResource BoolToVisConverter}}"
                                Height="42" Padding="16,0"
                                FontSize="13" FontWeight="SemiBold"
-                               ToolTip="Forçar Fechamento Imediato: Encerra instantaneamente todos os processos do scrcpy e ADB">
+                               ToolTip="Forçar Fechamento: Encerra os processos do scrcpy e ADB">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <ui:SymbolIcon Symbol="Warning24" Margin="0,0,6,0" FontSize="16" />
                             <TextBlock Text="Forçar Fechamento" VerticalAlignment="Center" />
