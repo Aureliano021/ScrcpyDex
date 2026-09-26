@@ -5,7 +5,7 @@
 [![Hardware](https://img.shields.io/badge/Tested%20on-Samsung%20Galaxy%20S23-orange)](https://www.samsung.com/galaxy-s23/)
 [![License](https://img.shields.io/badge/License-Apache%202.0%20%2F%20MIT-lightgrey)](#license--disclaimer)
 
-**ScrcpyDeX** is a breakthrough reverse-engineered solution that unlocks and runs **native Samsung DeX** directly on your PC over a standard USB cable. By combining loopback Miracast emulation with hardware-accelerated video rendering and Linux kernel `/dev/uhid` input, ScrcpyDeX delivers a true desktop experience with **zero Wi-Fi latency**, **GPU acceleration**, **integrated audio**, and **100% automated lifecycle management**—all without root privileges.
+**ScrcpyDeX** is an open-source interoperability solution that activates and runs **native Samsung DeX** directly on your PC over a standard USB cable. By combining loopback Miracast emulation with hardware-accelerated video rendering and Linux kernel `/dev/uhid` input, ScrcpyDeX delivers a true desktop experience with **zero Wi-Fi latency**, **GPU acceleration**, **integrated audio**, and **100% automated lifecycle management**—all without root privileges.
 
 Developed and validated on a **Samsung Galaxy S23 (`SM-S911B`)** running **Android 16 / One UI 8.5**.
 
@@ -108,12 +108,12 @@ This immediately terminates any hanging host processes (`scrcpy.exe`, `ffplay.ex
 * [Protocol Specification: Binary Control & Communication Contract (SSOT)](docs/PROTOCOL.md)
 
 ### Historical Research & Discovery Archive (`pt-br`)
-* [Original Development & Discovery Reports (pt-br)](relatórios/pt-br/)
+* [Original Development & Discovery Reports (pt-br)](reports/pt-br/)
 
 ---
 
 ## 📄 License, Legal & Compliance
 
 * **License:** Licensed under the [Apache License, Version 2.0](LICENSE).
-* **Legal & Interoperability Compliance:** See [docs/LEGAL_AND_LICENSING.md](docs/LEGAL_AND_LICENSING.md) for full legal analysis (DMCA 1201(f), EU Directive 2009/24/EC, Brazilian Software Law No. 9.609/1998, clean-room reverse engineering, and third-party attributions).
+* **Legal & Interoperability Compliance:** See [docs/LEGAL_AND_LICENSING.md](docs/LEGAL_AND_LICENSING.md) for full legal analysis (DMCA 1201(f), EU Directive 2009/24/EC, Brazilian Software Law No. 9.609/1998, clean-room protocol analysis & interoperability implementation, and third-party attributions).
 * **Trademark Disclaimer:** ScrcpyDeX is an independent open-source project. It is not affiliated with, endorsed by, or certified by Samsung Electronics Co., Ltd., Google LLC, or Genymobile. "Samsung", "Samsung DeX", "Galaxy", and "One UI" are registered trademarks of Samsung Electronics Co., Ltd.

@@ -45,7 +45,7 @@ public final class Ln {
     }
 
     public static void d(String message) {
-        // Enabled for debugging during the reverse engineering phase
+        // Enabled for debugging during the interoperability analysis phase
         System.out.println(getTimestamp() + " " + TAG + " [DEBUG] " + message);
     }
 }

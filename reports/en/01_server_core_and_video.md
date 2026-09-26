@@ -14,7 +14,7 @@ Samsung DeX (Desktop Experience) transforms flagship Galaxy smartphones and tabl
 2. **Legacy "Samsung DeX for PC" Windows App:** Discontinued by Samsung, prone to high latency, stutter, Wi-Fi interference, heavy CPU overhead, and closed-source dependencies.
 
 **The ScrcpyDeX Breakthrough:**  
-Samsung's `system_server` contains hidden display capabilities implemented inside proprietary classes: `com.samsung.android.hardware.display.SemWifiDisplayParameter` and `SemWifiDisplayConfig`. By orchestrating a **Miracast loopback connection directed strictly to `127.0.0.1` (localhost)**, the internal Samsung display engine can be tricked into initiating a full desktop session without connecting to an external Wi-Fi network or requiring Android root permissions. 
+Samsung's `system_server` contains hidden display capabilities implemented inside proprietary classes: `com.samsung.android.hardware.display.SemWifiDisplayParameter` and `SemWifiDisplayConfig`. By orchestrating a **Miracast loopback connection directed strictly to `127.0.0.1` (localhost)**, the internal Samsung display engine can be initialized to activate a full desktop session without connecting to an external Wi-Fi network or requiring Android root permissions. 
 
 Executing inside Android's native `app_process` under the `shell` identity (UID 2000), ScrcpyDeX acts simultaneously as a loopback RTSP sink and a high-performance H.264 video streamer over USB.
 
@@ -192,7 +192,7 @@ This atomic call binds the internal rendering pipeline of `displayIdToMirror` (t
 ### 5.3. Annex B NAL Unit Transport
 Encoded video packets are pulled from `MediaCodec.dequeueOutputBuffer()` and written directly to the video TCP socket (port `27183`):
 * Packets adhere to standard Annex B format, demarcated by start codes (`0x00000001` or `0x000001`).
-* Socket configuration enforces `TCP_NODELAY = true` to bypass the Nagle algorithm.
+* Socket configuration enforces `TCP_NODELAY = true` to disable the Nagle algorithm (eliminating buffering delay).
 * Frames are transmitted directly over the USB ADB tunnel to the PC client.
 
 ---

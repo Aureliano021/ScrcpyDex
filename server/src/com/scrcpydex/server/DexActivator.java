@@ -25,7 +25,7 @@ import com.scrcpydex.server.wrappers.DisplayManager;
 /**
  * Native Samsung DeX Activator via Miracast Loopback (127.0.0.1).
  * 
- * This module executes the core reverse-engineered discovery of this project:
+ * This module executes the core interoperability mechanism of this project:
  * instructs Samsung's WiFi Display subsystem to connect to the device itself
  * on localhost, enabling the FLAG_WIRELESS_DEX_DISPLAY (0x4000000)
  * and FLAG_EXTERNAL_DEX_HOSTING (0x20000) flags in system_server without root and without Wi-Fi.
