@@ -13,6 +13,12 @@ bin/
 client/obj/
 client/bin/
 client/.vs/
+obj/
+bin/
+publish/
+*.dll
+*.pdb
+*.launcher_backup.exe
 
 # Logs e temporários
 *.log

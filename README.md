@@ -1,11 +1,11 @@
-# ScrcpyDeX — Native Samsung DeX for PC via USB
+# ScrcpyDeX — Open-Source Client for Samsung DeX on PC via USB
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-blue)](https://www.microsoft.com/windows)
 [![Android](https://img.shields.io/badge/Android-11%20to%2016%2B%20%28One%20UI%203%20to%208.5%29-green)](https://www.samsung.com)
 [![Hardware](https://img.shields.io/badge/Tested%20on-Samsung%20Galaxy%20S23-orange)](https://www.samsung.com/galaxy-s23/)
-[![License](https://img.shields.io/badge/License-Apache%202.0%20%2F%20MIT-lightgrey)](#license--disclaimer)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-**ScrcpyDeX** is an open-source interoperability solution that activates and runs **native Samsung DeX** directly on your PC over a standard USB cable. By combining loopback Miracast emulation with hardware-accelerated video rendering and Linux kernel `/dev/uhid` input, ScrcpyDeX delivers a true desktop experience with **zero Wi-Fi latency**, **GPU acceleration**, **integrated audio**, and **100% automated lifecycle management**—all without root privileges.
+**ScrcpyDeX** is an open-source interoperability tool that activates and runs the **Samsung DeX desktop environment** directly on your PC over a standard USB cable. By combining loopback Miracast emulation with hardware-accelerated video rendering and Linux kernel `/dev/uhid` input, ScrcpyDeX delivers a desktop experience with **zero Wi-Fi latency**, **GPU acceleration**, **integrated audio**, and **automated lifecycle management**—without requiring root privileges.
 
 Developed and validated on a **Samsung Galaxy S23 (`SM-S911B`)** running **Android 16 / One UI 8.5**.
 
@@ -39,12 +39,14 @@ Developed and validated on a **Samsung Galaxy S23 (`SM-S911B`)** running **Andro
 
 ## 🚀 Quick Start
 
-1. Connect your Samsung Galaxy phone to your PC via USB cable and authorize the USB debugging prompt on the screen.
-2. Double-click **`ScrcpyDeX.bat`** (or run it in a terminal):
-   ```cmd
-   .\ScrcpyDeX.bat
-   ```
-3. The unified Samsung DeX desktop window will open automatically with full GPU acceleration, audio forwarding, and native mouse support.
+### 1. Graphical Control Center (Native & Zero Console Flashing):
+Double-click **`ScrcpyDeX.exe`** (or **`ScrcpyDeX.vbs`**) to launch the modern WinUI 3 Control Center with **zero command prompt flashing**. Configure preferences and click **🚀 Launch Samsung DeX**.
+
+### 2. Direct CLI Launch:
+Run **`ScrcpyDeX.bat`** directly from Command Prompt or PowerShell:
+```cmd
+.\ScrcpyDeX.bat
+```
 
 ---
 
@@ -99,12 +101,22 @@ This immediately terminates any hanging host processes (`scrcpy.exe`, `ffplay.ex
 
 ---
 
+## 🔒 Security, Trust Model & Operational Guidelines
+
+* **ADB Privilege Context (`UID 2000`):** The ScrcpyDeX server component runs under Android's standard development `shell` user. It operates **without root** privileges and relies only on authorized developer capabilities.
+* **Local Loopback Transport:** All video and control communication binds strictly to `127.0.0.1`.
+* **Direct USB Cable Recommended:** Use a physical USB connection with `adb forward`. **Using Wi-Fi ADB across untrusted or public networks is strongly discouraged**, as unauthenticated Wi-Fi debugging could expose input injection interfaces to local network adversaries.
+* **Authorized Devices Only:** Use ScrcpyDeX only on personal devices or hardware you are legitimately authorized to manage.
+
+---
+
 ## 📂 Documentation & Technical Reports
 
 ### English Technical Architecture Reports
 * [Report 01: Server Core Architecture, Loopback Miracast RTSP & H.264 Video Pipeline](docs/reports/01_server_core_and_video.md)
 * [Report 02: Control Channel Protocol, Input Event Injection & Coordinate Translation](docs/reports/02_control_channel_and_input.md)
 * [Report 03: Unified Client, Linux Kernel UHID Mouse & Lifecycle Orchestration](docs/reports/03_unified_client_and_uhid_mouse.md)
+* [Report 04: Desktop Configuration UI, Settings Persistence & Live Telemetry](docs/reports/04_configuration_ui_and_settings.md)
 * [Protocol Specification: Binary Control & Communication Contract (SSOT)](docs/PROTOCOL.md)
 
 ### Historical Research & Discovery Archive (`pt-br`)
@@ -112,8 +124,15 @@ This immediately terminates any hanging host processes (`scrcpy.exe`, `ffplay.ex
 
 ---
 
+## 🤝 Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our clean-room engineering standards, Developer Certificate of Origin (DCO 1.1) signing, and pull request procedures.
+
+---
+
 ## 📄 License, Legal & Compliance
 
 * **License:** Licensed under the [Apache License, Version 2.0](LICENSE).
-* **Legal & Interoperability Compliance:** See [docs/LEGAL_AND_LICENSING.md](docs/LEGAL_AND_LICENSING.md) for full legal analysis (DMCA 1201(f), EU Directive 2009/24/EC, Brazilian Software Law No. 9.609/1998, clean-room protocol analysis & interoperability implementation, and third-party attributions).
+* **Third-Party Notices:** See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for licenses and copyright attributions of external tools (`scrcpy`, AOSP tools, FFmpeg).
+* **Legal & Interoperability Compliance:** See [docs/LEGAL_AND_LICENSING.md](docs/LEGAL_AND_LICENSING.md) for architectural analysis and legal compliance details (DMCA 1201(f), EU Directive 2009/24/EC, Brazilian Software Law No. 9.609/1998, verifiable clean-room audit, and cryptographic hashes).
 * **Trademark Disclaimer:** ScrcpyDeX is an independent open-source project. It is not affiliated with, endorsed by, or certified by Samsung Electronics Co., Ltd., Google LLC, or Genymobile. "Samsung", "Samsung DeX", "Galaxy", and "One UI" are registered trademarks of Samsung Electronics Co., Ltd.

@@ -1,10 +1,14 @@
-# Protocolo de Comunicação — ScrcpyDex (SSOT)
+# Protocolo de Comunicação — ScrcpyDeX (SSOT)
 
-**Status:** Rascunho Inicial (Etapa 1)  
+**Status:** Especificação Técnica Normativa  
 **Versão do Protocolo:** `1.0`  
-**Transporte:** TCP via túnel `adb forward` sobre cabo USB (ou Wi-Fi ADB)
+**Transporte Recomendado:** TCP via túnel `adb forward` exclusivamente sobre cabo USB (`127.0.0.1`)
 
-Este documento é a **Única Fonte da Verdade (Single Source of Truth - SSOT)** para toda comunicação entre o cliente Windows (`ScrcpyDex.exe`) e o servidor Android (`scrcpydex-server.jar`).
+> [!WARNING]
+> **Aviso de Segurança e Transporte:**  
+> O canal de controle utiliza conexões diretas via sockets locais (`127.0.0.1`) e não incorpora criptografia ou autenticação por token em nível de aplicação. Por essa razão, **o transporte suportado e recomendado é exclusivamente local através do túnel `adb forward` via cabo USB**. O uso de ADB via Wi-Fi em redes abertas, públicas ou compartilhadas **não é recomendado**, pois entidades na mesma rede poderiam interagir com o daemon ADB.
+
+Este documento é a **Fonte Normativa de Referência (Single Source of Truth - SSOT)** para a especificação do protocolo entre clientes ScrcpyDeX e o servidor Android (`scrcpydex-server.jar`).
 
 ---
 

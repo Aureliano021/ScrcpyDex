@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ScrcpyDeXSettings",
+  "description": "User preferences schema for ScrcpyDeX client",
+  "type": "object",
+  "properties": {
+    "version": { "type": "string" },
+    "display": {
+      "type": "object",
+      "properties": {
+        "resolution": { "type": "string", "enum": ["1920x1080", "2560x1440", "3840x2160", "native"] },
+        "width": { "type": "integer", "minimum": 640 },
+        "height": { "type": "integer", "minimum": 480 },
+        "dpi": { "type": "integer", "minimum": 120, "maximum": 480 },
+        "fps": { "type": "integer", "enum": [30, 60, 90, 120] },
+        "bitrate": { "type": "integer", "minimum": 2000000, "maximum": 50000000 },
+        "codec": { "type": "string", "enum": ["h264", "h265"] },
+        "windowMode": { "type": "string", "enum": ["normal", "borderless", "fullscreen"] }
+      },
+      "required": ["resolution", "fps", "bitrate", "codec"]
+    },
+    "audio": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "bufferMs": { "type": "integer", "minimum": 10, "maximum": 500 }
+      },
+      "required": ["enabled"]
+    },
+    "input": {
+      "type": "object",
+      "properties": {
+        "mouseDriver": { "type": "string", "enum": ["uhid", "sdk"] },
+        "releaseKey": { "type": "string", "enum": ["LeftAlt", "WindowsKey", "RightCtrl"] },
+        "forwardGamepad": { "type": "boolean" }
+      },
+      "required": ["mouseDriver", "releaseKey"]
+    },
+    "device": {
+      "type": "object",
+      "properties": {
+        "turnScreenOff": { "type": "boolean" },
+        "stayAwake": { "type": "boolean" },
+        "autoConnect": { "type": "boolean" }
+      }
+    },
+    "ui": {
+      "type": "object",
+      "properties": {
+        "theme": { "type": "string", "enum": ["dark", "light", "system"] },
+        "startMinimized": { "type": "boolean" },
+        "showLogPanel": { "type": "boolean" }
+      }
+    }
+  },
+  "required": ["version", "display", "audio", "input", "device"]
+}
