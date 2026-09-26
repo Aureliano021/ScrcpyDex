@@ -8,10 +8,10 @@ import android.view.MotionEvent;
 import com.scrcpydex.server.wrappers.InputManager;
 
 /**
- * Tratador de Injeção de Eventos de Entrada (Mouse, Teclado e Scroll).
+ * Input Event Injection Handler (Mouse, Keyboard, and Scroll).
  * 
- * Injeta eventos diretamente no display do Samsung DeX com parâmetros
- * calibrados de pressão, tamanho e fontes de entrada nativas (Touchscreen e Mouse).
+ * Injects events directly into the Samsung DeX display with calibrated
+ * parameters for pressure, size, and native input sources (Touchscreen and Mouse).
  */
 public class InputHandler {
     private final int displayId;
@@ -41,12 +41,12 @@ public class InputHandler {
     }
 
     /**
-     * Injeta movimentação de cursor sem clique (Hover Move) ou com arrasto (Move).
+     * Injects cursor movement without clicking (Hover Move) or with dragging (Move).
      */
     public void handleMouseMove(int x, int y) {
         long now = SystemClock.uptimeMillis();
         if (currentButtons == 0) {
-            // Cursor em repouso se movendo (Hover)
+            // Idle cursor moving (Hover)
             pointerProperties[0].toolType = MotionEvent.TOOL_TYPE_MOUSE;
             setCoordinates(x, y, 0.0f);
 
@@ -68,7 +68,7 @@ public class InputHandler {
             );
             InputManager.injectInputEvent(event, displayId, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
         } else {
-            // Cursor arrastando com botão pressionado (Move)
+            // Dragging cursor with button pressed (Move)
             pointerProperties[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
             setCoordinates(x, y, 1.0f);
 
@@ -93,18 +93,18 @@ public class InputHandler {
     }
 
     /**
-     * Injeta clique ou soltura de botão do mouse.
+     * Injects mouse button press or release.
      * 
-     * Botão 1 (Esquerdo): Injetado como Touchscreen (TOOL_TYPE_FINGER) para
-     * máxima compatibilidade com botões, ícones e janelas do DeX.
-     * Botão 2 (Direito): Injetado como SOURCE_MOUSE com BUTTON_SECONDARY
-     * para abrir menus de contexto no DeX.
+     * Button 1 (Left): Injected as Touchscreen (TOOL_TYPE_FINGER) for
+     * maximum compatibility with DeX buttons, icons, and windows.
+     * Button 2 (Right): Injected as SOURCE_MOUSE with BUTTON_SECONDARY
+     * to open context menus in DeX.
      */
     public void handleMouseButton(int x, int y, int button, int action) {
         long now = SystemClock.uptimeMillis();
 
         if (button == 2) {
-            // Botão Direito: Menu de contexto no DeX
+            // Right Button: Context menu in DeX
             pointerProperties[0].toolType = MotionEvent.TOOL_TYPE_MOUSE;
             setCoordinates(x, y, action == 0 ? 1.0f : 0.0f);
 
@@ -157,7 +157,7 @@ public class InputHandler {
             return;
         }
 
-        // Botão 1 (Esquerdo / Principal):
+        // Button 1 (Left / Primary):
         pointerProperties[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
 
         if (action == 0) { // DOWN
@@ -209,10 +209,10 @@ public class InputHandler {
     }
 
     /**
-     * Injeta evento de tecla do teclado.
+     * Injects keyboard key event.
      * 
-     * @param keyCode Código da tecla (Android KeyEvent.KEYCODE_*)
-     * @param action 0=Pressionado (DOWN), 1=Solto (UP)
+     * @param keyCode Key code (Android KeyEvent.KEYCODE_*)
+     * @param action 0=Pressed (DOWN), 1=Released (UP)
      */
     public void handleKeyEvent(int keyCode, int action) {
         long now = SystemClock.uptimeMillis();
@@ -223,7 +223,7 @@ public class InputHandler {
     }
 
     /**
-     * Injeta rolagem de roda do mouse (Scroll).
+     * Injects mouse wheel scroll event.
      */
     public void handleScroll(int x, int y, float hScroll, float vScroll) {
         long now = SystemClock.uptimeMillis();

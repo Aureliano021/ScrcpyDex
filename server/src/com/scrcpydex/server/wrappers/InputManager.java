@@ -7,11 +7,11 @@ import com.scrcpydex.server.Ln;
 import java.lang.reflect.Method;
 
 /**
- * Wrapper de reflexão para o serviço IInputManager do Android.
+ * Reflection wrapper for Android's IInputManager service.
  * 
- * Permite injetar eventos de hardware (mouse, teclado, touch e scroll)
- * diretamente no subsistema de entrada do WindowManager do Android,
- * direcionando os eventos especificamente para o display do Samsung DeX.
+ * Allows injecting hardware events (mouse, keyboard, touch, and scroll)
+ * directly into Android's WindowManager input subsystem,
+ * targeting events specifically to the Samsung DeX display.
  */
 public final class InputManager {
     public static final int INJECT_INPUT_EVENT_MODE_ASYNC = 0;
@@ -37,19 +37,19 @@ public final class InputManager {
             SET_DISPLAY_ID_METHOD = setDisplayId;
 
         } catch (Exception e) {
-            throw new AssertionError("Falha ao inicializar wrapper InputManager", e);
+            throw new AssertionError("Failed to initialize InputManager wrapper", e);
         }
     }
 
     private InputManager() {}
 
     /**
-     * Injeta um evento de entrada associando-o ao ID da tela de destino.
+     * Injects an input event associated with the target display ID.
      * 
-     * @param event Instância de MotionEvent ou KeyEvent
-     * @param displayId ID do display (ex: display do DeX)
-     * @param mode Modo de injeção (0 = ASYNC para máxima fluidez)
-     * @return true se o evento foi aceito pelo WindowManager
+     * @param event Instance of MotionEvent or KeyEvent
+     * @param displayId Display ID (e.g., DeX display)
+     * @param mode Injection mode (0 = ASYNC for maximum fluidity)
+     * @return true if the event was accepted by WindowManager
      */
     public static boolean injectInputEvent(InputEvent event, int displayId, int mode) {
         try {
@@ -58,11 +58,11 @@ public final class InputManager {
             }
             boolean success = (boolean) INJECT_INPUT_EVENT_METHOD.invoke(MANAGER, event, mode);
             if (!success) {
-                Ln.w("injectInputEvent retornou false para evento no display " + displayId + ": " + event);
+                Ln.w("injectInputEvent returned false for event on display " + displayId + ": " + event);
             }
             return success;
         } catch (Exception e) {
-            Ln.e("Erro ao injetar evento de input: " + e.getMessage(), e);
+            Ln.e("Error injecting input event: " + e.getMessage(), e);
             return false;
         }
     }

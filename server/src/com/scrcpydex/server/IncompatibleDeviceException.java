@@ -1,9 +1,9 @@
 package com.scrcpydex.server;
 
 /**
- * Exceção lançada quando o dispositivo não atende aos requisitos mínimos
- * de hardware ou software para a execução do ScrcpyDeX (ex: aparelho não-Samsung,
- * versão do Android inferior a 11, ou ausência de APIs SemWifiDisplayConfig).
+ * Exception thrown when the device does not meet the minimum hardware
+ * or software requirements to run ScrcpyDeX (e.g., non-Samsung device,
+ * Android version below 11, or absence of SemWifiDisplayConfig APIs).
  */
 public class IncompatibleDeviceException extends RuntimeException {
     public IncompatibleDeviceException(String message) {

@@ -5,11 +5,11 @@ import android.os.IBinder;
 import com.scrcpydex.server.Ln;
 
 /**
- * Wrapper de reflexão para o serviço IDisplayManager do Android.
+ * Reflection wrapper for Android's IDisplayManager service.
  * 
- * Permite invocar métodos de gerenciamento de telas, especificamente
- * as APIs de WiFi Display (Miracast) que a Samsung utiliza para ativar
- * o Wireless DeX.
+ * Allows invoking display management methods, specifically
+ * the WiFi Display (Miracast) APIs that Samsung uses to activate
+ * Wireless DeX.
  */
 public final class DisplayManager {
     private final Object manager;
@@ -23,10 +23,10 @@ public final class DisplayManager {
             Method asInterface = stubClass.getMethod("asInterface", IBinder.class);
             this.manager = asInterface.invoke(null, binder);
 
-            // Método padrão para desconectar qualquer sessão ativa de Miracast
+            // Default method to disconnect any active Miracast session
             this.disconnectWifiDisplayMethod = manager.getClass().getMethod("disconnectWifiDisplay");
 
-            // Método proprietário da Samsung para conectar com SemWifiDisplayConfig
+            // Samsung proprietary method to connect with SemWifiDisplayConfig
             Method connectMethod = null;
             for (Method m : manager.getClass().getMethods()) {
                 if ("connectWifiDisplayWithConfig".equals(m.getName())) {
@@ -35,44 +35,44 @@ public final class DisplayManager {
                 }
             }
             if (connectMethod == null) {
-                throw new NoSuchMethodException("Método connectWifiDisplayWithConfig não encontrado em IDisplayManager");
+                throw new NoSuchMethodException("Method connectWifiDisplayWithConfig not found in IDisplayManager");
             }
             this.connectWifiDisplayWithConfigMethod = connectMethod;
 
         } catch (Exception e) {
-            throw new RuntimeException("Falha ao inicializar wrapper DisplayManager", e);
+            throw new RuntimeException("Failed to initialize DisplayManager wrapper", e);
         }
     }
 
     /**
-     * Encerra qualquer sessão ativa de WiFi Display / DeX no dispositivo.
+     * Terminates any active WiFi Display / DeX session on the device.
      */
     public void disconnectWifiDisplay() {
         try {
             disconnectWifiDisplayMethod.invoke(manager);
-            Ln.d("Comando disconnectWifiDisplay executado com sucesso.");
+            Ln.d("disconnectWifiDisplay command executed successfully.");
         } catch (Exception e) {
-            Ln.w("Falha ao invocar disconnectWifiDisplay: " + e.getMessage());
+            Ln.w("Failed to invoke disconnectWifiDisplay: " + e.getMessage());
         }
     }
 
     /**
-     * Inicia uma conexão de WiFi Display usando uma configuração personalizada da Samsung.
+     * Initiates a WiFi Display connection using custom Samsung configuration.
      * 
-     * @param config Instância de android.hardware.display.SemWifiDisplayConfig
-     * @param callback Instância (ou Proxy) de android.hardware.display.IWifiDisplayConnectionCallback
+     * @param config Instance of android.hardware.display.SemWifiDisplayConfig
+     * @param callback Instance (or Proxy) of android.hardware.display.IWifiDisplayConnectionCallback
      */
     public void connectWifiDisplayWithConfig(Object config, Object callback) {
         try {
             connectWifiDisplayWithConfigMethod.invoke(manager, config, callback);
-            Ln.d("Comando connectWifiDisplayWithConfig disparado.");
+            Ln.d("connectWifiDisplayWithConfig command triggered.");
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao conectar WiFi Display com SemWifiDisplayConfig", e);
+            throw new RuntimeException("Error connecting WiFi Display with SemWifiDisplayConfig", e);
         }
     }
 
     /**
-     * Retorna o objeto IDisplayManager subjacente para chamadas adicionais.
+     * Returns the underlying IDisplayManager object for additional invocations.
      */
     public Object getRawManager() {
         return manager;

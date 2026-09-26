@@ -5,12 +5,12 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Utilitário de Logging para o ScrcpyDex Server.
+ * Logging utility for ScrcpyDex Server.
  * 
- * Escreve diretamente no stdout/stderr com formatação limpa e timestamp.
- * Como o servidor roda via app_process (processo nativo de linha de comando
- * no Android), o log vai para a saída padrão do processo, que pode ser
- * lida diretamente pelo ADB ou redirecionada para um arquivo de log.
+ * Writes directly to stdout/stderr with clean formatting and timestamps.
+ * Because the server runs via app_process (native command-line process
+ * on Android), logs are directed to the standard process output, which can be
+ * read directly via ADB or redirected to a log file.
  */
 public final class Ln {
     private static final String TAG = "[ScrcpyDeX]";
@@ -18,7 +18,7 @@ public final class Ln {
             new SimpleDateFormat("HH:mm:ss.SSS", Locale.US);
 
     private Ln() {
-        // Classe utilitária estática
+        // Static utility class
     }
 
     private static String getTimestamp() {
@@ -34,18 +34,18 @@ public final class Ln {
     }
 
     public static void e(String message) {
-        System.err.println(getTimestamp() + " " + TAG + " [ERRO] " + message);
+        System.err.println(getTimestamp() + " " + TAG + " [ERROR] " + message);
     }
 
     public static void e(String message, Throwable throwable) {
-        System.err.println(getTimestamp() + " " + TAG + " [ERRO] " + message);
+        System.err.println(getTimestamp() + " " + TAG + " [ERROR] " + message);
         if (throwable != null) {
             throwable.printStackTrace(System.err);
         }
     }
 
     public static void d(String message) {
-        // Habilitado para depuração durante a fase de engenharia reversa
+        // Enabled for debugging during the reverse engineering phase
         System.out.println(getTimestamp() + " " + TAG + " [DEBUG] " + message);
     }
 }

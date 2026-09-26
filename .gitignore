@@ -17,3 +17,15 @@ client/.vs/
 # Logs e temporários
 *.log
 *.tmp
+
+# Reverse engineering dumps and proprietary artifacts (Protection)
+services.jar
+framework.jar
+*.dex
+!server/scrcpydex-server.jar
+*.odex
+*.vdex
+decompiled/
+decompiled_*/
+live_dumpsys_*.txt
+dex_capture.log

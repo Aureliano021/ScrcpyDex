@@ -11,12 +11,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Monitor Orientado a Eventos do Samsung DeX Display.
+ * Event-Driven Samsung DeX Display Monitor.
  * 
- * Substitui o polling lento e instável via "dumpsys display | grep ScrcpyDeX".
- * Utiliza o DisplayManagerGlobal diretamente via IPC nativa em memória,
- * escutando eventos de criação de tela para capturar o ID do display DeX
- * no momento exato em que ele surge no sistema.
+ * Replaces slow and unstable polling via "dumpsys display | grep ScrcpyDeX".
+ * Uses DisplayManagerGlobal directly via native in-memory IPC,
+ * listening for display creation events to capture the DeX display ID
+ * at the exact moment it appears in the system.
  */
 public class DisplayWatch {
     private static final String TARGET_DISPLAY_NAME = "ScrcpyDeX";
@@ -35,20 +35,20 @@ public class DisplayWatch {
             Method getInstance = dmgClass.getDeclaredMethod("getInstance");
             this.displayManagerGlobal = getInstance.invoke(null);
         } catch (Exception e) {
-            throw new RuntimeException("Falha ao obter DisplayManagerGlobal", e);
+            throw new RuntimeException("Failed to obtain DisplayManagerGlobal", e);
         }
     }
 
     /**
-     * Inicia a escuta de criação de displays e verifica se o display já existe.
+     * Starts listening for display creation and checks if the display already exists.
      */
     public void startListening(Handler handler) {
-        // 1. Verificar se o display já está ativo antes mesmo do listener
+        // 1. Check if the display is already active prior to listener registration
         if (checkExistingDisplays()) {
             return;
         }
 
-        // 2. Registrar listener nativo de displays via Proxy dinâmico
+        // 2. Register native display listener via dynamic Proxy
         try {
             Class<?> listenerClass = Class.forName("android.hardware.display.DisplayManager$DisplayListener");
             Object listenerProxy = Proxy.newProxyInstance(
@@ -64,7 +64,7 @@ public class DisplayWatch {
                 }
             );
 
-            // Tentar registrar com handler
+            // Try to register with handler
             try {
                 displayManagerGlobal.getClass()
                     .getMethod("registerDisplayListener", listenerClass, Handler.class, long.class, String.class)
@@ -80,17 +80,17 @@ public class DisplayWatch {
                         .invoke(displayManagerGlobal, listenerProxy, handler);
                 }
             }
-            Ln.d("DisplayListener registrado no DisplayManagerGlobal.");
+            Ln.d("DisplayListener registered in DisplayManagerGlobal.");
         } catch (Exception e) {
-            Ln.w("Falha ao registrar DisplayListener via Proxy: " + e.getMessage() + ". Utilizando verificação ativa.");
+            Ln.w("Failed to register DisplayListener via Proxy: " + e.getMessage() + ". Using active polling fallback.");
         }
     }
 
     /**
-     * Aguarda até que o display DeX seja detectado com timeout.
+     * Waits until the DeX display is detected, up to a timeout.
      * 
-     * @param timeoutSeconds Tempo limite em segundos
-     * @return ID do display DeX ou -1 se timeout
+     * @param timeoutSeconds Timeout in seconds
+     * @return DeX display ID, or -1 if timed out
      */
     public int waitForDisplay(int timeoutSeconds) throws InterruptedException {
         long deadline = System.currentTimeMillis() + (timeoutSeconds * 1000L);
@@ -120,7 +120,7 @@ public class DisplayWatch {
                 }
             }
         } catch (Exception e) {
-            Ln.w("Erro ao consultar getDisplayIds: " + e.getMessage());
+            Ln.w("Error querying getDisplayIds: " + e.getMessage());
         }
         return false;
     }
@@ -150,7 +150,7 @@ public class DisplayWatch {
                     this.dpi = dpiField.getInt(displayInfo);
                 } catch (Throwable ignored) {}
 
-                Ln.i("Display Samsung DeX detectado com sucesso: ID=" + displayId + 
+                Ln.i("Samsung DeX display detected successfully: ID=" + displayId + 
                      " (" + width + "x" + height + " @ " + dpi + "dpi)");
                 detectedDisplayId.set(displayId);
                 displayLatch.countDown();

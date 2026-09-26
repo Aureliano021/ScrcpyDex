@@ -23,12 +23,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.scrcpydex.server.wrappers.DisplayManager;
 
 /**
- * Ativador do Samsung DeX nativo via Loopback Miracast (127.0.0.1).
+ * Native Samsung DeX Activator via Miracast Loopback (127.0.0.1).
  * 
- * Este módulo executa a engenharia reversa fundamental descoberta no projeto:
- * instrui o subsistema de WiFi Display da Samsung a conectar-se ao próprio
- * dispositivo em localhost, ativando as flags FLAG_WIRELESS_DEX_DISPLAY (0x4000000)
- * e FLAG_EXTERNAL_DEX_HOSTING (0x20000) no system_server sem root e sem Wi-Fi.
+ * This module executes the core reverse-engineered discovery of this project:
+ * instructs Samsung's WiFi Display subsystem to connect to the device itself
+ * on localhost, enabling the FLAG_WIRELESS_DEX_DISPLAY (0x4000000)
+ * and FLAG_EXTERNAL_DEX_HOSTING (0x20000) flags in system_server without root and without Wi-Fi.
  */
 public class DexActivator {
     private static final int RTSP_PORT = 7236;
@@ -48,101 +48,101 @@ public class DexActivator {
     }
 
     /**
-     * Inicia a ativação completa do Samsung DeX.
+     * Initiates full Samsung DeX activation.
      * 
-     * @return true se o handshake RTSP completou com PLAY OK
-     * @throws Exception se ocorrer falha irrecuperável
+     * @return true if RTSP handshake completed with PLAY OK
+     * @throws Exception if an unrecoverable failure occurs
      */
     public boolean activate() throws Exception {
-        Ln.i("Iniciando ativação do motor Samsung DeX via loopback local...");
+        Ln.i("Starting Samsung DeX engine activation via local loopback...");
 
-        // 1. Limpeza de sessões prévias e garantia de liberação de socket
+        // 1. Clean up previous sessions and ensure socket release
         displayManager.disconnectWifiDisplay();
         waitForPortFree(RTSP_PORT, 5000);
 
-        // 2. Alocação de portas dinâmicas para dreno de RTP dummy
+        // 2. Allocate dynamic ports for dummy RTP drain
         this.rtpVideoPort = allocateUdpPort();
         this.rtpAudioPort = allocateUdpPort();
-        Ln.d("Portas RTP dinâmicas alocadas: Vídeo=" + rtpVideoPort + ", Áudio=" + rtpAudioPort);
+        Ln.d("Dynamic RTP ports allocated: Video=" + rtpVideoPort + ", Audio=" + rtpAudioPort);
 
         startUdpDrain(rtpVideoPort);
         startUdpDrain(rtpAudioPort);
 
-        // 3. Montar configuração SemWifiDisplayConfig via reflexão
+        // 3. Build SemWifiDisplayConfig via reflection
         Object config = buildSemWifiDisplayConfig(rtpVideoPort, rtpAudioPort);
 
-        // 4. Criar Proxy dinâmico para IWifiDisplayConnectionCallback
+        // 4. Create dynamic Proxy for IWifiDisplayConnectionCallback
         Object connectionCallback = createWifiDisplayCallback();
 
-        // 5. Disparar conexão IPC no DisplayManagerService da Samsung
+        // 5. Trigger IPC connection on Samsung DisplayManagerService
         displayManager.connectWifiDisplayWithConfig(config, connectionCallback);
-        Ln.i("Comando IPC connectWifiDisplayWithConfig disparado ao system_server.");
+        Ln.i("IPC connectWifiDisplayWithConfig command sent to system_server.");
 
-        // 6. Conectar ao socket RTSP que o RemoteDisplay abre em 127.0.0.1:7236
+        // 6. Connect to RTSP socket opened by RemoteDisplay at 127.0.0.1:7236
         this.rtspSocket = connectRtspLoopback(RTSP_PORT, 6000);
         if (rtspSocket == null) {
-            Ln.e("Falha crítica: o RemoteDisplay do Android não abriu a porta " + RTSP_PORT);
+            Ln.e("Critical failure: Android RemoteDisplay did not open port " + RTSP_PORT);
             displayManager.disconnectWifiDisplay();
             return false;
         }
 
         running.set(true);
 
-        // 7. Iniciar loop de handshake RTSP em thread dedicada
+        // 7. Start RTSP handshake loop on a dedicated thread
         Thread rtspThread = new Thread(this::runRtspStateMachine, "ScrcpyDeX-RTSP");
         rtspThread.setDaemon(true);
         rtspThread.start();
 
-        // 8. Aguardar sinal de conclusão do PLAY (DeX ativo)
+        // 8. Wait for PLAY completion signal (DeX active)
         boolean ready = rtspPlayCompleted.await(15, TimeUnit.SECONDS);
         if (ready) {
-            Ln.i("Handshake RTSP concluído com sucesso! Samsung DeX ativo na memória.");
+            Ln.i("RTSP handshake successfully completed! Native Samsung DeX active in memory.");
             return true;
         } else {
-            Ln.e("Timeout aguardando conclusão do handshake RTSP (15s).");
+            Ln.e("Timeout waiting for RTSP handshake completion (15s).");
             return false;
         }
     }
 
     /**
-     * Encerra a sessão DeX e libera portas de rede.
+     * Terminates the DeX session and releases network ports.
      */
     public void stop() {
         if (!running.getAndSet(false)) {
             return;
         }
-        Ln.i("Encerrando sessão DeX e limpando recursos...");
+        Ln.i("Terminating DeX session and releasing resources...");
         if (rtspSocket != null) {
             try {
                 rtspSocket.close();
             } catch (IOException ignored) {}
         }
         displayManager.disconnectWifiDisplay();
-        Ln.i("Sessão DeX desconectada.");
+        Ln.i("DeX session disconnected.");
     }
 
     /**
-     * Substitui Thread.sleep(800): tenta realizar o bind local em loop.
-     * Assim que o SO liberar a porta 7236, o método retorna imediatamente.
+     * Replaces Thread.sleep(800): attempts local bind in a loop.
+     * As soon as the OS releases port 7236, this method returns immediately.
      */
     private void waitForPortFree(int port, int timeoutMs) throws IOException {
         long deadline = System.currentTimeMillis() + timeoutMs;
-        Ln.d("Aguardando liberação da porta " + port + "...");
+        Ln.d("Waiting for port " + port + " to be released...");
         while (System.currentTimeMillis() < deadline) {
             try (ServerSocket ss = new ServerSocket(port, 1, InetAddress.getByName("127.0.0.1"))) {
-                // Se o bind teve sucesso, a porta está completamente livre
-                Ln.d("Porta " + port + " confirmada livre.");
+                // If bind succeeds, the port is completely free
+                Ln.d("Port " + port + " confirmed free.");
                 return;
             } catch (IOException e) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
-                    throw new IOException("Interrompido enquanto aguardava porta " + port, ie);
+                    throw new IOException("Interrupted while waiting for port " + port, ie);
                 }
             }
         }
-        Ln.w("Aviso: Porta " + port + " não liberou no prazo de " + timeoutMs + "ms, prosseguindo...");
+        Ln.w("Warning: Port " + port + " was not released within " + timeoutMs + "ms, proceeding...");
     }
 
     private int allocateUdpPort() throws IOException {
@@ -158,7 +158,7 @@ public class DexActivator {
                 DatagramPacket dp = new DatagramPacket(buf, buf.length);
                 while (running.get() || !Thread.currentThread().isInterrupted()) {
                     ds.receive(dp);
-                    // Drena silenciosamente os pacotes RTP de vídeo dummy sem alocar CPU
+                    // Silently drain dummy video RTP packets without burning CPU
                 }
             } catch (Exception ignored) {}
         }, "UdpDrain-" + port);
@@ -192,10 +192,10 @@ public class DexActivator {
                     public Object invoke(Object proxy, Method method, Object[] args) {
                         String name = method.getName();
                         if ("onSuccess".equals(name)) {
-                            Ln.i("IWifiDisplayConnectionCallback: Conexão aceita pelo system_server (onSuccess)!");
+                            Ln.i("IWifiDisplayConnectionCallback: Connection accepted by system_server (onSuccess)!");
                         } else if ("onFailure".equals(name)) {
                             int reason = args != null && args.length > 0 ? (int) args[0] : -1;
-                            Ln.e("IWifiDisplayConnectionCallback: Conexão falhou com código: " + reason);
+                            Ln.e("IWifiDisplayConnectionCallback: Connection failed with code: " + reason);
                         } else if ("asBinder".equals(name)) {
                             return null;
                         }
@@ -204,7 +204,7 @@ public class DexActivator {
                 }
             );
         } catch (Exception e) {
-            Ln.w("Não foi possível registrar Proxy para IWifiDisplayConnectionCallback: " + e.getMessage());
+            Ln.w("Could not register Proxy for IWifiDisplayConnectionCallback: " + e.getMessage());
             return null;
         }
     }
@@ -215,8 +215,8 @@ public class DexActivator {
             try {
                 Socket socket = new Socket("127.0.0.1", port);
                 socket.setTcpNoDelay(true);
-                socket.setSoTimeout(35000); // 35s timeout para leitura
-                Ln.d("Conectado com sucesso ao socket RTSP em 127.0.0.1:" + port);
+                socket.setSoTimeout(35000); // 35s read timeout
+                Ln.d("Successfully connected to RTSP socket at 127.0.0.1:" + port);
                 return socket;
             } catch (Exception e) {
                 try {
@@ -243,7 +243,7 @@ public class DexActivator {
             while (running.get()) {
                 String firstLine = in.readLine();
                 if (firstLine == null) {
-                    Ln.w("Socket RTSP fechado pelo host.");
+                    Ln.w("RTSP socket closed by host.");
                     break;
                 }
                 if (firstLine.trim().isEmpty()) continue;
@@ -280,7 +280,7 @@ public class DexActivator {
                     body = new String(buf, 0, read);
                 }
 
-                // Processar estados do handshake RTSP WFD
+                // Process WFD RTSP handshake states
                 if (firstLine.startsWith("OPTIONS")) {
                     String resp = "RTSP/1.0 200 OK\r\n" +
                                   "CSeq: " + cseq + "\r\n" +
@@ -341,14 +341,14 @@ public class DexActivator {
                                          "Session: " + sessionId + "\r\n\r\n";
                         sendRtsp(out, playReq);
                     } else if (sessionId != null) {
-                        Ln.i(">>> Resposta 200 OK para PLAY recebida! DeX nativo ativado. <<<");
+                        Ln.i(">>> Received 200 OK response for PLAY! Native DeX activated. <<<");
                         rtspPlayCompleted.countDown();
                     }
                 }
             }
         } catch (Exception e) {
             if (running.get()) {
-                Ln.e("Erro no loop RTSP: " + e.getMessage(), e);
+                Ln.e("Error in RTSP loop: " + e.getMessage(), e);
             }
         }
     }

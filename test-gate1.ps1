@@ -1,71 +1,71 @@
-# Script de Teste do Hard Gate 1 (ScrcpyDeX Server)
-# Valida a ativacao do Samsung DeX e streaming H.264 via USB
+# Hard Gate 1 Test Script (ScrcpyDeX Server)
+# Validates Samsung DeX activation and H.264 streaming via USB
 
 $ErrorActionPreference = "Stop"
 
 Write-Host "=================================================" -ForegroundColor Cyan
-Write-Host "      Teste de Validação: HARD GATE 1            " -ForegroundColor Cyan
+Write-Host "     Validation Test: HARD GATE 1                " -ForegroundColor Cyan
 Write-Host "     ScrcpyDeX Server (H.264 Stream via USB)     " -ForegroundColor Cyan
 Write-Host "=================================================" -ForegroundColor Cyan
 
-# 1. Verificar celular conectado via ADB
+# 1. Check for Galaxy device connected via ADB
 $device = adb devices | Select-String -Pattern "\bdevice\b" | Where-Object { $_ -notmatch "List of devices" }
 if (-not $device) {
-    Write-Host "[ERRO] Nenhum aparelho Samsung detectado via ADB!" -ForegroundColor Red
-    Write-Host "Conecte o Galaxy S23 via cabo USB e certifique-se de que a Depuracao USB esta ativa." -ForegroundColor Yellow
+    Write-Host "[ERROR] No Samsung device detected via ADB!" -ForegroundColor Red
+    Write-Host "Connect the Galaxy S23 via USB cable and ensure USB Debugging is enabled." -ForegroundColor Yellow
     exit 1
 }
-Write-Host "[1/4] Galaxy detectado via ADB." -ForegroundColor Green
+Write-Host "[1/4] Galaxy device detected via ADB." -ForegroundColor Green
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $serverJar = Join-Path $scriptDir "server\scrcpydex-server.jar"
 
 if (-not (Test-Path $serverJar)) {
-    Write-Host "[ERRO] Binario $serverJar nao encontrado. Execute build-server.ps1 primeiro." -ForegroundColor Red
+    Write-Host "[ERROR] Binary $serverJar not found. Run build-server.ps1 first." -ForegroundColor Red
     exit 1
 }
 
-# 2. Verificar presenca do ffplay
+# 2. Check for ffplay presence
 $ffplayCmd = Get-Command ffplay -ErrorAction SilentlyContinue
 if (-not $ffplayCmd) {
-    Write-Host "[AVISO] O player 'ffplay' (FFmpeg) nao foi encontrado no PATH." -ForegroundColor Yellow
-    Write-Host "Voce pode instala-lo rapidamente executando no terminal:" -ForegroundColor Yellow
+    Write-Host "[WARNING] The 'ffplay' player (FFmpeg) was not found in PATH." -ForegroundColor Yellow
+    Write-Host "You can install it quickly by running in terminal:" -ForegroundColor Yellow
     Write-Host "  winget install Gyan.FFmpeg" -ForegroundColor Cyan
-    Write-Host "Apos instalar, feche e abra o terminal novamente." -ForegroundColor Yellow
-    Write-Host "`nTentando continuar caso queira apenas iniciar o servidor..." -ForegroundColor Gray
+    Write-Host "After installing, restart your terminal." -ForegroundColor Yellow
+    Write-Host "`nAttempting to continue if you only want to start the server..." -ForegroundColor Gray
 }
 
-# 3. Limpeza de processos anteriores
-Write-Host "[2/4] Limpando processos anteriores no celular..." -ForegroundColor Green
+# 3. Clean up previous processes
+Write-Host "[2/4] Cleaning up previous processes on device..." -ForegroundColor Green
 adb shell "pkill -f com.scrcpydex.server.Server" 2>$null
 adb forward tcp:27183 tcp:27183
 
-# 4. Enviar JAR para o dispositivo
-Write-Host "[3/4] Enviando scrcpydex-server.jar para /data/local/tmp/..." -ForegroundColor Green
+# 4. Push JAR to device
+Write-Host "[3/4] Pushing scrcpydex-server.jar to /data/local/tmp/..." -ForegroundColor Green
 adb push $serverJar /data/local/tmp/scrcpydex-server.jar | Out-Null
 
-# 5. Iniciar o servidor no celular em background e abrir ffplay
-Write-Host "[4/4] Disparando o ScrcpyDeX Server no dispositivo..." -ForegroundColor Cyan
+# 5. Launch server on device in background and open ffplay
+Write-Host "[4/4] Launching ScrcpyDeX Server on device..." -ForegroundColor Cyan
 $serverProc = Start-Process -FilePath "adb" -ArgumentList "shell", "CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process /data/local/tmp com.scrcpydex.server.Server" -PassThru
 
-Write-Host "Servidor disparado (PID: $($serverProc.Id)). Aguardando inicialização do DeX (4s)..." -ForegroundColor Gray
+Write-Host "Server launched (PID: $($serverProc.Id)). Waiting for DeX initialization (4s)..." -ForegroundColor Gray
 Start-Sleep -Seconds 4
 
 if ($ffplayCmd) {
-    Write-Host "Iniciando ffplay com baixa latencia (60fps, nobuffer)..." -ForegroundColor Green
+    Write-Host "Launching ffplay with low latency (60fps, nobuffer)..." -ForegroundColor Green
     & ffplay -f h264 -framerate 60 -fflags nobuffer -flags low_delay -probesize 32768 -analyzeduration 100000 tcp://127.0.0.1:27183
 } else {
-    Write-Host "`nServidor rodando e aguardando conexao na porta 27183!" -ForegroundColor Green
-    Write-Host "Para assistir o stream, conecte qualquer player H.264 em tcp://127.0.0.1:27183" -ForegroundColor Cyan
+    Write-Host "`nServer running and awaiting connection on port 27183!" -ForegroundColor Green
+    Write-Host "To watch the stream, connect any H.264 player to tcp://127.0.0.1:27183" -ForegroundColor Cyan
 }
 
-Write-Host "`nPressione qualquer tecla para encerrar a sessão DeX..." -ForegroundColor Yellow
+Write-Host "`nPress any key to terminate DeX session..." -ForegroundColor Yellow
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 
-Write-Host "Finalizando sessão..." -ForegroundColor Gray
+Write-Host "Terminating session..." -ForegroundColor Gray
 adb shell "CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process /data/local/tmp com.scrcpydex.server.Server disconnect" 2>$null
 adb shell "pkill -f com.scrcpydex.server.Server" 2>$null
 if ($serverProc -and -not $serverProc.HasExited) {
     Stop-Process -Id $serverProc.Id -Force -ErrorAction SilentlyContinue
 }
-Write-Host "Sessão DeX encerrada com sucesso." -ForegroundColor Green
+Write-Host "DeX session terminated successfully." -ForegroundColor Green

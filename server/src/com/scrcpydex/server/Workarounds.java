@@ -9,13 +9,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
 /**
- * Ajustes de ambiente ("Workarounds") para app_process no Android 11+.
+ * Environment Adjustments ("Workarounds") for app_process on Android 11+.
  * 
- * Em aparelhos Samsung executando One UI, métodos internos como
- * DisplayManagerGlobal.getDisplayInfoLocked() tentam consultar
- * ActivityThread.currentActivityThread().getConfiguration(), que por padrão
- * gera NullPointerException em processos standalone de linha de comando.
- * Esta classe simula a estrutura do ActivityThread para garantir execução estável.
+ * On Samsung devices running One UI, internal methods such as
+ * DisplayManagerGlobal.getDisplayInfoLocked() attempt to query
+ * ActivityThread.currentActivityThread().getConfiguration(), which by default
+ * throws a NullPointerException in standalone command-line processes.
+ * This class mocks the ActivityThread structure to ensure stable execution.
  */
 public final class Workarounds {
 
@@ -37,7 +37,7 @@ public final class Workarounds {
             mSystemThreadField.setAccessible(true);
             mSystemThreadField.setBoolean(ACTIVITY_THREAD, true);
         } catch (Exception e) {
-            throw new AssertionError("Falha crítica ao inicializar Workarounds do ActivityThread", e);
+            throw new AssertionError("Critical failure initializing ActivityThread Workarounds", e);
         }
     }
 
@@ -64,7 +64,7 @@ public final class Workarounds {
             field.setAccessible(true);
             field.set(ACTIVITY_THREAD, configController);
         } catch (Throwable t) {
-            Ln.d("Workaround ConfigurationController ignorado: " + t.getMessage());
+            Ln.d("ConfigurationController workaround skipped: " + t.getMessage());
         }
     }
 
@@ -86,7 +86,7 @@ public final class Workarounds {
             mBoundApplicationField.setAccessible(true);
             mBoundApplicationField.set(ACTIVITY_THREAD, appBindData);
         } catch (Throwable t) {
-            Ln.d("Workaround AppInfo ignorado: " + t.getMessage());
+            Ln.d("AppInfo workaround skipped: " + t.getMessage());
         }
     }
 
@@ -97,7 +97,7 @@ public final class Workarounds {
             mInitialApplicationField.setAccessible(true);
             mInitialApplicationField.set(ACTIVITY_THREAD, app);
         } catch (Throwable t) {
-            Ln.d("Workaround AppContext ignorado: " + t.getMessage());
+            Ln.d("AppContext workaround skipped: " + t.getMessage());
         }
     }
 }

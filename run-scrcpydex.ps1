@@ -1,23 +1,23 @@
 # ScrcpyDeX - Samsung DeX for PC via USB
-# Ativa o motor nativo Samsung DeX no celular e abre em 1 unica janela nativa
+# Activates native Samsung DeX engine on device and launches in a single native window
 
 $ErrorActionPreference = "Continue"
 
 Write-Host "=================================================" -ForegroundColor Cyan
 Write-Host "         ScrcpyDeX - Samsung DeX for PC          " -ForegroundColor Cyan
-Write-Host "   Janela Unica Nativa via USB (Zero Wi-Fi)      " -ForegroundColor Cyan
+Write-Host "   Single Native Window via USB (Zero Wi-Fi)     " -ForegroundColor Cyan
 Write-Host "=================================================" -ForegroundColor Cyan
 
-# 1. Verificar Galaxy conectado via ADB
+# 1. Check for Galaxy device connected via ADB
 $device = adb devices | Select-String -Pattern "\bdevice\b" | Where-Object { $_ -notmatch "List of devices" }
 if (-not $device) {
-    Write-Host "ERRO: Nenhum aparelho Samsung detectado via ADB!" -ForegroundColor Red
-    Write-Host "Conecte o Galaxy S23 via cabo USB com Depuracao USB ativa." -ForegroundColor Yellow
+    Write-Host "ERROR: No Samsung device detected via ADB!" -ForegroundColor Red
+    Write-Host "Connect the Galaxy S23 via USB cable with USB Debugging enabled." -ForegroundColor Yellow
     exit 1
 }
-Write-Host "[1/4] Galaxy detectado via ADB." -ForegroundColor Green
+Write-Host "[1/4] Galaxy device detected via ADB." -ForegroundColor Green
 
-# 2. Localizar binarios
+# 2. Locate binaries
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $serverJar = Join-Path $scriptDir "server\scrcpydex-server.jar"
 $scrcpyExe = "C:\Users\aurel\AppData\Local\Microsoft\WinGet\Packages\Genymobile.scrcpy_Microsoft.Winget.Source_8wekyb3d8bbwe\scrcpy-win64-v4.1\scrcpy.exe"
@@ -26,23 +26,23 @@ if (-not (Test-Path $scrcpyExe)) {
     $cmd = Get-Command scrcpy -ErrorAction SilentlyContinue
     if ($cmd) { $scrcpyExe = $cmd.Source }
     else {
-        Write-Host "ERRO: Binario do scrcpy nao encontrado." -ForegroundColor Red
+        Write-Host "ERROR: scrcpy binary not found." -ForegroundColor Red
         exit 1
     }
 }
 
-# 3. Limpar processos anteriores no celular
-Write-Host "[2/4] Preparando celular..." -ForegroundColor Green
+# 3. Clean up previous processes on device
+Write-Host "[2/4] Preparing device..." -ForegroundColor Green
 adb shell "CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process /data/local/tmp com.scrcpydex.server.Server disconnect" 2>$null | Out-Null
 adb shell "pkill -f com.scrcpydex.server.Server" 2>$null | Out-Null
 adb shell "pkill -f scrcpy" 2>$null | Out-Null
 adb push $serverJar /data/local/tmp/scrcpydex-server.jar | Out-Null
 
-# 4. Iniciar o ativador DeX em background no celular
-Write-Host "[3/4] Ativando motor nativo Samsung DeX via loopback Miracast..." -ForegroundColor Cyan
+# 4. Start DeX activator in background on device
+Write-Host "[3/4] Activating native Samsung DeX engine via Miracast loopback..." -ForegroundColor Cyan
 $serverProc = Start-Process -FilePath "adb" -ArgumentList "shell", "CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process /data/local/tmp com.scrcpydex.server.Server activate" -PassThru
 
-# Aguardar o surgimento especifico do display 'ScrcpyDeX'
+# Wait for specific 'ScrcpyDeX' display to appear
 $dexId = $null
 $retries = 0
 while ($retries -lt 30 -and -not $dexId) {
@@ -59,38 +59,38 @@ while ($retries -lt 30 -and -not $dexId) {
 }
 
 if (-not $dexId) {
-    Write-Host "ERRO: Display do Samsung DeX nao foi detectado a tempo." -ForegroundColor Red
+    Write-Host "ERROR: Samsung DeX display was not detected in time." -ForegroundColor Red
     adb shell "CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process /data/local/tmp com.scrcpydex.server.Server disconnect" 2>$null | Out-Null
     adb shell "pkill -f com.scrcpydex.server.Server" 2>$null | Out-Null
     exit 1
 }
 
 Write-Host "=================================================" -ForegroundColor Green
-Write-Host "  Samsung DeX Ativado! Display ID: $dexId        " -ForegroundColor Green
+Write-Host "  Samsung DeX Activated! Display ID: $dexId      " -ForegroundColor Green
 Write-Host "=================================================" -ForegroundColor Green
-Write-Host "[4/4] Abrindo janela unica do Samsung DeX no PC..." -ForegroundColor Cyan
+Write-Host "[4/4] Opening single Samsung DeX window on PC..." -ForegroundColor Cyan
 Write-Host ""
-Write-Host ">>> CONTROLES DO MOUSE FISICO (UHID) <<<" -ForegroundColor Yellow
-Write-Host "- Para soltar o mouse de volta para o Windows: Pressione [ALT ESQUERDO]" -ForegroundColor Yellow
-Write-Host "- Para alternar Tela Cheia (Fullscreen):       Pressione [ALT + F]" -ForegroundColor Yellow
-Write-Host "- Para abrir menus de contexto:               Clique com Botao Direito" -ForegroundColor Yellow
+Write-Host ">>> PHYSICAL MOUSE CONTROLS (UHID) <<<" -ForegroundColor Yellow
+Write-Host "- To release mouse back to Windows: Press [LEFT ALT]" -ForegroundColor Yellow
+Write-Host "- To toggle Fullscreen:             Press [ALT + F]" -ForegroundColor Yellow
+Write-Host "- To open context menus:            Right Click" -ForegroundColor Yellow
 Write-Host ""
 
-# 5. Abrir a janela unica e nativa do DeX com scrcpy em modo UHID (Mouse Fisico Real)
+# 5. Open single native DeX window with scrcpy in UHID mode (Real Physical Mouse)
 try {
     & $scrcpyExe --display-id=$dexId --mouse=uhid --stay-awake --window-title="Samsung DeX (ScrcpyDeX)"
 }
 finally {
-    # 6. Desligamento 100% automatico e garantido ao fechar a janela
+    # 6. Guaranteed 100% automatic shutdown upon closing the window
     Write-Host ""
     Write-Host "=================================================" -ForegroundColor Gray
-    Write-Host "Encerrando sessao DeX no Galaxy S23..." -ForegroundColor Gray
+    Write-Host "Terminating DeX session on Galaxy S23..." -ForegroundColor Gray
     adb shell "CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process /data/local/tmp com.scrcpydex.server.Server disconnect" 2>$null | Out-Null
     adb shell "pkill -f com.scrcpydex.server.Server" 2>$null | Out-Null
     adb shell "pkill -f scrcpy" 2>$null | Out-Null
     if ($serverProc -and -not $serverProc.HasExited) {
         Stop-Process -Id $serverProc.Id -Force -ErrorAction SilentlyContinue
     }
-    Write-Host "Sessao DeX desligada com sucesso! Celular restaurado." -ForegroundColor Green
+    Write-Host "DeX session disconnected successfully! Device restored." -ForegroundColor Green
     Write-Host "=================================================" -ForegroundColor Gray
 }

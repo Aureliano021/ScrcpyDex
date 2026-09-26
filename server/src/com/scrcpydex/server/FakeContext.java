@@ -3,12 +3,11 @@ package com.scrcpydex.server;
 import android.content.ContextWrapper;
 
 /**
- * Contexto simulado ("FakeContext") para processos executados via app_process.
+ * Simulated Context ("FakeContext") for processes executed via app_process.
  * 
- * Como o app_process roda como processo de terminal (UID shell),
- * ele não possui uma Application padrão do Android. O FakeContext fornece
- * o package name "com.android.shell" para APIs do sistema que realizam
- * validação de chamador.
+ * Because app_process runs as a command-line terminal process (UID shell),
+ * it does not possess a default Android Application. FakeContext provides
+ * the package name "com.android.shell" for system APIs that perform caller validation.
  */
 public final class FakeContext extends ContextWrapper {
     public static final String PACKAGE_NAME = "com.android.shell";

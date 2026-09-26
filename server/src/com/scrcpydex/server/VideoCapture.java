@@ -14,18 +14,18 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Módulo de Captura e Codificação de Vídeo em Tempo Real (H.264 / MediaCodec).
+ * Real-Time Video Capture and Encoding Module (H.264 / MediaCodec).
  * 
- * Utiliza a API nativa DisplayManager.createVirtualDisplay(name, w, h, displayIdToMirror, surface)
- * introduzida no Android 14+ para espelhar o display DeX diretamente para o codificador
- * de hardware MediaCodec com latência mínima, transmitindo frames Annex B pelo socket TCP.
+ * Uses the native DisplayManager.createVirtualDisplay(name, w, h, displayIdToMirror, surface)
+ * API introduced in Android 14+ to mirror the DeX display directly to the
+ * MediaCodec hardware encoder with minimum latency, streaming Annex B frames over TCP socket.
  */
 public class VideoCapture {
     private static final String MIME_TYPE = "video/avc"; // H.264
     private static final int DEFAULT_BITRATE = 8_000_000; // 8 Mbps
     private static final int DEFAULT_FPS = 60;
-    private static final int DEFAULT_I_FRAME_INTERVAL = 10; // Segundos entre keyframes
-    private static final long REPEAT_FRAME_DELAY_US = 100_000; // 100ms para manter stream vivo
+    private static final int DEFAULT_I_FRAME_INTERVAL = 10; // Seconds between keyframes
+    private static final long REPEAT_FRAME_DELAY_US = 100_000; // 100ms to keep stream alive
 
     private final int displayId;
     private final int width;
@@ -53,40 +53,40 @@ public class VideoCapture {
     }
 
     /**
-     * Inicializa o MediaCodec e projeta o display DeX para o encoder.
+     * Initializes MediaCodec and projects the DeX display to the encoder.
      */
     public void start() throws Exception {
-        Ln.i("Inicializando codificador de hardware H.264 (" + width + "x" + height + " @ " + fps + "fps, " + (bitrate / 1_000_000) + " Mbps)...");
+        Ln.i("Initializing H.264 hardware encoder (" + width + "x" + height + " @ " + fps + "fps, " + (bitrate / 1_000_000) + " Mbps)...");
 
-        // 1. Configurar MediaFormat com largura e altura obrigatórias para latência mínima
+        // 1. Configure MediaFormat with required width and height for minimum latency
         MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, width, height);
         format.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
         format.setInteger(MediaFormat.KEY_FRAME_RATE, fps);
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1); // 1 keyframe a cada 1s para sincronização rápida de vídeo
-        format.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 50_000); // Repetir após 50ms para manter fluxo contínuo
-        format.setInteger(MediaFormat.KEY_PRIORITY, 0); // Prioridade de tempo real
-        format.setInteger(MediaFormat.KEY_LATENCY, 1);  // Emite frame assim que pronto
+        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1); // 1 keyframe every 1s for fast video synchronization
+        format.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 50_000); // Repeat after 50ms to keep continuous stream
+        format.setInteger(MediaFormat.KEY_PRIORITY, 0); // Realtime priority
+        format.setInteger(MediaFormat.KEY_LATENCY, 1);  // Output frame as soon as ready
         try {
             format.setInteger("prepend-sps-pps-to-idr-frames", 1);
         } catch (Throwable ignored) {}
 
-        // 2. Instanciar e configurar o MediaCodec
+        // 2. Instantiate and configure MediaCodec
         codec = MediaCodec.createEncoderByType(MIME_TYPE);
         codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
         inputSurface = codec.createInputSurface();
         codec.start();
 
-        // 3. Conectar espelhamento do DeX via DisplayManager.createVirtualDisplay (Android 14+)
+        // 3. Connect DeX mirroring via DisplayManager.createVirtualDisplay (Android 14+)
         Method createVirtualDisplayMethod = DisplayManager.class.getMethod(
             "createVirtualDisplay", String.class, int.class, int.class, int.class, Surface.class);
         this.virtualDisplay = (VirtualDisplay) createVirtualDisplayMethod.invoke(
             null, "scrcpydex", width, height, displayId, inputSurface);
-        Ln.i("Pipeline de espelhamento DisplayManager ➔ MediaCodec conectado com sucesso!");
+        Ln.i("Mirroring pipeline DisplayManager -> MediaCodec connected successfully!");
 
         running.set(true);
 
-        // 4. Iniciar loop de codificação e transmissão
+        // 4. Start encoding and transmission loop
         encodeLoop();
     }
 
@@ -113,21 +113,21 @@ public class VideoCapture {
 
                         if (!firstFrameLogged) {
                             firstFrameLogged = true;
-                            Ln.i(">>> Primeiro frame de vídeo H.264 transmitido com sucesso ao cliente! <<<");
+                            Ln.i(">>> First H.264 video frame successfully transmitted to client! <<<");
                         }
                     }
                     codec.releaseOutputBuffer(outputBufferIndex, false);
                 } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-                    Ln.d("MediaCodec: Formato de vídeo configurado: " + codec.getOutputFormat());
+                    Ln.d("MediaCodec: Video format configured: " + codec.getOutputFormat());
                 }
             }
         } catch (IOException ioe) {
             if (running.get()) {
-                Ln.w("Conexão de vídeo encerrada pelo cliente (Broken pipe).");
+                Ln.w("Video connection closed by client (Broken pipe).");
             }
         } catch (Exception e) {
             if (running.get()) {
-                Ln.e("Erro no loop de codificação de vídeo: " + e.getMessage(), e);
+                Ln.e("Error in video encoding loop: " + e.getMessage(), e);
             }
         } finally {
             stop();
@@ -135,13 +135,13 @@ public class VideoCapture {
     }
 
     /**
-     * Encerra o loop e libera os recursos gráficos.
+     * Terminates loop and releases graphics resources.
      */
     public void stop() {
         if (!running.getAndSet(false)) {
             return;
         }
-        Ln.i("Finalizando pipeline de captura de vídeo...");
+        Ln.i("Shutting down video capture pipeline...");
 
         if (virtualDisplay != null) {
             virtualDisplay.release();
@@ -158,6 +158,6 @@ public class VideoCapture {
             } catch (Exception ignored) {}
             codec = null;
         }
-        Ln.i("Recursos do MediaCodec e VirtualDisplay liberados.");
+        Ln.i("MediaCodec and VirtualDisplay resources released.");
     }
 }

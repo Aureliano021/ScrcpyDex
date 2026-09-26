@@ -9,17 +9,17 @@ import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Canal de Controle e Mensageria Bidirecional (Porta TCP 27184).
+ * Bidirectional Control and Messaging Channel (TCP Port 27184).
  * 
- * Implementa o protocolo binário especificado em docs/PROTOCOL.md:
- * - Emite MSG_DEX_READY e MSG_DISPLAY_INFO ao cliente conectado
- * - Processa mensagens de entrada do cliente (Mouse, Teclado, Scroll)
- *   e despacha imediatamente para o InputHandler com TCP_NODELAY.
+ * Implements the binary protocol specified in docs/PROTOCOL.md:
+ * - Emits MSG_DEX_READY and MSG_DISPLAY_INFO to the connected client
+ * - Processes incoming client input messages (Mouse, Keyboard, Scroll)
+ *   and dispatches immediately to InputHandler with TCP_NODELAY.
  */
 public class ControlChannel {
     public static final int CONTROL_PORT = 27184;
 
-    // Tipos de Mensagem definidos em docs/PROTOCOL.md
+    // Message types defined in docs/PROTOCOL.md
     public static final byte MSG_DEX_READY = 0x01;
     public static final byte MSG_DISPLAY_INFO = 0x02;
     public static final byte MSG_HEARTBEAT = 0x03;
@@ -55,7 +55,7 @@ public class ControlChannel {
     }
 
     /**
-     * Inicia o servidor do canal de controle em thread separada.
+     * Starts the control channel server on a separate thread.
      */
     public void start() throws IOException {
         serverSocket = new ServerSocket(CONTROL_PORT, 1, InetAddress.getByName("127.0.0.1"));
@@ -65,7 +65,7 @@ public class ControlChannel {
         Thread thread = new Thread(this::listenLoop, "ScrcpyDeX-Control");
         thread.setDaemon(true);
         thread.start();
-        Ln.i("Canal de controle TCP escutando em 127.0.0.1:" + CONTROL_PORT);
+        Ln.i("TCP control channel listening on 127.0.0.1:" + CONTROL_PORT);
     }
 
     private void listenLoop() {
@@ -75,27 +75,27 @@ public class ControlChannel {
             out = new DataOutputStream(clientSocket.getOutputStream());
             in = new DataInputStream(clientSocket.getInputStream());
 
-            Ln.i("Cliente de controle conectado: " + clientSocket.getRemoteSocketAddress());
+            Ln.i("Control client connected: " + clientSocket.getRemoteSocketAddress());
 
-            // 1. Enviar evento de DeX pronto com ID do display
+            // 1. Send DeX ready event with display ID
             out.writeByte(MSG_DEX_READY);
             out.writeInt(displayId);
             out.flush();
 
-            // 2. Enviar dimensões e densidade do display
+            // 2. Send display dimensions and density
             out.writeByte(MSG_DISPLAY_INFO);
             out.writeInt(width);
             out.writeInt(height);
             out.writeInt(dpi);
             out.flush();
 
-            Ln.d("Eventos de inicialização (MSG_DEX_READY e MSG_DISPLAY_INFO) enviados ao cliente.");
+            Ln.d("Initialization events (MSG_DEX_READY and MSG_DISPLAY_INFO) sent to client.");
 
-            // 3. Loop contínuo de leitura de mensagens de entrada do cliente
+            // 3. Continuous read loop for incoming client messages
             while (running.get()) {
                 int msgType = in.read();
                 if (msgType == -1) {
-                    Ln.w("Conexão do canal de controle fechada pelo cliente.");
+                    Ln.w("Control channel connection closed by client.");
                     break;
                 }
 
@@ -136,12 +136,12 @@ public class ControlChannel {
                         int jsonLen = in.readUnsignedShort();
                         byte[] jsonBytes = new byte[jsonLen];
                         in.readFully(jsonBytes);
-                        Ln.i("Configurações recebidas do cliente: " + new String(jsonBytes, "UTF-8"));
+                        Ln.i("Configuration received from client: " + new String(jsonBytes, "UTF-8"));
                         break;
                     }
 
                     case MSG_DISCONNECT: {
-                        Ln.i("Comando MSG_DISCONNECT recebido do cliente.");
+                        Ln.i("MSG_DISCONNECT command received from client.");
                         if (onDisconnectCallback != null) {
                             onDisconnectCallback.run();
                         }
@@ -149,14 +149,14 @@ public class ControlChannel {
                     }
 
                     default:
-                        Ln.w("Tipo de mensagem desconhecido no canal de controle: 0x" + Integer.toHexString(msgType));
+                        Ln.w("Unknown message type on control channel: 0x" + Integer.toHexString(msgType));
                         break;
                 }
             }
 
         } catch (IOException ioe) {
             if (running.get()) {
-                Ln.w("Canal de controle encerrado: " + ioe.getMessage());
+                Ln.w("Control channel closed: " + ioe.getMessage());
             }
         } finally {
             stop();
@@ -164,7 +164,7 @@ public class ControlChannel {
     }
 
     /**
-     * Encerra o canal de controle e fecha os sockets.
+     * Stops the control channel and closes sockets.
      */
     public void stop() {
         if (!running.getAndSet(false)) {
@@ -178,6 +178,6 @@ public class ControlChannel {
                 serverSocket.close();
             }
         } catch (IOException ignored) {}
-        Ln.i("Canal de controle finalizado.");
+        Ln.i("Control channel terminated.");
     }
 }
