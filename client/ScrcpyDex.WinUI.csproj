@@ -14,6 +14,10 @@
     <StartupObject>ScrcpyDex.Program</StartupObject>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <Version>1.1.0</Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <ProductVersion>1.1.0</ProductVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,6 +27,7 @@
     </ApplicationDefinition>
     <Page Remove="src\App.xaml" />
     <Resource Include="icon.ico" />
+    <EmbeddedResource Include="..\server\scrcpydex-server.jar" LogicalName="scrcpydex-server.jar" />
   </ItemGroup>
 
   <ItemGroup>

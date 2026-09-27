@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
+// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,13 +26,15 @@ namespace ScrcpyDex.Core.IO
         private static readonly string[] ExecutableExtensions = { ".exe", "" };
 
         /// <summary>
-        /// Resolves the absolute path to scrcpy.exe.
+        /// Attempts to resolve the absolute path to scrcpy.exe.
+        /// Returns true if an existing binary is located, otherwise false.
         /// </summary>
-        public static string ResolveScrcpyExecutable(string? customPath = null)
+        public static bool TryResolveScrcpyExecutable(out string resolvedPath, string? customPath = null)
         {
             if (!string.IsNullOrWhiteSpace(customPath) && File.Exists(customPath))
             {
-                return Path.GetFullPath(customPath);
+                resolvedPath = Path.GetFullPath(customPath);
+                return true;
             }
 
             string baseDir = AppContext.BaseDirectory;
@@ -52,7 +54,11 @@ namespace ScrcpyDex.Core.IO
 
                 foreach (var candidate in candidates)
                 {
-                    if (File.Exists(candidate)) return Path.GetFullPath(candidate);
+                    if (File.Exists(candidate))
+                    {
+                        resolvedPath = Path.GetFullPath(candidate);
+                        return true;
+                    }
                 }
 
                 dir = dir.Parent;
@@ -60,7 +66,11 @@ namespace ScrcpyDex.Core.IO
 
             // 2. Search in PATH
             string? pathFromEnv = FindInPath("scrcpy");
-            if (pathFromEnv != null) return pathFromEnv;
+            if (pathFromEnv != null && File.Exists(pathFromEnv))
+            {
+                resolvedPath = pathFromEnv;
+                return true;
+            }
 
             // 3. Search WinGet Packages
             string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -77,14 +87,22 @@ namespace ScrcpyDex.Core.IO
                         {
                             var match = Directory.GetFiles(scrcpyDir, "scrcpy.exe", SearchOption.AllDirectories)
                                 .FirstOrDefault();
-                            if (match != null) return Path.GetFullPath(match);
+                            if (match != null && File.Exists(match))
+                            {
+                                resolvedPath = Path.GetFullPath(match);
+                                return true;
+                            }
                         }
                     }
                     catch { }
                 }
 
                 string wingetLinks = Path.Combine(localAppData, "Microsoft", "WinGet", "Links", "scrcpy.exe");
-                if (File.Exists(wingetLinks)) return Path.GetFullPath(wingetLinks);
+                if (File.Exists(wingetLinks))
+                {
+                    resolvedPath = Path.GetFullPath(wingetLinks);
+                    return true;
+                }
             }
 
             // 4. Search Program Files
@@ -92,28 +110,46 @@ namespace ScrcpyDex.Core.IO
             if (!string.IsNullOrEmpty(programFiles))
             {
                 string pfScrcpy = Path.Combine(programFiles, "scrcpy", "scrcpy.exe");
-                if (File.Exists(pfScrcpy)) return Path.GetFullPath(pfScrcpy);
+                if (File.Exists(pfScrcpy))
+                {
+                    resolvedPath = Path.GetFullPath(pfScrcpy);
+                    return true;
+                }
             }
 
             string programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
             if (!string.IsNullOrEmpty(programFilesX86))
             {
                 string pfScrcpy86 = Path.Combine(programFilesX86, "scrcpy", "scrcpy.exe");
-                if (File.Exists(pfScrcpy86)) return Path.GetFullPath(pfScrcpy86);
+                if (File.Exists(pfScrcpy86))
+                {
+                    resolvedPath = Path.GetFullPath(pfScrcpy86);
+                    return true;
+                }
             }
 
-            // Fallback
-            return "scrcpy.exe";
+            resolvedPath = "scrcpy.exe";
+            return false;
         }
 
         /// <summary>
-        /// Resolves the absolute path to adb.exe.
+        /// Resolves the absolute path to scrcpy.exe, falling back to "scrcpy.exe".
         /// </summary>
-        public static string ResolveAdbExecutable(string? customPath = null, string? scrcpyPath = null)
+        public static string ResolveScrcpyExecutable(string? customPath = null)
+        {
+            return TryResolveScrcpyExecutable(out string path, customPath) ? path : path;
+        }
+
+        /// <summary>
+        /// Attempts to resolve the absolute path to adb.exe.
+        /// Returns true if an existing binary is located, otherwise false.
+        /// </summary>
+        public static bool TryResolveAdbExecutable(out string resolvedPath, string? customPath = null, string? scrcpyPath = null)
         {
             if (!string.IsNullOrWhiteSpace(customPath) && File.Exists(customPath))
             {
-                return Path.GetFullPath(customPath);
+                resolvedPath = Path.GetFullPath(customPath);
+                return true;
             }
 
             // 1. Sibling to resolved scrcpy executable (official releases bundle adb together)
@@ -123,7 +159,11 @@ namespace ScrcpyDex.Core.IO
                 if (!string.IsNullOrEmpty(scrcpyDir))
                 {
                     string siblingAdb = Path.Combine(scrcpyDir, "adb.exe");
-                    if (File.Exists(siblingAdb)) return Path.GetFullPath(siblingAdb);
+                    if (File.Exists(siblingAdb))
+                    {
+                        resolvedPath = Path.GetFullPath(siblingAdb);
+                        return true;
+                    }
                 }
             }
 
@@ -143,7 +183,11 @@ namespace ScrcpyDex.Core.IO
 
                 foreach (var candidate in candidates)
                 {
-                    if (File.Exists(candidate)) return Path.GetFullPath(candidate);
+                    if (File.Exists(candidate))
+                    {
+                        resolvedPath = Path.GetFullPath(candidate);
+                        return true;
+                    }
                 }
 
                 dir = dir.Parent;
@@ -151,14 +195,22 @@ namespace ScrcpyDex.Core.IO
 
             // 3. Search in PATH
             string? pathFromEnv = FindInPath("adb");
-            if (pathFromEnv != null) return pathFromEnv;
+            if (pathFromEnv != null && File.Exists(pathFromEnv))
+            {
+                resolvedPath = pathFromEnv;
+                return true;
+            }
 
             // 4. Android SDK Platform Tools
             string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             if (!string.IsNullOrEmpty(localAppData))
             {
                 string sdkAdb = Path.Combine(localAppData, "Android", "Sdk", "platform-tools", "adb.exe");
-                if (File.Exists(sdkAdb)) return Path.GetFullPath(sdkAdb);
+                if (File.Exists(sdkAdb))
+                {
+                    resolvedPath = Path.GetFullPath(sdkAdb);
+                    return true;
+                }
 
                 string wingetPackagesDir = Path.Combine(localAppData, "Microsoft", "WinGet", "Packages");
                 if (Directory.Exists(wingetPackagesDir))
@@ -171,31 +223,51 @@ namespace ScrcpyDex.Core.IO
                         {
                             var match = Directory.GetFiles(scrcpyDir, "adb.exe", SearchOption.AllDirectories)
                                 .FirstOrDefault();
-                            if (match != null) return Path.GetFullPath(match);
+                            if (match != null && File.Exists(match))
+                            {
+                                resolvedPath = Path.GetFullPath(match);
+                                return true;
+                            }
                         }
                     }
                     catch { }
                 }
 
                 string wingetLinks = Path.Combine(localAppData, "Microsoft", "WinGet", "Links", "adb.exe");
-                if (File.Exists(wingetLinks)) return Path.GetFullPath(wingetLinks);
+                if (File.Exists(wingetLinks))
+                {
+                    resolvedPath = Path.GetFullPath(wingetLinks);
+                    return true;
+                }
             }
 
-            return "adb.exe";
+            resolvedPath = "adb.exe";
+            return false;
         }
 
         /// <summary>
-        /// Resolves the absolute path to scrcpydex-server.jar.
+        /// Resolves the absolute path to adb.exe, falling back to "adb.exe".
         /// </summary>
-        public static string? ResolveServerJar(string? customPath = null)
+        public static string ResolveAdbExecutable(string? customPath = null, string? scrcpyPath = null)
+        {
+            return TryResolveAdbExecutable(out string path, customPath, scrcpyPath) ? path : path;
+        }
+
+        /// <summary>
+        /// Attempts to resolve the absolute path to scrcpydex-server.jar.
+        /// Searches filesystem candidates and extracts from embedded assembly resources if not found.
+        /// </summary>
+        public static bool TryResolveServerJar(out string resolvedPath, string? customPath = null)
         {
             if (!string.IsNullOrWhiteSpace(customPath) && File.Exists(customPath))
             {
-                return Path.GetFullPath(customPath);
+                resolvedPath = Path.GetFullPath(customPath);
+                return true;
             }
 
             string baseDir = AppContext.BaseDirectory;
 
+            // 1. Search candidate directories relative to baseDir and upward (up to 5 levels)
             var dir = new DirectoryInfo(baseDir);
             for (int i = 0; i < 5 && dir != null; i++)
             {
@@ -203,19 +275,105 @@ namespace ScrcpyDex.Core.IO
                 {
                     Path.Combine(dir.FullName, "server", "scrcpydex-server.jar"),
                     Path.Combine(dir.FullName, "server", "build", "scrcpydex-server.jar"),
+                    Path.Combine(dir.FullName, "ScrcpyDex", "server", "scrcpydex-server.jar"),
+                    Path.Combine(dir.FullName, "ScrcpyDex", "publish", "scrcpydex-server.jar"),
+                    Path.Combine(dir.FullName, "publish", "scrcpydex-server.jar"),
+                    Path.Combine(dir.FullName, "tests", "server", "scrcpydex-server.jar"),
                     Path.Combine(dir.FullName, "scrcpydex-server.jar"),
                     Path.Combine(dir.FullName, "client", "server", "scrcpydex-server.jar")
                 };
 
                 foreach (var candidate in candidates)
                 {
-                    if (File.Exists(candidate)) return Path.GetFullPath(candidate);
+                    if (File.Exists(candidate))
+                    {
+                        resolvedPath = Path.GetFullPath(candidate);
+                        return true;
+                    }
                 }
 
                 dir = dir.Parent;
             }
 
-            return null;
+            // 2. Check AppData / LocalApplicationData cache
+            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            if (!string.IsNullOrEmpty(localAppData))
+            {
+                string cachedJar = Path.Combine(localAppData, "ScrcpyDeX", "server", "scrcpydex-server.jar");
+                if (File.Exists(cachedJar))
+                {
+                    resolvedPath = Path.GetFullPath(cachedJar);
+                    return true;
+                }
+            }
+
+            // 3. Fallback: Extract embedded scrcpydex-server.jar resource
+            if (TryExtractEmbeddedServerJar(out string extractedPath))
+            {
+                resolvedPath = extractedPath;
+                return true;
+            }
+
+            resolvedPath = string.Empty;
+            return false;
+        }
+
+        /// <summary>
+        /// Resolves the absolute path to scrcpydex-server.jar, extracting from embedded resources if needed.
+        /// </summary>
+        public static string? ResolveServerJar(string? customPath = null)
+        {
+            return TryResolveServerJar(out string path, customPath) ? path : null;
+        }
+
+        private static bool TryExtractEmbeddedServerJar(out string extractedPath)
+        {
+            extractedPath = string.Empty;
+            try
+            {
+                var assembly = typeof(ScrcpyPathResolver).Assembly;
+                Stream? stream = assembly.GetManifestResourceStream("scrcpydex-server.jar")
+                              ?? assembly.GetManifestResourceStream("ScrcpyDex.WinUI.scrcpydex-server.jar");
+
+                if (stream == null)
+                {
+                    foreach (var name in assembly.GetManifestResourceNames())
+                    {
+                        if (name.EndsWith("scrcpydex-server.jar", StringComparison.OrdinalIgnoreCase))
+                        {
+                            stream = assembly.GetManifestResourceStream(name);
+                            if (stream != null) break;
+                        }
+                    }
+                }
+
+                if (stream == null) return false;
+
+                using (stream)
+                {
+                    string targetDir = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        "ScrcpyDeX", "server");
+
+                    if (!Directory.Exists(targetDir))
+                    {
+                        Directory.CreateDirectory(targetDir);
+                    }
+
+                    string targetFile = Path.Combine(targetDir, "scrcpydex-server.jar");
+                    using (var fs = new FileStream(targetFile, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        stream.CopyTo(fs);
+                    }
+
+                    extractedPath = targetFile;
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>

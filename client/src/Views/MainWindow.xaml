@@ -20,37 +20,95 @@
         <local:InverseBooleanConverter x:Key="InverseBoolConverter" />
         <local:BitrateLabelConverter x:Key="BitrateConverter" />
         <local:LogEntryColorConverter x:Key="LogColorConverter" />
+        <local:CountToVisibilityConverter x:Key="CountToVisConverter" />
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
 
-        <!-- Navigation Tab Item Style -->
+        <!-- Modern Fluent Segmented TabControl Style -->
+        <Style x:Key="ModernTabControl" TargetType="TabControl">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Modern Segmented Pill Capsule Header -->
+                            <Border Grid.Row="0"
+                                    Background="#181818"
+                                    BorderBrush="#2A2A2A"
+                                    BorderThickness="1"
+                                    CornerRadius="9"
+                                    Padding="4"
+                                    HorizontalAlignment="Left"
+                                    Margin="0,0,0,16"
+                                    SnapsToDevicePixels="True">
+                                <TabPanel IsItemsHost="True"
+                                          Background="Transparent"
+                                          KeyboardNavigation.TabIndex="1" />
+                            </Border>
+
+                            <!-- Selected Tab Page Content -->
+                            <Border Grid.Row="1"
+                                    Background="Transparent"
+                                    BorderThickness="0">
+                                <ContentPresenter ContentSource="SelectedContent"
+                                                  Margin="0" />
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern Fluent Segmented TabItem Style -->
         <Style x:Key="ModernTabItem" TargetType="TabItem">
-            <Setter Property="Foreground" Value="#A0A0A0" />
-            <Setter Property="FontSize" Value="13.5" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Padding" Value="18,12" />
+            <Setter Property="Foreground" Value="#9E9E9E" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="16,8" />
             <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TabItem">
                         <Border x:Name="TabBorder"
                                 Background="Transparent"
                                 BorderBrush="Transparent"
-                                BorderThickness="0,0,0,2"
+                                BorderThickness="1"
+                                CornerRadius="6"
                                 Padding="{TemplateBinding Padding}"
-                                Margin="0,0,8,0">
+                                Margin="0,0,3,0"
+                                SnapsToDevicePixels="True">
                             <ContentPresenter ContentSource="Header"
                                               HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="TabBorder" Property="Background" Value="#15FFFFFF" />
-                                <Setter Property="Foreground" Value="#E0E0E0" />
+                                <Setter TargetName="TabBorder" Property="Background" Value="#12FFFFFF" />
+                                <Setter Property="Foreground" Value="#EEEEEE" />
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#0078D4" />
+                                <Setter TargetName="TabBorder" Property="Background" Value="#2D2D2D" />
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#404040" />
                                 <Setter Property="Foreground" Value="#FFFFFF" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
                             </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="True" />
+                                    <Condition Property="IsMouseOver" Value="True" />
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="TabBorder" Property="Background" Value="#333333" />
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#4D4D4D" />
+                                <Setter Property="Foreground" Value="#FFFFFF" />
+                            </MultiTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -72,9 +130,11 @@
             <RowDefinition Height="Auto" />
             <!-- 1: Top App Header -->
             <RowDefinition Height="Auto" />
-            <!-- 2: Main Content (Tabs) -->
+            <!-- 2: Prerequisite Warning Banner -->
+            <RowDefinition Height="Auto" />
+            <!-- 3: Main Content (Tabs) -->
             <RowDefinition Height="*" />
-            <!-- 3: Bottom Action Command Bar -->
+            <!-- 4: Bottom Action Command Bar -->
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
@@ -88,7 +148,7 @@
             <ui:TitleBar.Header>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Border Background="#0078D4" CornerRadius="4" Padding="6,2" Margin="10,0,0,0">
-                        <TextBlock Text="v1.0 Fluent" FontSize="10.5" FontWeight="Bold" Foreground="White" />
+                        <TextBlock Text="v1.1 Fluent" FontSize="10.5" FontWeight="Bold" Foreground="White" />
                     </Border>
                 </StackPanel>
             </ui:TitleBar.Header>
@@ -111,25 +171,51 @@
                                FontSize="12" Foreground="#8C8C8C" Margin="0,3,0,0" />
                 </StackPanel>
 
-                <!-- Quick Actions: Save Settings & Reset Defaults -->
+                <!-- Auto-Save Status Indicator -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <ui:Button Appearance="Secondary"
-                               Command="{Binding ResetDefaultsCommand}"
-                               Height="34" Padding="12,0" Margin="0,0,8,0"
-                               ToolTip="Reset all configuration values to default settings">
+                    <ui:SymbolIcon Symbol="Checkmark24" FontSize="13" Foreground="#4CAF50" Margin="0,0,6,0" />
+                    <TextBlock Text="Auto-saved" Foreground="#8E8E8E" FontSize="12" VerticalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Prerequisite Warning Banner (scrcpy missing, etc.) -->
+        <Border Grid.Row="2"
+                Background="#3A2500"
+                BorderBrush="#B8860B"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16,12"
+                Margin="24,12,24,0"
+                Visibility="{Binding HasPrerequisiteWarning, Converter={StaticResource BoolToVisConverter}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <ui:SymbolIcon Symbol="Warning24" FontSize="20" Foreground="#FFC107" Margin="0,0,12,0" VerticalAlignment="Center" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="Prerequisite Warning" FontWeight="SemiBold" FontSize="13" Foreground="#FFD54F" />
+                    <TextBlock Text="{Binding PrerequisiteWarning}" Foreground="#FFE082" FontSize="12" Margin="0,2,0,0" TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0,0,0">
+                    <ui:Button Appearance="Primary"
+                               Command="{Binding BrowseScrcpyPathCommand}"
+                               Height="32" Padding="12,0" Margin="0,0,8,0"
+                               ToolTip="Configure custom scrcpy.exe path">
                         <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon Symbol="ArrowReset24" Margin="0,0,6,0" FontSize="14" />
-                            <TextBlock Text="Reset Defaults" VerticalAlignment="Center" FontSize="12" />
+                            <ui:SymbolIcon Symbol="FolderOpen24" Margin="0,0,6,0" FontSize="14" />
+                            <TextBlock Text="Configure Path..." FontSize="12" FontWeight="SemiBold" />
                         </StackPanel>
                     </ui:Button>
-
-                    <ui:Button Appearance="Primary"
-                               Command="{Binding SaveSettingsCommand}"
-                               Height="34" Padding="14,0"
-                               ToolTip="Save configuration changes to settings.json">
+                    <ui:Button Appearance="Secondary"
+                               Command="{Binding RefreshScrcpyCheckCommand}"
+                               Height="32" Padding="10,0"
+                               ToolTip="Refresh scrcpy detection status">
                         <StackPanel Orientation="Horizontal">
-                            <ui:SymbolIcon Symbol="Save24" Margin="0,0,6,0" FontSize="14" />
-                            <TextBlock Text="Save Settings" VerticalAlignment="Center" FontSize="12" />
+                            <ui:SymbolIcon Symbol="ArrowSync24" Margin="0,0,4,0" FontSize="14" />
+                            <TextBlock Text="Refresh" FontSize="12" />
                         </StackPanel>
                     </ui:Button>
                 </StackPanel>
@@ -137,7 +223,11 @@
         </Border>
 
         <!-- Navigation Tabs Container -->
-        <TabControl Grid.Row="2" ItemContainerStyle="{StaticResource ModernTabItem}" Background="Transparent" BorderThickness="0" Margin="24,12,24,12">
+        <TabControl Grid.Row="3"
+                    Style="{StaticResource ModernTabControl}"
+                    ItemContainerStyle="{StaticResource ModernTabItem}"
+                    SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}"
+                    Margin="24,14,24,12">
             <!-- TAB 1: Display & Video -->
             <TabItem>
                 <TabItem.Header>
@@ -335,6 +425,50 @@
                             <ui:ToggleSwitch IsChecked="{Binding Settings.Device.AutoConnect}" />
                         </ui:CardControl>
 
+                        <!-- Executable & System Paths Section -->
+                        <TextBlock Text="Executable &amp; System Paths" Style="{StaticResource SectionHeaderStyle}" Margin="0,18,0,12" />
+
+                        <!-- scrcpy Executable Path Card -->
+                        <ui:CardControl Margin="0,0,0,8">
+                            <ui:CardControl.Header>
+                                <StackPanel Margin="0,2">
+                                    <TextBlock Text="scrcpy Executable Path" FontWeight="SemiBold" FontSize="13.5" />
+                                    <TextBlock Text="Custom filesystem path to scrcpy.exe (leave empty for automatic detection)" Foreground="#9E9E9E" FontSize="12" Margin="0,2,0,4" />
+                                    <TextBlock Text="{Binding ResolvedScrcpyStatusText}"
+                                               FontSize="11.5"
+                                               Foreground="{Binding ResolvedScrcpyStatusColor}"
+                                               TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </ui:CardControl.Header>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <ui:TextBox Width="260"
+                                            PlaceholderText="Auto-detected on system (leave empty)"
+                                            Text="{Binding Settings.Paths.ScrcpyPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            Height="32" Margin="0,0,8,0" />
+                                <ui:Button Appearance="Secondary"
+                                           Command="{Binding BrowseScrcpyPathCommand}"
+                                           Height="32" Padding="12,0" Margin="0,0,6,0"
+                                           ToolTip="Browse for scrcpy.exe file">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:SymbolIcon Symbol="FolderOpen24" Margin="0,0,6,0" FontSize="14" />
+                                        <TextBlock Text="Browse..." FontSize="12" />
+                                    </StackPanel>
+                                </ui:Button>
+                                <ui:Button Appearance="Secondary"
+                                           Command="{Binding RefreshScrcpyCheckCommand}"
+                                           Height="32" Padding="10,0" Margin="0,0,6,0"
+                                           ToolTip="Re-scan and refresh scrcpy detection">
+                                    <ui:SymbolIcon Symbol="ArrowSync24" FontSize="14" />
+                                </ui:Button>
+                                <ui:Button Appearance="Secondary"
+                                           Command="{Binding ResetScrcpyPathCommand}"
+                                           Height="32" Padding="10,0"
+                                           ToolTip="Reset path to automatic system discovery">
+                                    <ui:SymbolIcon Symbol="ArrowReset24" FontSize="14" />
+                                </ui:Button>
+                            </StackPanel>
+                        </ui:CardControl>
+
                         <!-- Telemetry Specs Box -->
                         <TextBlock Text="Connected Device Information" Style="{StaticResource SectionHeaderStyle}" Margin="0,18,0,12" />
 
@@ -381,6 +515,28 @@
                                 </StackPanel>
                             </Grid>
                         </Border>
+
+                        <!-- Configuration Management & Factory Reset Section -->
+                        <TextBlock Text="Configuration Management" Style="{StaticResource SectionHeaderStyle}" Margin="0,18,0,12" />
+
+                        <!-- Reset Defaults Card -->
+                        <ui:CardControl Margin="0,0,0,12">
+                            <ui:CardControl.Header>
+                                <StackPanel Margin="0,2">
+                                    <TextBlock Text="Restore Default Configuration" FontWeight="SemiBold" FontSize="13.5" />
+                                    <TextBlock Text="Revert all display, audio, input, device, and path settings to initial factory defaults" Foreground="#9E9E9E" FontSize="12" Margin="0,2,0,0" />
+                                </StackPanel>
+                            </ui:CardControl.Header>
+                            <ui:Button Appearance="Secondary"
+                                       Command="{Binding ResetDefaultsCommand}"
+                                       Height="34" Padding="16,0"
+                                       ToolTip="Reset all configuration values to defaults">
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Symbol="ArrowReset24" Margin="0,0,8,0" FontSize="14" />
+                                    <TextBlock Text="Reset Defaults" FontSize="12.5" />
+                                </StackPanel>
+                            </ui:Button>
+                        </ui:CardControl>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -399,75 +555,72 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <!-- Logs Toolbar -->
-                    <Border Grid.Row="0" Background="#202020" BorderBrush="#333333" BorderThickness="1" CornerRadius="6" Padding="14,8" Margin="0,0,0,8">
+                    <!-- Minimal Logs Toolbar: Filter, Copy, Clear -->
+                    <Border Grid.Row="0" Background="#202020" BorderBrush="#333333" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,0,10">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="Live Diagnostic Logs" FontWeight="SemiBold" FontSize="13" Foreground="#FFFFFF" VerticalAlignment="Center" />
-                                <Border Background="#2E2E2E" CornerRadius="10" Padding="8,2" Margin="10,0,0,0">
-                                    <TextBlock Text="{Binding DiagnosticLogs.Count, StringFormat='{}{0} entries'}" FontSize="11" Foreground="#A0A0A0" />
-                                </Border>
-                            </StackPanel>
+                            <!-- Filter -->
+                            <ui:TextBox Grid.Column="0"
+                                        PlaceholderText="Filter logs..."
+                                        Text="{Binding LogSearchFilter, UpdateSourceTrigger=PropertyChanged}"
+                                        Height="32"
+                                        MaxWidth="340"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center">
+                                <ui:TextBox.Icon>
+                                    <ui:SymbolIcon Symbol="Search24" FontSize="14" Foreground="#888888" />
+                                </ui:TextBox.Icon>
+                            </ui:TextBox>
 
+                            <!-- Copy and Clear -->
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                <!-- Auto-Scroll Toggle -->
-                                <ui:ToggleSwitch IsChecked="{Binding IsAutoScrollEnabled}"
-                                                 Content="Auto-Scroll"
-                                                 FontSize="12"
-                                                 Margin="0,0,16,0" />
-
-                                <!-- Copy Logs Button -->
                                 <ui:Button Appearance="Secondary"
                                            Command="{Binding CopyLogsCommand}"
-                                           Height="30" Padding="10,0" Margin="0,0,6,0"
-                                           ToolTip="Copy entire log buffer to Windows clipboard">
+                                           Height="32" Padding="14,0" Margin="0,0,8,0"
+                                           ToolTip="Copy all logs to clipboard">
                                     <StackPanel Orientation="Horizontal">
-                                        <ui:SymbolIcon Symbol="Copy24" Margin="0,0,4,0" FontSize="13" />
-                                        <TextBlock Text="Copy" FontSize="11.5" />
+                                        <ui:SymbolIcon Symbol="Copy24" Margin="0,0,6,0" FontSize="14" />
+                                        <TextBlock Text="Copy" FontSize="12" />
                                     </StackPanel>
                                 </ui:Button>
 
-                                <!-- Clear Logs Button -->
                                 <ui:Button Appearance="Secondary"
                                            Command="{Binding ClearLogsCommand}"
-                                           Height="30" Padding="10,0"
-                                           ToolTip="Clear log buffer">
+                                           Height="32" Padding="14,0"
+                                           ToolTip="Clear log history">
                                     <StackPanel Orientation="Horizontal">
-                                        <ui:SymbolIcon Symbol="Delete24" Margin="0,0,4,0" FontSize="13" />
-                                        <TextBlock Text="Clear" FontSize="11.5" />
+                                        <ui:SymbolIcon Symbol="Delete24" Margin="0,0,6,0" FontSize="14" />
+                                        <TextBlock Text="Clear" FontSize="12" />
                                     </StackPanel>
                                 </ui:Button>
                             </StackPanel>
                         </Grid>
                     </Border>
 
-                    <!-- Virtualized Log View -->
-                    <Border Grid.Row="1" Background="#101010" BorderBrush="#2E2E2E" BorderThickness="1" CornerRadius="6" Padding="4">
-                        <ListBox x:Name="LogsListBox"
-                                 ItemsSource="{Binding DiagnosticLogs}"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 FontFamily="Cascadia Code, Consolas, Segoe UI Mono, monospace"
-                                 FontSize="11.5"
-                                 ScrollViewer.CanContentScroll="True"
-                                 VirtualizingStackPanel.IsVirtualizing="True"
-                                 VirtualizingStackPanel.VirtualizationMode="Recycling"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                                 ScrollViewer.VerticalScrollBarVisibility="Auto">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding}"
-                                               Foreground="{Binding Converter={StaticResource LogColorConverter}}"
-                                               TextWrapping="NoWrap"
-                                               Margin="0,1" />
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                    <!-- Selectable Read-Only Log Console -->
+                    <Border Grid.Row="1" Background="#0C0C0C" BorderBrush="#282828" BorderThickness="1" CornerRadius="8" Padding="10,8">
+                        <RichTextBox x:Name="LogsRichTextBox"
+                                     IsReadOnly="True"
+                                     IsUndoEnabled="False"
+                                     Background="Transparent"
+                                     Foreground="#FFFFFF"
+                                     BorderThickness="0"
+                                     FontFamily="Cascadia Code, Consolas, Courier New, monospace"
+                                     FontSize="12"
+                                     Cursor="IBeam"
+                                     VerticalScrollBarVisibility="Auto"
+                                     HorizontalScrollBarVisibility="Auto">
+                            <RichTextBox.Resources>
+                                <Style TargetType="{x:Type Paragraph}">
+                                    <Setter Property="Margin" Value="0,1" />
+                                    <Setter Property="LineHeight" Value="18" />
+                                </Style>
+                            </RichTextBox.Resources>
+                        </RichTextBox>
                     </Border>
                 </Grid>
             </TabItem>
@@ -489,7 +642,7 @@
                             <ui:CardControl.Header>
                                 <StackPanel Margin="0,4">
                                     <TextBlock Text="ScrcpyDeX — Standalone Interoperability Tool" FontWeight="Bold" FontSize="15" Foreground="#FFFFFF" />
-                                    <TextBlock Text="Version 1.0.0 (Fluent Windows Client) • Licensed under Apache License, Version 2.0" Foreground="#0078D4" FontWeight="SemiBold" FontSize="12.5" Margin="0,3,0,0" />
+                                    <TextBlock Text="Version 1.1.0 (Fluent Windows Client) • Licensed under Apache License, Version 2.0" Foreground="#0078D4" FontWeight="SemiBold" FontSize="12.5" Margin="0,3,0,0" />
                                     <TextBlock Text="Copyright © 2026 Aureliano Peixoto and ScrcpyDeX Contributors." Foreground="#A0A0A0" FontSize="12" Margin="0,3,0,0" />
                                 </StackPanel>
                             </ui:CardControl.Header>
@@ -550,7 +703,7 @@
         </TabControl>
 
         <!-- Bottom Action Command Bar -->
-        <Border Grid.Row="3" Background="#1E1E1E" BorderBrush="#2C2C2C" BorderThickness="0,1,0,0" Padding="24,14">
+        <Border Grid.Row="4" Background="#1E1E1E" BorderBrush="#2C2C2C" BorderThickness="0,1,0,0" Padding="24,14">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <!-- Left: Device Indicator & Status -->
@@ -578,12 +731,25 @@
 
                     <!-- Session State & Subtitle -->
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding StatusMessage}"
-                                   FontWeight="SemiBold" FontSize="13" Foreground="#FFFFFF"
-                                   TextTrimming="CharacterEllipsis" MaxWidth="360" />
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding StatusMessage}"
+                                       FontWeight="SemiBold" FontSize="13" Foreground="#FFFFFF"
+                                       TextTrimming="CharacterEllipsis" MaxWidth="340" />
+                            <ui:Button Appearance="Danger"
+                                       Command="{Binding GoToLogsCommand}"
+                                       Visibility="{Binding ErrorLogCount, Converter={StaticResource CountToVisConverter}}"
+                                       Height="22" Padding="6,0" Margin="10,0,0,0"
+                                       VerticalAlignment="Center"
+                                       ToolTip="View diagnostic logs">
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:SymbolIcon Symbol="Warning16" FontSize="11" Margin="0,0,4,0" />
+                                    <TextBlock Text="View Logs" FontSize="10.5" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </ui:Button>
+                        </StackPanel>
                         <TextBlock Text="{Binding DeviceStatusDetails}"
                                    FontSize="11" Foreground="#8E8E8E" Margin="0,2,0,0"
-                                   TextTrimming="CharacterEllipsis" MaxWidth="360" />
+                                   TextTrimming="CharacterEllipsis" MaxWidth="420" />
                     </StackPanel>
                 </StackPanel>
 
@@ -615,16 +781,16 @@
                         </StackPanel>
                     </ui:Button>
 
-                    <!-- Emergency "Forçar Fechamento" (Kill Switch) Button -->
+                    <!-- Emergency "Force Close" (Kill Switch) Button -->
                     <ui:Button Appearance="Danger"
                                Command="{Binding EmergencyKillCommand}"
                                Visibility="{Binding ShowForceCloseButton, Converter={StaticResource BoolToVisConverter}}"
                                Height="42" Padding="16,0"
                                FontSize="13" FontWeight="SemiBold"
-                               ToolTip="Forçar Fechamento: Encerra os processos do scrcpy e ADB">
+                               ToolTip="Force Close: Terminate scrcpy and ADB processes">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <ui:SymbolIcon Symbol="Warning24" Margin="0,0,6,0" FontSize="16" />
-                            <TextBlock Text="Forçar Fechamento" VerticalAlignment="Center" />
+                            <TextBlock Text="Force Close" VerticalAlignment="Center" />
                         </StackPanel>
                     </ui:Button>
                 </StackPanel>

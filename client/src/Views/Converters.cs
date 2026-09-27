@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
+// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -71,6 +71,8 @@ namespace ScrcpyDex.WinUI.Views
                     };
 
                 case "orange":
+                case "darkorange":
+                case "goldenrod":
                     return role switch
                     {
                         "Border" => OrangeBorder,
@@ -136,6 +138,7 @@ namespace ScrcpyDex.WinUI.Views
         private static readonly SolidColorBrush InfoBrush = new SolidColorBrush(Color.FromRgb(220, 225, 230));
         private static readonly SolidColorBrush AutoBrush = new SolidColorBrush(Color.FromRgb(100, 200, 255));
         private static readonly SolidColorBrush StateBrush = new SolidColorBrush(Color.FromRgb(180, 130, 255));
+        private static readonly SolidColorBrush ScrcpyBrush = new SolidColorBrush(Color.FromRgb(77, 208, 225));
 
         static LogEntryColorConverter()
         {
@@ -144,6 +147,7 @@ namespace ScrcpyDex.WinUI.Views
             InfoBrush.Freeze();
             AutoBrush.Freeze();
             StateBrush.Freeze();
+            ScrcpyBrush.Freeze();
         }
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -151,9 +155,27 @@ namespace ScrcpyDex.WinUI.Views
             string line = value?.ToString() ?? string.Empty;
             if (line.Contains("[ERR]") || line.Contains("[CRIT]")) return ErrBrush;
             if (line.Contains("[WARN]")) return WarnBrush;
+            if (line.Contains("[SCRCPY]")) return ScrcpyBrush;
             if (line.Contains("[AUTO]")) return AutoBrush;
             if (line.Contains("[State Machine]") || line.Contains("[Session]")) return StateBrush;
             return InfoBrush;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+    public class CountToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int count)
+            {
+                return count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            }
+            return Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

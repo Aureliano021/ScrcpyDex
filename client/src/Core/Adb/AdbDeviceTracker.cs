@@ -13,11 +13,13 @@
 // limitations under the License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ScrcpyDex.Core.IO;
 using ScrcpyDex.Models;
 
 namespace ScrcpyDex.Core.Adb
@@ -30,6 +32,7 @@ namespace ScrcpyDex.Core.Adb
     {
         private readonly string _host;
         private readonly int _port;
+        private readonly string? _customAdbPath;
         private TcpClient? _tcpClient;
         private NetworkStream? _stream;
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
@@ -39,10 +42,11 @@ namespace ScrcpyDex.Core.Adb
         public event EventHandler<IReadOnlyList<DeviceInfo>>? DevicesChanged;
         public event EventHandler<string>? RawDataReceived;
 
-        public AdbDeviceTracker(string host = "127.0.0.1", int port = 5037)
+        public AdbDeviceTracker(string host = "127.0.0.1", int port = 5037, string? adbPath = null)
         {
             _host = host;
             _port = port;
+            _customAdbPath = adbPath;
         }
 
         public void Start()
@@ -60,7 +64,21 @@ namespace ScrcpyDex.Core.Adb
                 try
                 {
                     _tcpClient = new TcpClient();
-                    await _tcpClient.ConnectAsync(_host, _port, ct).ConfigureAwait(false);
+                    try
+                    {
+                        await _tcpClient.ConnectAsync(_host, _port, ct).ConfigureAwait(false);
+                    }
+                    catch (Exception) when (!ct.IsCancellationRequested)
+                    {
+                        // ADB daemon might not be running. Start it using resolved adb executable.
+                        await EnsureAdbServerRunningAsync(ct).ConfigureAwait(false);
+
+                        // Retry connecting after launching adb start-server
+                        CleanupConnection();
+                        _tcpClient = new TcpClient();
+                        await _tcpClient.ConnectAsync(_host, _port, ct).ConfigureAwait(false);
+                    }
+
                     _stream = _tcpClient.GetStream();
 
                     // Send "0012host:track-devices" (18 bytes = 0x0012)
@@ -165,6 +183,38 @@ namespace ScrcpyDex.Core.Adb
             try { _tcpClient?.Dispose(); } catch { }
             _stream = null;
             _tcpClient = null;
+        }
+
+        private async Task EnsureAdbServerRunningAsync(CancellationToken ct)
+        {
+            try
+            {
+                string adbPath = !string.IsNullOrWhiteSpace(_customAdbPath) && File.Exists(_customAdbPath)
+                    ? _customAdbPath
+                    : ScrcpyPathResolver.ResolveAdbExecutable();
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = adbPath,
+                    Arguments = "start-server",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
+
+                using var proc = Process.Start(psi);
+                if (proc != null)
+                {
+                    using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                    using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct, timeoutCts.Token);
+                    await proc.WaitForExitAsync(linkedCts.Token).ConfigureAwait(false);
+                }
+            }
+            catch
+            {
+                // Best effort invocation
+            }
         }
 
         public async ValueTask DisposeAsync()

@@ -13,16 +13,19 @@
 // limitations under the License.
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ScrcpyDex.Core.Adb;
 using ScrcpyDex.Core.Collections;
 using ScrcpyDex.Core.Configuration;
+using ScrcpyDex.Core.IO;
 using ScrcpyDex.Core.Lifecycle;
 using ScrcpyDex.Models;
 using ScrcpyDex.Services;
@@ -41,6 +44,7 @@ namespace ScrcpyDex.ViewModels
         private readonly IScrcpyExecutionService? _executionService;
         private readonly IAdbService? _adbService;
         private bool _isDisposed;
+        private bool _isStoppingSession;
 
         #region Observable Properties
 
@@ -50,6 +54,7 @@ namespace ScrcpyDex.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CanStart))]
         [NotifyPropertyChangedFor(nameof(DeviceStatusPillText))]
+        [NotifyPropertyChangedFor(nameof(DeviceStatusText))]
         [NotifyPropertyChangedFor(nameof(DeviceStatusColor))]
         [NotifyPropertyChangedFor(nameof(DeviceStatusDetails))]
         [NotifyCanExecuteChangedFor(nameof(StartDeXCommand))]
@@ -62,6 +67,7 @@ namespace ScrcpyDex.ViewModels
         [NotifyPropertyChangedFor(nameof(CanStop))]
         [NotifyPropertyChangedFor(nameof(ShowForceCloseButton))]
         [NotifyPropertyChangedFor(nameof(DeviceStatusPillText))]
+        [NotifyPropertyChangedFor(nameof(DeviceStatusText))]
         [NotifyPropertyChangedFor(nameof(DeviceStatusColor))]
         [NotifyPropertyChangedFor(nameof(DeviceStatusDetails))]
         [NotifyCanExecuteChangedFor(nameof(StartDeXCommand))]
@@ -81,15 +87,41 @@ namespace ScrcpyDex.ViewModels
         [NotifyPropertyChangedFor(nameof(ShowForceCloseButton))]
         private bool _isForceCloseRequested;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanStart))]
+        [NotifyPropertyChangedFor(nameof(ResolvedScrcpyStatusText))]
+        [NotifyPropertyChangedFor(nameof(ResolvedScrcpyStatusColor))]
+        [NotifyCanExecuteChangedFor(nameof(StartDeXCommand))]
+        private bool _isScrcpyInstalled = true;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasPrerequisiteWarning))]
+        private string? _prerequisiteWarning;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ResolvedScrcpyStatusText))]
+        [NotifyPropertyChangedFor(nameof(ResolvedScrcpyStatusColor))]
+        private string? _resolvedScrcpyPath;
+
         #endregion
 
         #region Computed State Properties
+
+        public string ResolvedScrcpyStatusText =>
+            IsScrcpyInstalled && !string.IsNullOrEmpty(ResolvedScrcpyPath)
+                ? $"Resolved: {ResolvedScrcpyPath}"
+                : "Status: scrcpy executable not detected";
+
+        public string ResolvedScrcpyStatusColor =>
+            IsScrcpyInstalled ? "#84E184" : "#FF8F00";
+
+        public bool HasPrerequisiteWarning => !string.IsNullOrWhiteSpace(PrerequisiteWarning);
 
         public bool IsIdle => CurrentState == SessionState.Idle;
 
         public bool IsStreaming => CurrentState == SessionState.StreamingActive;
 
-        public bool CanStart => CurrentState == SessionState.Idle && CurrentDevice != null && CurrentDevice.IsConnected;
+        public bool CanStart => IsScrcpyInstalled && CurrentState == SessionState.Idle && CurrentDevice != null && CurrentDevice.IsConnected;
 
         public bool CanStop => CurrentState != SessionState.Idle && CurrentState != SessionState.Error;
 
@@ -111,9 +143,16 @@ namespace ScrcpyDex.ViewModels
                     return $"{CurrentDevice.Model} Connected";
                 }
 
+                if (CurrentDevice != null && string.Equals(CurrentDevice.State, "unauthorized", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "Device detected (Unauthorized)";
+                }
+
                 return "Disconnected";
             }
         }
+
+        public string DeviceStatusText => DeviceStatusPillText;
 
         public string DeviceStatusColor
         {
@@ -131,6 +170,11 @@ namespace ScrcpyDex.ViewModels
                     return "Green";
                 }
 
+                if (CurrentDevice != null && string.Equals(CurrentDevice.State, "unauthorized", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "Goldenrod";
+                }
+
                 return "Red";
             }
         }
@@ -139,6 +183,11 @@ namespace ScrcpyDex.ViewModels
         {
             get
             {
+                if (CurrentDevice != null && string.Equals(CurrentDevice.State, "unauthorized", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "Device detected (Unauthorized). Unlock the phone screen and authorize USB debugging.";
+                }
+
                 if (CurrentDevice == null || !CurrentDevice.IsConnected)
                 {
                     return "No device detected. Connect a Samsung Galaxy device via USB.";
@@ -189,6 +238,25 @@ namespace ScrcpyDex.ViewModels
         #region Diagnostics Collection
 
         public BoundedRingBuffer<string> DiagnosticLogs { get; }
+        public ICollectionView FilteredLogs { get; }
+
+        [ObservableProperty]
+        private string _logSearchFilter = string.Empty;
+
+        [ObservableProperty]
+        private string _logLevelFilter = "All";
+
+        [ObservableProperty]
+        private int _totalLogCount;
+
+        [ObservableProperty]
+        private int _errorLogCount;
+
+        [ObservableProperty]
+        private int _warnLogCount;
+
+        [ObservableProperty]
+        private int _selectedTabIndex = 0;
 
         #endregion
 
@@ -219,7 +287,10 @@ namespace ScrcpyDex.ViewModels
             _adbService = adbService ?? AdbService.Instance;
 
             _settings = new ScrcpyDeXSettings();
+            _settings.SettingChanged += OnSettingChanged;
             DiagnosticLogs = new BoundedRingBuffer<string>(1000, Application.Current?.Dispatcher);
+            FilteredLogs = CollectionViewSource.GetDefaultView(DiagnosticLogs);
+            FilteredLogs.Filter = FilterLogItem;
 
             // Subscribe to State Machine transitions
             _stateMachine.StateChanged += OnStateMachineStateChanged;
@@ -230,7 +301,38 @@ namespace ScrcpyDex.ViewModels
             // Subscribe to execution engine events
             if (_executionService != null)
             {
-                _executionService.LogReceived += (s, e) => Log(e.Text, e.IsError ? "ERR" : "SCRCPY");
+                _executionService.LogReceived += (s, e) =>
+                {
+                    string text = e.Text;
+                    string level;
+
+                    if (text.Contains("file pushed", StringComparison.OrdinalIgnoreCase) ||
+                        text.StartsWith("INFO:", StringComparison.OrdinalIgnoreCase) ||
+                        text.Contains("[server] INFO:", StringComparison.OrdinalIgnoreCase) ||
+                        text.Contains("Texture:", StringComparison.OrdinalIgnoreCase) ||
+                        text.Contains("Renderer:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        level = "SCRCPY";
+                    }
+                    else if (text.Contains("WARN:", StringComparison.OrdinalIgnoreCase) ||
+                             text.Contains("[server] WARN:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        level = "WARN";
+                    }
+                    else if (text.StartsWith("ERROR:", StringComparison.OrdinalIgnoreCase) ||
+                             text.Contains("[server] ERROR:", StringComparison.OrdinalIgnoreCase) ||
+                             text.Contains("Exception in thread", StringComparison.OrdinalIgnoreCase) ||
+                             text.Contains("Could not open video stream", StringComparison.OrdinalIgnoreCase))
+                    {
+                        level = "ERR";
+                    }
+                    else
+                    {
+                        level = "SCRCPY";
+                    }
+
+                    Log(text, level);
+                };
                 _executionService.StreamingStarted += (s, e) =>
                 {
                     RunOnUI(async () =>
@@ -244,6 +346,25 @@ namespace ScrcpyDex.ViewModels
                     RunOnUI(async () =>
                     {
                         Log($"scrcpy process exited with code {exitCode}");
+                        if (!_isStoppingSession)
+                        {
+                            _isStoppingSession = true;
+                            try
+                            {
+                                if (_adbService != null)
+                                {
+                                    await _adbService.StopDeXSessionAsync(CurrentDevice?.Serial);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Log($"Error during post-exit DeX session teardown: {ex.Message}", "WARN");
+                            }
+                            finally
+                            {
+                                _isStoppingSession = false;
+                            }
+                        }
                         await _stateMachine.FireAsync(SessionTrigger.ProcessExited, $"Process exited (code {exitCode})");
                         await _stateMachine.FireAsync(SessionTrigger.Reset);
                         StatusMessage = "Session disconnected. Ready.";
@@ -263,6 +384,74 @@ namespace ScrcpyDex.ViewModels
             InitializeAsync();
         }
 
+        partial void OnSettingsChanged(ScrcpyDeXSettings? oldValue, ScrcpyDeXSettings newValue)
+        {
+            if (oldValue != null)
+            {
+                oldValue.SettingChanged -= OnSettingChanged;
+            }
+            if (newValue != null)
+            {
+                newValue.SettingChanged += OnSettingChanged;
+            }
+        }
+
+        private CancellationTokenSource? _autoSaveCts;
+
+        private void OnSettingChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            _autoSaveCts?.Cancel();
+            _autoSaveCts = new CancellationTokenSource();
+            var ct = _autoSaveCts.Token;
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(250, ct).ConfigureAwait(false);
+                    if (ct.IsCancellationRequested) return;
+
+                    await _configRepo.SaveAsync(Settings, ct).ConfigureAwait(false);
+
+                    RunOnUI(() =>
+                    {
+                        if (e.PropertyName?.StartsWith("Paths.") == true)
+                        {
+                            ValidateScrcpyInstallation();
+                        }
+                    });
+                }
+                catch (OperationCanceledException) { }
+                catch (Exception ex)
+                {
+                    RunOnUI(() => Log($"Failed to auto-save settings: {ex.Message}", "WARN"));
+                }
+            }, ct);
+        }
+
+        public void ValidateScrcpyInstallation(bool logSuccess = false)
+        {
+            string? customPath = Settings?.Paths?.ScrcpyPath;
+            if (!ScrcpyPathResolver.TryResolveScrcpyExecutable(out string scrcpyPath, customPath))
+            {
+                IsScrcpyInstalled = false;
+                ResolvedScrcpyPath = null;
+                PrerequisiteWarning = "scrcpy executable was not found on system. Please install scrcpy or configure its path in Device & System.";
+                Log(PrerequisiteWarning, "WARN");
+            }
+            else
+            {
+                bool wasInstalled = IsScrcpyInstalled;
+                IsScrcpyInstalled = true;
+                ResolvedScrcpyPath = scrcpyPath;
+                PrerequisiteWarning = null;
+                if (!wasInstalled || logSuccess)
+                {
+                    Log($"scrcpy located at: {scrcpyPath}");
+                }
+            }
+        }
+
         private async void InitializeAsync()
         {
             Log("ScrcpyDeX UI initialized.");
@@ -275,6 +464,17 @@ namespace ScrcpyDex.ViewModels
             catch (Exception ex)
             {
                 Log($"Failed to load configuration, fallback to defaults: {ex.Message}", "WARN");
+            }
+
+            ValidateScrcpyInstallation(logSuccess: true);
+
+            if (ScrcpyPathResolver.TryResolveServerJar(out string serverJarPath))
+            {
+                Log($"scrcpydex-server.jar ready at: {serverJarPath}");
+            }
+            else
+            {
+                Log("Warning: scrcpydex-server.jar not found on disk and extraction failed.", "WARN");
             }
 
             try
@@ -293,7 +493,7 @@ namespace ScrcpyDex.ViewModels
                 try
                 {
                     var initial = await _adbService.DetectDeviceAsync().ConfigureAwait(false);
-                    if (initial.IsConnected)
+                    if (initial.IsConnected || string.Equals(initial.State, "unauthorized", StringComparison.OrdinalIgnoreCase))
                     {
                         RunOnUI(() => UpdateDevice(initial));
                     }
@@ -339,7 +539,15 @@ namespace ScrcpyDex.ViewModels
                 }
                 else
                 {
-                    UpdateDevice(null);
+                    var unauthorized = devices.FirstOrDefault(d => string.Equals(d.State, "unauthorized", StringComparison.OrdinalIgnoreCase));
+                    if (unauthorized != null)
+                    {
+                        UpdateDevice(unauthorized);
+                    }
+                    else
+                    {
+                        UpdateDevice(null);
+                    }
                 }
             });
         }
@@ -360,6 +568,14 @@ namespace ScrcpyDex.ViewModels
                 {
                     Log("Auto-connect triggered by settings policy.", "AUTO");
                     _ = StartDeX();
+                }
+            }
+            else if (device != null && string.Equals(device.State, "unauthorized", StringComparison.OrdinalIgnoreCase))
+            {
+                Log($"Device detected (unauthorized): {device.Serial} - {device.State}", "WARN");
+                if (CurrentState == SessionState.Idle)
+                {
+                    StatusMessage = "Device detected (Unauthorized). Authorize USB debugging on device.";
                 }
             }
             else
@@ -383,6 +599,13 @@ namespace ScrcpyDex.ViewModels
         [RelayCommand(CanExecute = nameof(CanStart))]
         private async Task StartDeX()
         {
+            if (!IsScrcpyInstalled)
+            {
+                StatusMessage = "scrcpy executable was not found on system.";
+                Log("Cannot start DeX session: scrcpy is not installed or configured.", "ERR");
+                return;
+            }
+
             if (!CanStart || CurrentDevice == null) return;
 
             try
@@ -451,6 +674,9 @@ namespace ScrcpyDex.ViewModels
         [RelayCommand(CanExecute = nameof(CanStop))]
         private async Task StopDeX()
         {
+            if (_isStoppingSession) return;
+            _isStoppingSession = true;
+
             try
             {
                 IsForceCloseRequested = true;
@@ -458,7 +684,7 @@ namespace ScrcpyDex.ViewModels
                 StatusMessage = "Stopping session...";
                 await _stateMachine.FireAsync(SessionTrigger.UserStop, "Disconnect requested");
 
-                // Immediately yield to UI thread so "Forçar Fechamento" renders instantly
+                // Immediately yield to UI thread so "Force Close" renders instantly
                 await Task.Yield();
 
                 if (_executionService != null)
@@ -483,16 +709,18 @@ namespace ScrcpyDex.ViewModels
             finally
             {
                 IsForceCloseRequested = false;
+                _isStoppingSession = false;
             }
         }
 
         [RelayCommand]
         private async Task EmergencyKill()
         {
+            _isStoppingSession = true;
             try
             {
-                Log("Forçar fechamento acionado. Encerrando processos...", "WARN");
-                StatusMessage = "Forçar fechamento acionado!";
+                Log("Force close triggered. Terminating processes...", "WARN");
+                StatusMessage = "Force close triggered!";
                 await _stateMachine.EmergencyHaltAsync("Force close activated");
 
                 if (_executionService != null)
@@ -506,17 +734,18 @@ namespace ScrcpyDex.ViewModels
                 }
 
                 await _stateMachine.FireAsync(SessionTrigger.Reset, "Force close reset");
-                StatusMessage = "Todos os processos finalizados. Pronto.";
-                Log("Forçar fechamento concluído.");
+                StatusMessage = "All processes terminated. Ready.";
+                Log("Force close complete.");
             }
             catch (Exception ex)
             {
-                Log($"Erro durante o fechamento forçado: {ex.Message}", "ERR");
-                StatusMessage = "Fechamento forçado concluído com avisos.";
+                Log($"Error during force close: {ex.Message}", "ERR");
+                StatusMessage = "Force close completed with warnings.";
             }
             finally
             {
                 IsForceCloseRequested = false;
+                _isStoppingSession = false;
             }
         }
 
@@ -537,12 +766,63 @@ namespace ScrcpyDex.ViewModels
         }
 
         [RelayCommand]
+        private void BrowseScrcpyPath()
+        {
+            try
+            {
+                var dialog = new Microsoft.Win32.OpenFileDialog
+                {
+                    Title = "Select scrcpy.exe executable",
+                    Filter = "scrcpy.exe (scrcpy.exe)|scrcpy.exe|Executable files (*.exe)|*.exe|All files (*.*)|*.*",
+                    CheckFileExists = true
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    Settings.Paths.ScrcpyPath = dialog.FileName;
+                    ValidateScrcpyInstallation(logSuccess: true);
+                    _ = _configRepo.SaveAsync(Settings);
+                    StatusMessage = "scrcpy path updated.";
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"Error selecting scrcpy path: {ex.Message}", "ERR");
+            }
+        }
+
+        [RelayCommand]
+        private void ResetScrcpyPath()
+        {
+            Settings.Paths.ScrcpyPath = null;
+            ValidateScrcpyInstallation(logSuccess: true);
+            _ = _configRepo.SaveAsync(Settings);
+            StatusMessage = "scrcpy path reset to auto-detection.";
+        }
+
+        [RelayCommand]
+        private void RefreshScrcpyCheck()
+        {
+            Log("Re-scanning system for scrcpy executable...");
+            ValidateScrcpyInstallation(logSuccess: true);
+            if (IsScrcpyInstalled)
+            {
+                StatusMessage = "scrcpy located successfully.";
+            }
+            else
+            {
+                StatusMessage = "scrcpy executable not found.";
+            }
+        }
+
+        [RelayCommand]
         private async Task ResetDefaults()
         {
             try
             {
                 Settings = new ScrcpyDeXSettings();
                 await _configRepo.SaveAsync(Settings);
+                ValidateScrcpyInstallation(logSuccess: true);
                 StatusMessage = "Configuration reset to defaults.";
                 Log("Settings reset to default values and saved to settings.json.");
             }
@@ -556,6 +836,10 @@ namespace ScrcpyDex.ViewModels
         private void ClearLogs()
         {
             DiagnosticLogs.ClearAll();
+            TotalLogCount = 0;
+            ErrorLogCount = 0;
+            WarnLogCount = 0;
+            FilteredLogs?.Refresh();
             Log("Diagnostic logs buffer cleared.");
         }
 
@@ -575,14 +859,89 @@ namespace ScrcpyDex.ViewModels
             }
         }
 
+        [RelayCommand]
+        private async Task ExportLogs()
+        {
+            try
+            {
+                string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                string fileName = $"ScrcpyDeX_logs_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+                string fullPath = Path.Combine(desktop, fileName);
+
+                string content = string.Join(Environment.NewLine, DiagnosticLogs);
+                await File.WriteAllTextAsync(fullPath, content);
+
+                StatusMessage = $"Logs exported to Desktop ({fileName})";
+                Log($"Logs exported successfully to: {fullPath}");
+            }
+            catch (Exception ex)
+            {
+                Log($"Failed to export logs: {ex.Message}", "ERR");
+                StatusMessage = "Failed to export logs.";
+            }
+        }
+
+        [RelayCommand]
+        private void GoToLogs()
+        {
+            SelectedTabIndex = 3;
+        }
+
+        [RelayCommand]
+        private void SetLogLevelFilter(string level)
+        {
+            LogLevelFilter = level;
+        }
+
         #endregion
 
         #region Helpers & Diagnostics
+
+        private bool FilterLogItem(object obj)
+        {
+            if (obj is not string log) return false;
+
+            if (LogLevelFilter == "Errors" && !log.Contains("[ERR]") && !log.Contains("[CRIT]")) return false;
+            if (LogLevelFilter == "Warnings" && !log.Contains("[WARN]")) return false;
+            if (LogLevelFilter == "Info" && !log.Contains("[INFO]")) return false;
+            if (LogLevelFilter == "Scrcpy" && !log.Contains("[SCRCPY]") && !log.Contains("[State Machine]")) return false;
+
+            if (!string.IsNullOrWhiteSpace(LogSearchFilter))
+            {
+                return log.IndexOf(LogSearchFilter, StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+
+            return true;
+        }
+
+        partial void OnLogSearchFilterChanged(string value)
+        {
+            FilteredLogs?.Refresh();
+        }
+
+        partial void OnLogLevelFilterChanged(string value)
+        {
+            FilteredLogs?.Refresh();
+        }
 
         public void Log(string message, string level = "INFO")
         {
             string entry = $"[{DateTime.Now:HH:mm:ss.fff}] [{level}] {message}";
             DiagnosticLogs.Push(entry);
+
+            RunOnUI(() =>
+            {
+                TotalLogCount = DiagnosticLogs.Count;
+                if (level.Equals("ERR", StringComparison.OrdinalIgnoreCase) || level.Equals("CRIT", StringComparison.OrdinalIgnoreCase))
+                {
+                    ErrorLogCount++;
+                }
+                else if (level.Equals("WARN", StringComparison.OrdinalIgnoreCase))
+                {
+                    WarnLogCount++;
+                }
+                FilteredLogs?.Refresh();
+            });
         }
 
         private static void RunOnUI(Action action)
