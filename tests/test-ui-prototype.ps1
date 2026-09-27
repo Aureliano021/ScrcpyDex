@@ -10,6 +10,8 @@ Write-Host "=================================================" -ForegroundColor 
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 if (-not $scriptDir) { $scriptDir = (Get-Location).Path }
+$rootDir = Split-Path -Parent $scriptDir
+if (-not $rootDir -or -not (Test-Path (Join-Path $rootDir "client"))) { $rootDir = $scriptDir }
 
 $passed = 0
 $failed = 0
@@ -33,14 +35,14 @@ function Assert-Test($name, [scriptblock]$condition) {
 
 # 1. ConfigStore Files Exist
 Assert-Test "Configuration files exist" {
-    $configFile = Join-Path $scriptDir "config\settings.json"
-    $schemaFile = Join-Path $scriptDir "config\settings.schema.json"
+    $configFile = Join-Path $rootDir "config\settings.json"
+    $schemaFile = Join-Path $rootDir "config\settings.schema.json"
     (Test-Path $configFile) -and (Test-Path $schemaFile)
 }
 
 # 2. JSON Settings Validation
 Assert-Test "settings.json parses valid JSON with 60 FPS & 8 Mbps defaults" {
-    $configFile = Join-Path $scriptDir "config\settings.json"
+    $configFile = Join-Path $rootDir "config\settings.json"
     $content = Get-Content $configFile -Raw | ConvertFrom-Json
     ($content.version -eq "1.0") -and 
     ($content.display.resolution -eq "1920x1080") -and 
@@ -51,7 +53,7 @@ Assert-Test "settings.json parses valid JSON with 60 FPS & 8 Mbps defaults" {
 
 # 3. Settings Roundtrip Save & Load
 Assert-Test "Settings save and reload roundtrip" {
-    $configFile = Join-Path $scriptDir "config\settings.json"
+    $configFile = Join-Path $rootDir "config\settings.json"
     $origJson = Get-Content $configFile -Raw
     $testObj = $origJson | ConvertFrom-Json
     $testObj.display.bitrate = 16000000
@@ -67,14 +69,15 @@ Assert-Test "Settings save and reload roundtrip" {
 
 # 4. Headless WinUI XAML Verification & Kill Switch Default Collapsed
 Assert-Test "WinUI 3 XAML parses, 30/60/120 FPS bound, and Kill Switch collapsed" {
-    $winUiScript = Join-Path $scriptDir "client\ScrcpyDeX-WinUI.ps1"
+    $winUiScript = Join-Path $rootDir "client\ScrcpyDeX-WinUI.ps1"
     $output = & pwsh.exe -ExecutionPolicy Bypass -NoProfile -File $winUiScript -HeadlessTest
     ($output -match "HEADLESS TEST PASSED")
 }
 
 # 5. Parameterized Orchestrator Syntax Check
 Assert-Test "run-scrcpydex.ps1 accepts custom parameters" {
-    $runScript = Join-Path $scriptDir "run-scrcpydex.ps1"
+    $runScript = Join-Path $rootDir "tools\launchers\run-scrcpydex.ps1"
+    if (-not (Test-Path $runScript)) { $runScript = Join-Path $rootDir "run-scrcpydex.ps1" }
     $tokens = $null
     $parseErrors = $null
     $ast = [System.Management.Automation.Language.Parser]::ParseFile($runScript, [ref]$tokens, [ref]$parseErrors)
@@ -83,7 +86,7 @@ Assert-Test "run-scrcpydex.ps1 accepts custom parameters" {
 
 # 6. C# Source Architecture Check
 Assert-Test "C# client source models and services compiled structure" {
-    $csharpDir = Join-Path $scriptDir "client\src"
+    $csharpDir = Join-Path $rootDir "client\src"
     (Test-Path (Join-Path $csharpDir "Models\DisplayConfig.cs")) -and
     (Test-Path (Join-Path $csharpDir "Models\DeviceInfo.cs")) -and
     (Test-Path (Join-Path $csharpDir "Services\ConfigStore.cs")) -and
@@ -92,12 +95,11 @@ Assert-Test "C# client source models and services compiled structure" {
 }
 
 # 7. Native Zero-Flash Windows Launchers Validation
-Assert-Test "Native Launchers exist (ScrcpyDeX.exe, ScrcpyDeX.vbs, ScrcpyDeX-UI.bat)" {
-    (Test-Path (Join-Path $scriptDir "ScrcpyDeX.exe")) -and
-    (Test-Path (Join-Path $scriptDir "ScrcpyDeX.vbs")) -and
-    (Test-Path (Join-Path $scriptDir "ScrcpyDeX-UI.bat")) -and
-    (Test-Path (Join-Path $scriptDir "ScrcpyDeX.bat")) -and
-    (Test-Path (Join-Path $scriptDir "stop-dex.bat"))
+Assert-Test "Native Launchers exist (ScrcpyDeX.bat, stop-dex.bat, tools/launchers)" {
+    (Test-Path (Join-Path $rootDir "ScrcpyDeX.bat")) -and
+    (Test-Path (Join-Path $rootDir "stop-dex.bat")) -and
+    (Test-Path (Join-Path $rootDir "tools\launchers\ScrcpyDeX.vbs")) -and
+    (Test-Path (Join-Path $rootDir "tools\launchers\ScrcpyDeX-UI.bat"))
 }
 
 Write-Host "=================================================" -ForegroundColor Cyan

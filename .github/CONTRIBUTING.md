@@ -26,7 +26,7 @@ To preserve the intellectual property integrity of ScrcpyDeX, every contributor 
 
 ## 2. Developer Certificate of Origin (DCO)
 
-ScrcpyDeX uses the **Developer Certificate of Origin (DCO)** version 1.1 to confirm that contributors have the right to submit their contributions under the project's [Apache License, Version 2.0](LICENSE).
+ScrcpyDeX uses the **Developer Certificate of Origin (DCO)** version 1.1 to confirm that contributors have the right to submit their contributions under the project's [Apache License, Version 2.0](../LICENSE).
 
 ### DCO 1.1 Agreement Text
 ```
@@ -81,7 +81,7 @@ Signed-off-by: Jane Developer <jane.developer@example.com>
 
 1. **Keep PRs Focused:** Submit small, focused pull requests addressing a single issue or feature.
 2. **Test on Physical Devices:** When making changes to the server or display activation logic, test on physical Samsung Galaxy hardware across supported One UI versions if possible.
-3. **Update Documentation:** If your PR changes protocol messages or CLI flags, update [`docs/PROTOCOL.md`](docs/PROTOCOL.md) and [`README.md`](README.md).
+3. **Update Documentation:** If your PR changes protocol messages or CLI flags, update [`docs/PROTOCOL.md`](../docs/PROTOCOL.md) and [`README.md`](../README.md).
 4. **Reproducible Builds:** When modifying Java server code in `server/src/`, recompile using `server/build-server.ps1` and document any toolchain changes.
 
 ---

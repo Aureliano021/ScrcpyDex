@@ -18,7 +18,11 @@ if (-not $device) {
 Write-Host "[1/4] Galaxy device detected via ADB." -ForegroundColor Green
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$serverJar = Join-Path $scriptDir "server\scrcpydex-server.jar"
+$rootDir = Split-Path -Parent $scriptDir
+$serverJar = Join-Path $rootDir "server\scrcpydex-server.jar"
+if (-not (Test-Path $serverJar)) {
+    $serverJar = Join-Path $scriptDir "server\scrcpydex-server.jar"
+}
 
 if (-not (Test-Path $serverJar)) {
     Write-Host "[ERROR] Binary $serverJar not found. Run build-server.ps1 first." -ForegroundColor Red
