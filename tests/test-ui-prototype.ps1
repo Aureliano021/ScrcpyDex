@@ -13,6 +13,9 @@ if (-not $scriptDir) { $scriptDir = (Get-Location).Path }
 $rootDir = Split-Path -Parent $scriptDir
 if (-not $rootDir -or -not (Test-Path (Join-Path $rootDir "client"))) { $rootDir = $scriptDir }
 
+$savedConfigFile = Join-Path $rootDir "config\settings.json"
+$savedConfigContent = if (Test-Path $savedConfigFile) { Get-Content $savedConfigFile -Raw } else { $null }
+
 $passed = 0
 $failed = 0
 
@@ -100,6 +103,11 @@ Assert-Test "Native Launchers exist (ScrcpyDeX.bat, stop-dex.bat, tools/launcher
     (Test-Path (Join-Path $rootDir "stop-dex.bat")) -and
     (Test-Path (Join-Path $rootDir "tools\launchers\ScrcpyDeX.vbs")) -and
     (Test-Path (Join-Path $rootDir "tools\launchers\ScrcpyDeX-UI.bat"))
+}
+
+# Restore pristine configuration
+if ($savedConfigContent -ne $null -and (Test-Path $savedConfigFile)) {
+    Set-Content $savedConfigFile -Value $savedConfigContent -NoNewline -Encoding UTF8
 }
 
 Write-Host "=================================================" -ForegroundColor Cyan
