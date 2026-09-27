@@ -53,14 +53,14 @@ Such use does not imply any sponsorship, endorsement, commercial association, or
 
 ---
 
-## 3. Device Safety, Platform Integrity & Knox Preservation
+## 3. Device Safety, Platform Integrity & Knox Status
 
-ScrcpyDeX has been meticulously engineered to maintain the highest technical safety and security posture possible, operating strictly within standard platform developer interfaces without compromising system integrity.
+ScrcpyDeX operates strictly within standard platform developer interfaces without modifying system partitions or boot structures.
 
-### 3.1 Preservation of Knox Warranty Counter (`0x0`)
-* **Zero Bootloader Modification:** ScrcpyDeX **does not require, recommend, or perform bootloader unlocking** (`OEM Unlocking`).
-* **Factory Knox Status Preserved:** Because the device's cryptographic secure boot chain and kernel signing remain untouched, the Samsung Knox electronic fuse (e-fuse / `Knox Warranty Void`) flag remains **0x0 (Un-tripped)**.
-* **Critical Subsystems Remain Intact:** Secure hardware-backed features such as **Samsung Pay**, **Samsung Pass**, **Secure Folder**, **Samsung Health**, enterprise MDM containers, and wideband biometrics continue to function normally.
+### 3.1 Knox Warranty Counter on Tested Devices (`0x0`)
+* **No Bootloader Modification:** ScrcpyDeX **does not require, recommend, or perform bootloader unlocking** (`OEM Unlocking`).
+* **Factory Knox Status on Tested Devices:** Because the device's cryptographic secure boot chain and kernel signing remain untouched, the Samsung Knox electronic fuse (e-fuse / `Knox Warranty Void`) flag remained **0x0 (Un-tripped)** on tested hardware.
+* **Hardware-Backed Features:** On the tested Galaxy S23 device, features relying on hardware integrity (such as **Samsung Pass**, **Secure Folder**, **Samsung Health**, and biometrics) continued to function normally.
 
 ### 3.2 Non-Root Architecture (`UID 2000` Shell Context)
 * **Zero Root Privilege Requirements:** ScrcpyDeX **does not require, request, execute, or exploit root privileges** (`UID 0`).

@@ -5,7 +5,7 @@
 <h1 align="center">ScrcpyDeX</h1>
 
 <p align="center">
-  <b>High-performance, open-source client for Samsung DeX on PC via USB</b><br>
+  <b>Open-source client for Samsung DeX on PC via USB</b><br>
   Low-latency 60 FPS desktop streaming, Linux UHID mouse emulation, WASAPI audio forwarding, and rootless operation.
 </p>
 
@@ -21,7 +21,7 @@
 
 > [!NOTE]
 > **Independent Open-Source Project & Non-Affiliation Notice:**  
-> ScrcpyDeX is an independent, community-driven project and is **NOT** affiliated with, sponsored by, or endorsed by **Samsung Electronics Co., Ltd.** or **Google LLC**. "Samsung", "Samsung DeX", "Galaxy", and "One UI" are registered trademarks of Samsung Electronics Co., Ltd. For full legal, compliance, Knox safety (0x0 preservation), and statutory reverse engineering protections, please read the [**Legal Disclaimer & Terms of Interoperability**](docs/DISCLAIMER.md) and [**Legal Compliance Analysis**](docs/LEGAL_AND_LICENSING.md).
+> ScrcpyDeX is an independent, community-driven project and is **NOT** affiliated with, sponsored by, or endorsed by **Samsung Electronics Co., Ltd.** or **Google LLC**. "Samsung", "Samsung DeX", "Galaxy", and "One UI" are registered trademarks of Samsung Electronics Co., Ltd. For full legal terms, warranty disclaimers, and reverse engineering analysis, please read the [**Legal Disclaimer & Terms of Interoperability**](docs/DISCLAIMER.md) and [**Legal Compliance Analysis**](docs/LEGAL_AND_LICENSING.md).
 
 ---
 
@@ -33,26 +33,24 @@
 
 ## ⚡ Key Features
 
-* **Runs Purely Over USB (No Wi-Fi Needed):** Streams directly through standard ADB port forwards over USB cable, bypassing wireless network congestion, bandwidth throttles, and corporate firewall restrictions.
-* **Low Latency Hardware Video Pipeline:** Hardware-accelerated 60 FPS video decoding via `scrcpy`'s Direct3D11 rendering backend with sub-frame presentation times.
-* **Native Desktop Mouse Emulation (UHID):** Injects pointer events via Linux `/dev/uhid` so Android recognizes a real physical USB mouse—unlocking native desktop cursor icons, hover states, fluid scroll wheel, and right-click context menus.
-* **Integrated WASAPI Audio Forwarding:** Captures DeX audio on the device and forwards it cleanly to your PC speakers or headphones over USB.
-* **Rootless & Zero Knox Impact (0x0):** Operates under standard development user context (`UID 2000 shell`), strictly preserving Knox warranty bits (`0x0`) and enterprise device integrity.
-* **Automatic Session Cleanup:** Gracefully handles disconnection, restores the phone screen to its previous state, and terminates background daemons automatically.
+* **Runs Over USB (No Wi-Fi Needed):** Streams directly through standard ADB port forwards over USB cable, bypassing wireless network congestion, bandwidth throttles, and local network restrictions.
+* **Hardware-Accelerated Video Pipeline:** 60 FPS video decoding handled via `scrcpy`'s Direct3D11 rendering backend.
+* **Native Desktop Mouse Emulation (UHID):** Injects pointer events via Linux `/dev/uhid` so Android recognizes a physical USB mouse—supporting native desktop cursor icons, hover states, fluid scroll wheel, and right-click context menus.
+* **Integrated WASAPI Audio Forwarding:** Captures DeX audio on the device and forwards it to your PC speakers or headphones over USB.
+* **Standard ADB Privileges (UID 2000):** Operates under standard development user context (`UID 2000 shell`) without root access — Knox warranty bit (`0x0`) remained untouched on the tested Galaxy S23 device.
+* **Automatic Session Cleanup:** Closes the session, restores the phone screen to its previous state, and terminates background daemons automatically upon window close.
 
 ---
 
 ## 🚀 Quick Start
 
-### Step 0: Download the Latest Package
-Download the pre-compiled distribution package from **[GitHub Releases](https://github.com/Aureliano021/ScrcpyDex/releases/latest)**:
-1. Download **`ScrcpyDeX-v1.0.0-win-x64.zip`**.
+### Step 0: Download
+Download the latest pre-compiled archive from **[GitHub Releases](https://github.com/Aureliano021/ScrcpyDex/releases/latest)**:
+1. Download the Windows package (`ScrcpyDeX-v*-win-x64.zip`).
 2. Extract the archive into a folder of your choice on your Windows PC.
 
-*(If building from source, see [Building & Architecture](#-building--project-structure) below).*
-
 ### Step 1: Verify Prerequisites
-1. **Samsung Galaxy Device:** A smartphone or tablet with native Samsung DeX capability (Galaxy S-series, Note-series, Z Fold, or Tab S-series).
+1. **Samsung Galaxy Device:** Built and verified on a Galaxy S23 (One UI 8.5 / Android 16). Should also work on other Galaxy devices with native DeX support (S-series, Note-series, Z Fold, Tab S-series), but that hasn't been tested yet — if you try it on a different model, please open an issue with your results so we can build a compatibility list.
 2. **USB Debugging:** Enable *Developer Options* on your Galaxy, then toggle on *USB Debugging*.
 3. **scrcpy v2.0+:** Installed on your PC (e.g. `winget install Genymobile.scrcpy` or available in system `PATH`).
 4. **USB Cable:** Standard USB-C to USB-A or USB-C to USB-C cable.
@@ -82,7 +80,7 @@ This terminates remaining host processes (`scrcpy.exe`, `ffplay.exe`), resets AD
 
 ---
 
-## 📁 Building & Project Structure
+## 📁 Project Structure
 
 ```text
 ScrcpyDex/
