@@ -137,7 +137,7 @@ namespace ScrcpyDex.Services
             }
 
             // Resolve scrcpy binary
-            string scrcpyPath = ScrcpyPathResolver.ResolveScrcpyExecutable(_customScrcpyPath);
+            string scrcpyPath = ScrcpyPathResolver.ResolveScrcpyExecutable(settings.Paths?.ScrcpyPath ?? _customScrcpyPath);
             ResolvedScrcpyPath = scrcpyPath;
 
             if (!File.Exists(scrcpyPath) && scrcpyPath != "scrcpy.exe" && scrcpyPath != "scrcpy")
@@ -569,8 +569,8 @@ namespace ScrcpyDex.Services
                 StreamingStarted?.Invoke(this, EventArgs.Empty);
             }
 
-            // Detect errors in process log stream
-            if (entry.IsError || IsErrorIndicator(entry.Text))
+            // Detect true fatal errors in process log stream (do not trigger on benign stderr logs or warnings)
+            if (IsFatalErrorIndicator(entry.Text))
             {
                 ErrorOccurred?.Invoke(this, entry.Text);
             }
@@ -587,11 +587,20 @@ namespace ScrcpyDex.Services
                    text.Contains("Display: ", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static bool IsErrorIndicator(string text)
+        private static bool IsFatalErrorIndicator(string text)
         {
             if (string.IsNullOrWhiteSpace(text)) return false;
 
+            // Benign ADB push progress, warnings, and info lines on stderr are not errors
+            if (text.Contains("file pushed", StringComparison.OrdinalIgnoreCase) ||
+                text.Contains("WARN:", StringComparison.OrdinalIgnoreCase) ||
+                text.Contains("INFO:", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
             return text.StartsWith("ERROR:", StringComparison.OrdinalIgnoreCase) ||
+                   text.Contains("[server] ERROR:", StringComparison.OrdinalIgnoreCase) ||
                    text.Contains("Exception in thread", StringComparison.OrdinalIgnoreCase) ||
                    text.Contains("Could not open video stream", StringComparison.OrdinalIgnoreCase) ||
                    text.Contains("Failed to start", StringComparison.OrdinalIgnoreCase);
@@ -608,6 +617,14 @@ namespace ScrcpyDex.Services
                 }
             }
             catch { }
+
+            lock (_stateLock)
+            {
+                _currentProcess = null;
+                _processStream = null;
+                _stopping = false;
+                _streamingStartedFired = false;
+            }
 
             _exitTcs?.TrySetResult(exitCode);
             ProcessExited?.Invoke(this, exitCode);

@@ -13,7 +13,10 @@
 // limitations under the License.
 using System;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows;
+using System.Windows.Documents;
+using System.Windows.Media;
 using ScrcpyDex.ViewModels;
 using Wpf.Ui.Controls;
 
@@ -25,6 +28,19 @@ namespace ScrcpyDex.WinUI.Views
     /// </summary>
     public partial class MainWindow : FluentWindow
     {
+        private static readonly SolidColorBrush GreenBrush = new SolidColorBrush(Color.FromRgb(76, 175, 80));   // scrcpy green
+        private static readonly SolidColorBrush RedBrush = new SolidColorBrush(Color.FromRgb(244, 67, 54));     // error red
+        private static readonly SolidColorBrush YellowBrush = new SolidColorBrush(Color.FromRgb(255, 235, 59)); // warn yellow
+        private static readonly SolidColorBrush WhiteBrush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); // default white
+
+        static MainWindow()
+        {
+            GreenBrush.Freeze();
+            RedBrush.Freeze();
+            YellowBrush.Freeze();
+            WhiteBrush.Freeze();
+        }
+
         public MainViewModel ViewModel { get; }
 
         public MainWindow()
@@ -39,29 +55,108 @@ namespace ScrcpyDex.WinUI.Views
 
         private void OnMainWindowLoaded(object sender, RoutedEventArgs e)
         {
+            if (LogsRichTextBox.Document == null)
+            {
+                LogsRichTextBox.Document = new FlowDocument
+                {
+                    Background = Brushes.Transparent,
+                    PagePadding = new Thickness(4, 2, 4, 2)
+                };
+            }
+
+            RebuildLogsDocument();
+
             if (ViewModel.DiagnosticLogs is INotifyCollectionChanged observableLogs)
             {
                 observableLogs.CollectionChanged += OnDiagnosticLogsCollectionChanged;
+            }
+
+            ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+        }
+
+        private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(MainViewModel.LogSearchFilter))
+            {
+                Dispatcher.BeginInvoke(new Action(RebuildLogsDocument));
             }
         }
 
         private void OnDiagnosticLogsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            if (ViewModel.IsAutoScrollEnabled && LogsListBox != null && LogsListBox.Items.Count > 0)
+            Dispatcher.BeginInvoke(new Action(() =>
             {
-                // Auto-scroll virtualized log viewer to bottom entry
-                Dispatcher.BeginInvoke(new Action(() =>
+                if (e.Action == NotifyCollectionChangedAction.Reset)
                 {
-                    try
+                    LogsRichTextBox?.Document?.Blocks.Clear();
+                    return;
+                }
+
+                if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems != null)
+                {
+                    string filter = ViewModel.LogSearchFilter;
+                    foreach (var item in e.NewItems)
                     {
-                        if (LogsListBox.Items.Count > 0)
+                        if (item is string logLine)
                         {
-                            LogsListBox.ScrollIntoView(LogsListBox.Items[LogsListBox.Items.Count - 1]);
+                            if (string.IsNullOrEmpty(filter) || logLine.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
+                            {
+                                AppendLogLine(logLine);
+                            }
                         }
                     }
-                    catch { }
-                }));
+                }
+            }));
+        }
+
+        private void RebuildLogsDocument()
+        {
+            if (LogsRichTextBox?.Document == null) return;
+
+            LogsRichTextBox.Document.Blocks.Clear();
+            string filter = ViewModel.LogSearchFilter;
+
+            foreach (var line in ViewModel.DiagnosticLogs)
+            {
+                if (string.IsNullOrEmpty(filter) || line.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    AppendLogLine(line);
+                }
             }
+
+            LogsRichTextBox.ScrollToEnd();
+        }
+
+        private void AppendLogLine(string line)
+        {
+            if (LogsRichTextBox?.Document == null) return;
+
+            // Colors: scrcpy green, error red, warn yellow, default white
+            SolidColorBrush brush = WhiteBrush;
+            if (line.Contains("[ERR]", StringComparison.OrdinalIgnoreCase) || line.Contains("[CRIT]", StringComparison.OrdinalIgnoreCase))
+            {
+                brush = RedBrush;
+            }
+            else if (line.Contains("[WARN]", StringComparison.OrdinalIgnoreCase))
+            {
+                brush = YellowBrush;
+            }
+            else if (line.Contains("[SCRCPY]", StringComparison.OrdinalIgnoreCase))
+            {
+                brush = GreenBrush;
+            }
+
+            var p = new Paragraph { Margin = new Thickness(0, 1, 0, 1), LineHeight = 17 };
+            p.Inlines.Add(new Run(line) { Foreground = brush });
+            LogsRichTextBox.Document.Blocks.Add(p);
+
+            // Keep buffer bounded to limit memory usage
+            if (LogsRichTextBox.Document.Blocks.Count > 1000)
+            {
+                LogsRichTextBox.Document.Blocks.Remove(LogsRichTextBox.Document.Blocks.FirstBlock);
+            }
+
+            LogsRichTextBox.ScrollToEnd();
         }
 
         private void OnMainWindowClosed(object? sender, EventArgs e)
