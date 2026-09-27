@@ -84,17 +84,31 @@ namespace ScrcpyDex.Services
                 }
 
                 var lines = result.Output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                DeviceInfo? unauthorizedDevice = null;
                 foreach (var line in lines)
                 {
                     string trimmed = line.Trim();
                     if (trimmed.StartsWith("List of devices", StringComparison.OrdinalIgnoreCase)) continue;
 
                     var parts = trimmed.Split(new[] { '\t', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length >= 2 && parts[1].Equals("device", StringComparison.OrdinalIgnoreCase))
+                    if (parts.Length >= 2)
                     {
-                        string serial = parts[0];
-                        return await QueryDeviceInfoAsync(serial, ct).ConfigureAwait(false);
+                        if (parts[1].Equals("device", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string serial = parts[0];
+                            return await QueryDeviceInfoAsync(serial, ct).ConfigureAwait(false);
+                        }
+                        else if (parts[1].Equals("unauthorized", StringComparison.OrdinalIgnoreCase) && unauthorizedDevice == null)
+                        {
+                            string serial = parts[0];
+                            unauthorizedDevice = new DeviceInfo(serial, "Unknown", "unauthorized");
+                        }
                     }
+                }
+
+                if (unauthorizedDevice != null)
+                {
+                    return unauthorizedDevice;
                 }
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)

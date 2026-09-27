@@ -57,7 +57,10 @@ Download the latest pre-compiled archive from **[GitHub Releases](https://github
 
 ### Step 2: Launch ScrcpyDeX
 * **GUI Control Center:** Run **`ScrcpyDeX.exe`** (or **`ScrcpyDeX.bat`**).
-* Confirm your Galaxy device appears in the device selector.
+* Confirm that your device is recognized by the application (the status bar at the bottom displays your device model and connection state). The image below shows an example of the program recognizing a connected device:
+
+  ![Device connected preview](assets/device_connected_preview.png)
+
 * Click **Start DeX Session**.
 
 ### Step 3: Emergency Kill Switch

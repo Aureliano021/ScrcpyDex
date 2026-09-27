@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
+// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -46,10 +46,10 @@ namespace ScrcpyDex.Models
         public bool AudioEnabled { get; set; } = true;
 
         [JsonPropertyName("turnScreenOff")]
-        public bool TurnScreenOff { get; set; } = true;
+        public bool TurnScreenOff { get; set; } = false;
 
         [JsonPropertyName("stayAwake")]
-        public bool StayAwake { get; set; } = true;
+        public bool StayAwake { get; set; } = false;
 
         [JsonPropertyName("mouseDriver")]
         public string MouseDriver { get; set; } = "uhid";
