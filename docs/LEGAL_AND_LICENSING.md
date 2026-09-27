@@ -54,7 +54,7 @@ Choosing the Apache License 2.0 ensures:
 
 ## 3. Third-Party Licenses & Attributions
 
-ScrcpyDeX interacts with external open-source tools and platform APIs. Full third-party notices, licenses, and attributions are maintained in [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md).
+ScrcpyDeX interacts with external open-source tools and platform APIs. Full third-party notices, licenses, and attributions are maintained in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 ### 3.1 Genymobile `scrcpy`
 * **License:** Apache License, Version 2.0
@@ -259,7 +259,7 @@ CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process /data/local/tmp com.s
 
 ## 10. Contributor Guidelines & Clean-Room Standards
 
-All contributors submitting code, documentation, or pull requests to ScrcpyDeX must comply with the guidelines defined in [`CONTRIBUTING.md`](../CONTRIBUTING.md):
+All contributors submitting code, documentation, or pull requests to ScrcpyDeX must comply with the guidelines defined in [`CONTRIBUTING.md`](../.github/CONTRIBUTING.md):
 
 1. **Strict Clean-Room Implementation:** No proprietary vendor bytecode, disassembled proprietary method bodies, or trademarked media may be committed.
 2. **Interface Compatibility:** Interactions with system features must rely on dynamic reflection or public Android APIs.
