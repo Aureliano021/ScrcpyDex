@@ -117,10 +117,9 @@ This stops lingering host processes (`scrcpy.exe`, `ffplay.exe`), sends a discon
 * [Report 02: Control Channel Protocol, Input Event Injection & Coordinate Translation](docs/reports/02_control_channel_and_input.md)
 * [Report 03: Unified Client, Linux Kernel UHID Mouse & Lifecycle Orchestration](docs/reports/03_unified_client_and_uhid_mouse.md)
 * [Report 04: Desktop Configuration UI, Settings Persistence & Live Telemetry](docs/reports/04_configuration_ui_and_settings.md)
+* [Report 05: Client Architecture, Resilient Process Engine & Systems Blueprint](docs/reports/05_client_architecture_and_design_patterns.md)
 * [Protocol Specification: Binary Control & Communication Contract (SSOT)](docs/PROTOCOL.md)
 
-### Historical Research & Discovery Archive (`pt-br`)
-* [Original Development & Discovery Reports (pt-br)](reports/pt-br/)
 
 ---
 
