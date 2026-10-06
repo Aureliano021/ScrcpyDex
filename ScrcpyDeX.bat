@@ -13,12 +13,14 @@ set "PS_EXE=powershell.exe"
 where pwsh.exe >nul 2>&1
 if %ERRORLEVEL% EQU 0 set "PS_EXE=pwsh.exe"
 
-REM 3. If --cli flag is passed or WinUI script does not exist, run console orchestrator
+REM 3. If --cli flag is passed or UI script does not exist, run console orchestrator
 if /i "%~1"=="--cli" goto :run_cli
-if not exist "%~dp0client\ScrcpyDeX-WinUI.ps1" goto :run_cli
+set "UI_SCRIPT=%~dp0src\ScrcpyDex.App.Wpf\ScrcpyDeX-WinUI.ps1"
+if not exist "%UI_SCRIPT%" set "UI_SCRIPT=%~dp0client\ScrcpyDeX-WinUI.ps1"
+if not exist "%UI_SCRIPT%" goto :run_cli
 
-REM Launch WinUI Control Center
-start "" %PS_EXE% -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File "%~dp0client\ScrcpyDeX-WinUI.ps1" %*
+REM Launch UI Control Center
+start "" %PS_EXE% -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File "%UI_SCRIPT%" %*
 exit /b 0
 
 :run_cli

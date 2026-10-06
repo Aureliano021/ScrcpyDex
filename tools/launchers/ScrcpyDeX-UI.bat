@@ -9,9 +9,12 @@ if exist "%ROOT_DIR%ScrcpyDeX.exe" (
     exit /b 0
 )
 
+set "UI_SCRIPT=%ROOT_DIR%src\ScrcpyDex.App.Wpf\ScrcpyDeX-WinUI.ps1"
+if not exist "%UI_SCRIPT%" set "UI_SCRIPT=%ROOT_DIR%client\ScrcpyDeX-WinUI.ps1"
+
 where pwsh.exe >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
-    start "" pwsh.exe -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File "%ROOT_DIR%client\ScrcpyDeX-WinUI.ps1" %*
+    start "" pwsh.exe -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File "%UI_SCRIPT%" %*
 ) else (
-    start "" powershell.exe -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File "%ROOT_DIR%client\ScrcpyDeX-WinUI.ps1" %*
+    start "" powershell.exe -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File "%UI_SCRIPT%" %*
 )

@@ -51,7 +51,14 @@ public class Win32 {
 
 # 2. Locate required binaries (ADB, FFplay, Server JAR)
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$rootDir = Split-Path -Parent $scriptDir
+if (-not $scriptDir) { $scriptDir = (Get-Location).Path }
+$currDir = $scriptDir
+while ($currDir -and -not (Test-Path (Join-Path $currDir "server\scrcpydex-server.jar"))) {
+    $parentDir = Split-Path -Parent $currDir
+    if (-not $parentDir -or $parentDir -eq $currDir) { break }
+    $currDir = $parentDir
+}
+$rootDir = if ($currDir -and (Test-Path (Join-Path $currDir "server\scrcpydex-server.jar"))) { $currDir } else { Split-Path -Parent (Split-Path -Parent $scriptDir) }
 $serverJar = Join-Path $rootDir "server\scrcpydex-server.jar"
 
 if (-not (Test-Path $serverJar)) {

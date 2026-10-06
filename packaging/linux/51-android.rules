@@ -1,0 +1,9 @@
+# udev rules for Samsung Android devices and ADB debugging
+# Place in /etc/udev/rules.d/51-android.rules and reload with:
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+
+# Samsung Electronics
+SUBSYSTEM=="usb", ATTR{idVendor}=="04e8", MODE="0666", GROUP="plugdev", TAG+="uaccess"
+
+# Google (Generic ADB)
+SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", MODE="0666", GROUP="plugdev", TAG+="uaccess"

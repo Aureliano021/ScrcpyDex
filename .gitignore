@@ -10,6 +10,9 @@ bin/
 .vscode/
 
 # .NET / C#
+src/**/obj/
+src/**/bin/
+src/**/.vs/
 client/obj/
 client/bin/
 client/.vs/

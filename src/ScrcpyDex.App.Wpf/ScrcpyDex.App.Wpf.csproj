@@ -27,7 +27,7 @@
     </ApplicationDefinition>
     <Page Remove="src\App.xaml" />
     <Resource Include="icon.ico" />
-    <EmbeddedResource Include="..\server\scrcpydex-server.jar" LogicalName="scrcpydex-server.jar" />
+    <EmbeddedResource Include="..\..\server\scrcpydex-server.jar" LogicalName="scrcpydex-server.jar" />
   </ItemGroup>
 
   <ItemGroup>

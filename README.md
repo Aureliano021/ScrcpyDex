@@ -89,15 +89,17 @@ This terminates remaining host processes (`scrcpy.exe`, `ffplay.exe`), resets AD
 ScrcpyDex/
 ├── .github/          # Contributor guidelines (CONTRIBUTING.md) and CI workflows
 ├── assets/           # Application icons, logos, and vector assets
-├── client/           # WPF desktop control application in C# (.NET 8, WPF-UI Fluent styling)
 ├── config/           # Default session settings (settings.json, settings.schema.json)
 ├── docs/             # Technical architecture reports, protocol specifications, and legal audits
+├── packaging/        # Platform packaging (Linux scripts/udev rules, Windows bundles)
 ├── server/           # Java loopback display daemon (scrcpydex-server.jar)
+├── src/              # Source code directory
+│   └── ScrcpyDex.App.Wpf/ # WPF desktop control application in C# (.NET 8, WPF-UI Fluent styling)
 ├── tests/            # Automated verification test suites (Gate 1, Gate 2, UI Prototype)
 ├── tools/            # Build utilities, icon compilers, and fallback launchers
 ├── LICENSE           # Apache License 2.0
 ├── README.md         # Project documentation and landing page
-├── ScrcpyDeX.bat     # Smart launcher (runs native .exe, WinUI, or CLI)
+├── ScrcpyDeX.bat     # Smart Windows launcher (runs native .exe, WPF UI, or CLI)
 └── stop-dex.bat      # Fast cleanup and session disconnect script
 ```
 
