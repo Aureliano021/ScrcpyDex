@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
+// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
+using ScrcpyDex.Core.Platform;
 
 namespace ScrcpyDex.Core.Lifecycle
 {
@@ -40,7 +41,7 @@ namespace ScrcpyDex.Core.Lifecycle
     /// When the parent process terminates (clean exit, crash, or Task Manager kill),
     /// the Windows NT kernel atomically terminates all child processes in the job.
     /// </summary>
-    public sealed class ProcessJobTracker : IDisposable
+    public sealed class ProcessJobTracker : IProcessLifetimeManager
     {
         private readonly SafeJobHandle _jobHandle;
         private bool _disposed;

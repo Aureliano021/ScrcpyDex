@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using ScrcpyDex.Core.Configuration;
 using ScrcpyDex.Core.IO;
 using ScrcpyDex.Core.Lifecycle;
+using ScrcpyDex.Core.Platform;
 using ScrcpyDex.Models;
 
 namespace ScrcpyDex.Services
@@ -49,7 +50,7 @@ namespace ScrcpyDex.Services
     /// </summary>
     public sealed class ScrcpyExecutionService : IScrcpyExecutionService
     {
-        private readonly ProcessJobTracker _jobTracker;
+        private readonly IProcessLifetimeManager _lifetimeManager;
         private readonly AdbService? _adbService;
         private readonly string? _customScrcpyPath;
         private readonly string? _customServerJarPath;
@@ -100,12 +101,12 @@ namespace ScrcpyDex.Services
         public event EventHandler<ProcessLogEntry>? LogReceived;
 
         public ScrcpyExecutionService(
-            ProcessJobTracker? jobTracker = null,
+            IProcessLifetimeManager? lifetimeManager = null,
             AdbService? adbService = null,
             string? customScrcpyPath = null,
             string? customServerJarPath = null)
         {
-            _jobTracker = jobTracker ?? ProcessJobTracker.Default;
+            _lifetimeManager = lifetimeManager ?? PlatformLifetimeManager.Default;
             _adbService = adbService;
             _customScrcpyPath = customScrcpyPath;
             _customServerJarPath = customServerJarPath;
@@ -199,8 +200,8 @@ namespace ScrcpyDex.Services
                     throw new InvalidOperationException("Process.Start failed to launch scrcpy.exe.");
                 }
 
-                // Register with Windows Job Object immediately for kernel-level orphan termination
-                _jobTracker.AssignProcess(process);
+                // Register with platform process lifetime manager immediately for orphan termination
+                _lifetimeManager.AssignProcess(process);
 
                 // Initialize non-blocking asynchronous stream pumping
                 var processStream = new NonBlockingProcessStream(4096);
@@ -414,8 +415,11 @@ namespace ScrcpyDex.Services
                 args.Add(serial);
             }
 
-            // Direct3D 11 rendering driver
-            args.Add("--render-driver=direct3d11");
+            // Rendering driver (direct3d11 on Windows, opengl on Linux/POSIX by default)
+            string renderDriver = !string.IsNullOrWhiteSpace(settings.Display?.RenderDriver)
+                ? settings.Display.RenderDriver
+                : (OperatingSystem.IsWindows() ? "direct3d11" : "opengl");
+            args.Add($"--render-driver={renderDriver}");
 
             // Hardware UHID mouse injection
             string mouseDriver = !string.IsNullOrWhiteSpace(settings.Input?.MouseDriver)
@@ -538,7 +542,8 @@ namespace ScrcpyDex.Services
                     Fps = config.Fps,
                     Bitrate = config.Bitrate,
                     Codec = config.Codec,
-                    WindowMode = config.WindowMode
+                    WindowMode = config.WindowMode,
+                    RenderDriver = config.RenderDriver
                 },
                 Audio = new AudioSection
                 {

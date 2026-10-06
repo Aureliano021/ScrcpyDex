@@ -14,7 +14,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Windows.Threading;
+using System.Threading;
 
 namespace ScrcpyDex.Core.Collections
 {
@@ -26,20 +26,26 @@ namespace ScrcpyDex.Core.Collections
     {
         private readonly int _maxCapacity;
         private readonly object _syncLock = new object();
-        private readonly Dispatcher? _dispatcher;
+        private readonly Action<Action>? _dispatcherInvoke;
+        private readonly SynchronizationContext? _syncContext;
 
-        public BoundedRingBuffer(int maxCapacity = 500, Dispatcher? dispatcher = null)
+        public BoundedRingBuffer(int maxCapacity = 500, Action<Action>? dispatcherInvoke = null, SynchronizationContext? syncContext = null)
         {
             if (maxCapacity <= 0) throw new ArgumentOutOfRangeException(nameof(maxCapacity), "Capacity must be positive.");
             _maxCapacity = maxCapacity;
-            _dispatcher = dispatcher;
+            _dispatcherInvoke = dispatcherInvoke;
+            _syncContext = syncContext;
         }
 
         public void Push(T item)
         {
-            if (_dispatcher != null && !_dispatcher.CheckAccess())
+            if (_dispatcherInvoke != null)
             {
-                _dispatcher.BeginInvoke(new Action(() => PushInternal(item)));
+                _dispatcherInvoke(() => PushInternal(item));
+            }
+            else if (_syncContext != null && SynchronizationContext.Current != _syncContext)
+            {
+                _syncContext.Post(_ => PushInternal(item), null);
             }
             else
             {
@@ -61,9 +67,13 @@ namespace ScrcpyDex.Core.Collections
 
         public void ClearAll()
         {
-            if (_dispatcher != null && !_dispatcher.CheckAccess())
+            if (_dispatcherInvoke != null)
             {
-                _dispatcher.BeginInvoke(new Action(ClearAllInternal));
+                _dispatcherInvoke(ClearAllInternal);
+            }
+            else if (_syncContext != null && SynchronizationContext.Current != _syncContext)
+            {
+                _syncContext.Post(_ => ClearAllInternal(), null);
             }
             else
             {
