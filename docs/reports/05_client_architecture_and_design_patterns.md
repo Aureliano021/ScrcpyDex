@@ -1,5 +1,7 @@
 # Architectural Blueprint & Technical Analysis: ScrcpyDeX Client
 
+> **Note (historical record):** This report documents the project at the time of this stage. Names such as WinUI refer to the Fluent visual style. The shipped desktop client is a WPF application (.NET 8, WPF-UI). scrcpy is an external dependency (official scrcpy v2.4 or newer), not bundled. Direct3D11 rendering is specific to the Windows client.
+
 **Document Version:** 1.0.0  
 **Phase:** Stage 5 — Client Deep Architectural Audit & Systems Modernization Blueprint  
 **Target Platform:** Windows 10/11 x64 (.NET 8/9, WinUI 3 / Modern WPF)  
