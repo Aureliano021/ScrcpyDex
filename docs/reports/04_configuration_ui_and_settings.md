@@ -1,5 +1,7 @@
 # Technical Report 04: Desktop Configuration UI, Settings Persistence, Modern Styling & Gate 4 Sign-Off
 
+> **Note (historical record):** This report documents the project at the time of this stage. Names such as WinUI refer to the Fluent visual style. The shipped desktop client is a WPF application (.NET 8, WPF-UI). scrcpy is an external dependency (official scrcpy v2.4 or newer), not bundled. Direct3D11 rendering is specific to the Windows client.
+
 **Project:** ScrcpyDeX Standalone Architecture  
 **Component:** Desktop Management Interface, Settings Store, Native Launcher & Diagnostics Hub  
 **Date of Completion:** September 26, 2026  
