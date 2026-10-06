@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=ScrcpyDeX
+Comment=Open-Source Client for Samsung DeX via USB
+Exec=/usr/local/bin/start-dex.sh
+Icon=scrcpydex
+Terminal=false
+Categories=Utility;HardwareSettings;
+Keywords=samsung;dex;scrcpy;android;desktop;
