@@ -1,5 +1,7 @@
 # Technical Report 01: Server Core Architecture, Loopback Miracast RTSP & H.264 Video Pipeline
 
+> **Note (historical record):** This report documents the project at the time of this stage. Names such as WinUI refer to the Fluent visual style. The shipped desktop client is a WPF application (.NET 8, WPF-UI). scrcpy is an external dependency (official scrcpy v2.4 or newer), not bundled. Direct3D11 rendering is specific to the Windows client.
+
 **Project:** ScrcpyDeX Standalone Architecture  
 **Component:** Android Server Core (`scrcpydex-server.jar`)  
 **Target Hardware:** Samsung Galaxy S23 (`SM-S911B`), One UI 8.5 / Android 16 (`SDK 36`)  

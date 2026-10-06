@@ -52,7 +52,7 @@ Download the latest pre-compiled archive from **[GitHub Releases](https://github
 ### Step 1: Verify Prerequisites
 1. **Samsung Galaxy Device:** Built and verified on a Galaxy S23 (One UI 8.5 / Android 16). Should also work on other Galaxy devices with native DeX support (S-series, Note-series, Z Fold, Tab S-series), but that hasn't been tested yet — if you try it on a different model, please open an issue with your results so we can build a compatibility list.
 2. **USB Debugging:** Enable *Developer Options* on your Galaxy, then toggle on *USB Debugging*.
-3. **scrcpy v2.0+:** Installed on your PC (e.g. `winget install Genymobile.scrcpy` or available in system `PATH`).
+3. **scrcpy v2.4+:** Installed on your PC (e.g. `winget install Genymobile.scrcpy` or available in system `PATH`). Version 2.4 is the first release that supports the `--mouse=uhid` option used by ScrcpyDeX; older versions are not supported.
 4. **USB Cable:** Standard USB-C to USB-A or USB-C to USB-C cable.
 
 ### Step 2: Launch ScrcpyDeX
@@ -89,7 +89,7 @@ This terminates remaining host processes (`scrcpy.exe`, `ffplay.exe`), resets AD
 ScrcpyDex/
 ├── .github/          # Contributor guidelines (CONTRIBUTING.md) and CI workflows
 ├── assets/           # Application icons, logos, and vector assets
-├── client/           # Fluent WinUI 3 / WPF desktop control application in C# (.NET 8)
+├── client/           # WPF desktop control application in C# (.NET 8, WPF-UI Fluent styling)
 ├── config/           # Default session settings (settings.json, settings.schema.json)
 ├── docs/             # Technical architecture reports, protocol specifications, and legal audits
 ├── server/           # Java loopback display daemon (scrcpydex-server.jar)
