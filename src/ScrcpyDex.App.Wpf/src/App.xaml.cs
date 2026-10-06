@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
+// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,6 +13,8 @@
 // limitations under the License.
 using System;
 using System.Windows;
+using ScrcpyDex.Core.Lifecycle;
+using ScrcpyDex.Core.Platform;
 using Wpf.Ui.Appearance;
 
 namespace ScrcpyDex.WinUI
@@ -26,6 +28,10 @@ namespace ScrcpyDex.WinUI
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            if (OperatingSystem.IsWindows())
+            {
+                PlatformLifetimeManager.Default = ProcessJobTracker.Default;
+            }
             try
             {
                 ApplicationThemeManager.Apply(ApplicationTheme.Dark);
