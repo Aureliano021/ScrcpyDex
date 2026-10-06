@@ -19,6 +19,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ScrcpyDex.Core.IO;
 using ScrcpyDex.Core.Lifecycle;
+using ScrcpyDex.Core.Platform;
 
 namespace ScrcpyDex.Core.Adb
 {
@@ -43,7 +44,7 @@ namespace ScrcpyDex.Core.Adb
     public sealed class AdbResilienceService
     {
         private readonly string _adbPath;
-        private readonly ProcessJobTracker _jobTracker;
+        private readonly IProcessLifetimeManager _jobTracker;
         private int _consecutiveFailures;
         private DateTime _circuitBreakerUntilUtc = DateTime.MinValue;
         private readonly object _circuitLock = new object();
@@ -51,10 +52,10 @@ namespace ScrcpyDex.Core.Adb
         private const int MaxConsecutiveFailures = 3;
         private static readonly TimeSpan CircuitBreakDuration = TimeSpan.FromSeconds(5);
 
-        public AdbResilienceService(string adbPath, ProcessJobTracker jobTracker)
+        public AdbResilienceService(string adbPath, IProcessLifetimeManager? jobTracker = null)
         {
             _adbPath = string.IsNullOrWhiteSpace(adbPath) ? "adb" : adbPath;
-            _jobTracker = jobTracker;
+            _jobTracker = jobTracker ?? PlatformLifetimeManager.Default;
         }
 
         public bool IsCircuitBreakerOpen

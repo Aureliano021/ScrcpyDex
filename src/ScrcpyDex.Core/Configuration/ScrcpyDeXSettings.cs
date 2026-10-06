@@ -168,6 +168,11 @@ namespace ScrcpyDex.Core.Configuration
 
         [JsonPropertyName("windowMode")]
         public string WindowMode { get => _windowMode; set => SetProperty(ref _windowMode, value); }
+
+        private string? _renderDriver;
+
+        [JsonPropertyName("renderDriver")]
+        public string? RenderDriver { get => _renderDriver; set => SetProperty(ref _renderDriver, value); }
     }
 
     public sealed class AudioSection : ObservableObject

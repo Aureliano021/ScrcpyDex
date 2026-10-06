@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using ScrcpyDex.Core.Adb;
 using ScrcpyDex.Core.IO;
 using ScrcpyDex.Core.Lifecycle;
+using ScrcpyDex.Core.Platform;
 using ScrcpyDex.Models;
 
 namespace ScrcpyDex.Services
@@ -44,7 +45,7 @@ namespace ScrcpyDex.Services
     public class AdbService : IAdbService
     {
         private readonly string _adbPath;
-        private readonly ProcessJobTracker _jobTracker;
+        private readonly IProcessLifetimeManager _jobTracker;
         private readonly AdbResilienceService _resilience;
         private Process? _activatorProcess;
         private NonBlockingProcessStream? _activatorStream;
@@ -56,9 +57,9 @@ namespace ScrcpyDex.Services
 
         public void ResetResilienceState() => _resilience.ResetCircuitBreaker();
 
-        public AdbService(string? adbPath = null, ProcessJobTracker? jobTracker = null)
+        public AdbService(string? adbPath = null, IProcessLifetimeManager? jobTracker = null)
         {
-            _jobTracker = jobTracker ?? ProcessJobTracker.Default;
+            _jobTracker = jobTracker ?? PlatformLifetimeManager.Default;
             _adbPath = !string.IsNullOrWhiteSpace(adbPath)
                 ? adbPath
                 : ScrcpyPathResolver.ResolveAdbExecutable();
@@ -491,7 +492,7 @@ namespace ScrcpyDex.Services
         /// </summary>
         public static Process? LaunchDeXSession(DisplayConfig config, string rootDir)
         {
-            var executionService = new ScrcpyExecutionService(ProcessJobTracker.Default, Instance);
+            var executionService = new ScrcpyExecutionService(PlatformLifetimeManager.Default, Instance);
             var startTask = executionService.StartAsync(config);
             startTask.GetAwaiter().GetResult();
             return null;

@@ -57,6 +57,9 @@ namespace ScrcpyDex.Models
         [JsonPropertyName("releaseKey")]
         public string ReleaseKey { get; set; } = "LeftAlt";
 
+        [JsonPropertyName("renderDriver")]
+        public string? RenderDriver { get; set; }
+
         public static DisplayConfig CreateDefault()
         {
             return new DisplayConfig();

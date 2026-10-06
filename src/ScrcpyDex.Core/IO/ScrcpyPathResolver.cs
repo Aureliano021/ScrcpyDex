@@ -12,18 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
+using ScrcpyDex.Core.Platform;
 
 namespace ScrcpyDex.Core.IO
 {
     /// <summary>
     /// Dynamically resolves filesystem paths for scrcpy binaries, adb, and scrcpydex-server.jar.
-    /// Traverses execution base directories, repo roots, PATH, and standard Windows package manager locations.
+    /// Traverses execution base directories, repo roots, PATH, and standard Windows and Linux package manager locations.
     /// </summary>
     public static class ScrcpyPathResolver
     {
-        private static readonly string[] ExecutableExtensions = { ".exe", "" };
+        private static readonly string[] ExecutableExtensions = OperatingSystem.IsWindows()
+            ? new[] { ".exe", "" }
+            : new[] { "", ".exe" };
 
         /// <summary>
         /// Attempts to resolve the absolute path to scrcpy.exe.
@@ -38,6 +43,7 @@ namespace ScrcpyDex.Core.IO
             }
 
             string baseDir = AppContext.BaseDirectory;
+            string scrcpyBin = OperatingSystem.IsWindows() ? "scrcpy.exe" : "scrcpy";
 
             // 1. Check relative to base directory and upward directory hierarchy (up to 5 levels)
             var dir = new DirectoryInfo(baseDir);
@@ -45,11 +51,12 @@ namespace ScrcpyDex.Core.IO
             {
                 string[] candidates =
                 {
-                    Path.Combine(dir.FullName, "scrcpy", "scrcpy.exe"),
-                    Path.Combine(dir.FullName, "scrcpy.exe"),
-                    Path.Combine(dir.FullName, "tools", "scrcpy", "scrcpy.exe"),
-                    Path.Combine(dir.FullName, "tools", "scrcpy.exe"),
-                    Path.Combine(dir.FullName, "bin", "scrcpy", "scrcpy.exe")
+                    Path.Combine(dir.FullName, "scrcpy", scrcpyBin),
+                    Path.Combine(dir.FullName, scrcpyBin),
+                    Path.Combine(dir.FullName, "tools", "scrcpy", scrcpyBin),
+                    Path.Combine(dir.FullName, "tools", scrcpyBin),
+                    Path.Combine(dir.FullName, "bin", "scrcpy", scrcpyBin),
+                    Path.Combine(dir.FullName, "bin", scrcpyBin)
                 };
 
                 foreach (var candidate in candidates)
@@ -72,63 +79,89 @@ namespace ScrcpyDex.Core.IO
                 return true;
             }
 
-            // 3. Search WinGet Packages
-            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            if (!string.IsNullOrEmpty(localAppData))
+            // 3. Platform-specific candidate directories
+            if (OperatingSystem.IsWindows())
             {
-                string wingetPackagesDir = Path.Combine(localAppData, "Microsoft", "WinGet", "Packages");
-                if (Directory.Exists(wingetPackagesDir))
+                // WinGet Packages
+                string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                if (!string.IsNullOrEmpty(localAppData))
                 {
-                    try
+                    string wingetPackagesDir = Path.Combine(localAppData, "Microsoft", "WinGet", "Packages");
+                    if (Directory.Exists(wingetPackagesDir))
                     {
-                        var scrcpyDir = Directory.GetDirectories(wingetPackagesDir, "Genymobile.scrcpy*")
-                            .FirstOrDefault();
-                        if (scrcpyDir != null)
+                        try
                         {
-                            var match = Directory.GetFiles(scrcpyDir, "scrcpy.exe", SearchOption.AllDirectories)
+                            var scrcpyDir = Directory.GetDirectories(wingetPackagesDir, "Genymobile.scrcpy*")
                                 .FirstOrDefault();
-                            if (match != null && File.Exists(match))
+                            if (scrcpyDir != null)
                             {
-                                resolvedPath = Path.GetFullPath(match);
-                                return true;
+                                var match = Directory.GetFiles(scrcpyDir, "scrcpy.exe", SearchOption.AllDirectories)
+                                    .FirstOrDefault();
+                                if (match != null && File.Exists(match))
+                                {
+                                    resolvedPath = Path.GetFullPath(match);
+                                    return true;
+                                }
                             }
                         }
+                        catch { }
                     }
-                    catch { }
+
+                    string wingetLinks = Path.Combine(localAppData, "Microsoft", "WinGet", "Links", "scrcpy.exe");
+                    if (File.Exists(wingetLinks))
+                    {
+                        resolvedPath = Path.GetFullPath(wingetLinks);
+                        return true;
+                    }
                 }
 
-                string wingetLinks = Path.Combine(localAppData, "Microsoft", "WinGet", "Links", "scrcpy.exe");
-                if (File.Exists(wingetLinks))
+                // Program Files
+                string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+                if (!string.IsNullOrEmpty(programFiles))
                 {
-                    resolvedPath = Path.GetFullPath(wingetLinks);
-                    return true;
+                    string pfScrcpy = Path.Combine(programFiles, "scrcpy", "scrcpy.exe");
+                    if (File.Exists(pfScrcpy))
+                    {
+                        resolvedPath = Path.GetFullPath(pfScrcpy);
+                        return true;
+                    }
+                }
+
+                string programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+                if (!string.IsNullOrEmpty(programFilesX86))
+                {
+                    string pfScrcpy86 = Path.Combine(programFilesX86, "scrcpy", "scrcpy.exe");
+                    if (File.Exists(pfScrcpy86))
+                    {
+                        resolvedPath = Path.GetFullPath(pfScrcpy86);
+                        return true;
+                    }
                 }
             }
-
-            // 4. Search Program Files
-            string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-            if (!string.IsNullOrEmpty(programFiles))
+            else
             {
-                string pfScrcpy = Path.Combine(programFiles, "scrcpy", "scrcpy.exe");
-                if (File.Exists(pfScrcpy))
+                // Linux / Unix well-known installation locations
+                string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                string[] unixCandidates =
                 {
-                    resolvedPath = Path.GetFullPath(pfScrcpy);
-                    return true;
+                    "/usr/local/bin/scrcpy",
+                    "/usr/bin/scrcpy",
+                    "/opt/scrcpy/scrcpy",
+                    "/snap/bin/scrcpy",
+                    Path.Combine(home, ".local", "bin", "scrcpy")
+                };
+
+                foreach (var unixPath in unixCandidates)
+                {
+                    if (File.Exists(unixPath))
+                    {
+                        resolvedPath = Path.GetFullPath(unixPath);
+                        return true;
+                    }
                 }
             }
 
-            string programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
-            if (!string.IsNullOrEmpty(programFilesX86))
-            {
-                string pfScrcpy86 = Path.Combine(programFilesX86, "scrcpy", "scrcpy.exe");
-                if (File.Exists(pfScrcpy86))
-                {
-                    resolvedPath = Path.GetFullPath(pfScrcpy86);
-                    return true;
-                }
-            }
-
-            resolvedPath = "scrcpy.exe";
+            resolvedPath = scrcpyBin;
             return false;
         }
 
@@ -152,13 +185,15 @@ namespace ScrcpyDex.Core.IO
                 return true;
             }
 
+            string adbBin = OperatingSystem.IsWindows() ? "adb.exe" : "adb";
+
             // 1. Sibling to resolved scrcpy executable (official releases bundle adb together)
             if (!string.IsNullOrWhiteSpace(scrcpyPath) && File.Exists(scrcpyPath))
             {
                 string? scrcpyDir = Path.GetDirectoryName(scrcpyPath);
                 if (!string.IsNullOrEmpty(scrcpyDir))
                 {
-                    string siblingAdb = Path.Combine(scrcpyDir, "adb.exe");
+                    string siblingAdb = Path.Combine(scrcpyDir, adbBin);
                     if (File.Exists(siblingAdb))
                     {
                         resolvedPath = Path.GetFullPath(siblingAdb);
@@ -175,10 +210,10 @@ namespace ScrcpyDex.Core.IO
             {
                 string[] candidates =
                 {
-                    Path.Combine(dir.FullName, "scrcpy", "adb.exe"),
-                    Path.Combine(dir.FullName, "tools", "adb.exe"),
-                    Path.Combine(dir.FullName, "platform-tools", "adb.exe"),
-                    Path.Combine(dir.FullName, "adb.exe")
+                    Path.Combine(dir.FullName, "scrcpy", adbBin),
+                    Path.Combine(dir.FullName, "tools", adbBin),
+                    Path.Combine(dir.FullName, "platform-tools", adbBin),
+                    Path.Combine(dir.FullName, adbBin)
                 };
 
                 foreach (var candidate in candidates)
@@ -201,47 +236,71 @@ namespace ScrcpyDex.Core.IO
                 return true;
             }
 
-            // 4. Android SDK Platform Tools
-            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            if (!string.IsNullOrEmpty(localAppData))
+            // 4. Platform-specific Android SDK Platform Tools
+            if (OperatingSystem.IsWindows())
             {
-                string sdkAdb = Path.Combine(localAppData, "Android", "Sdk", "platform-tools", "adb.exe");
-                if (File.Exists(sdkAdb))
+                string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                if (!string.IsNullOrEmpty(localAppData))
                 {
-                    resolvedPath = Path.GetFullPath(sdkAdb);
-                    return true;
-                }
-
-                string wingetPackagesDir = Path.Combine(localAppData, "Microsoft", "WinGet", "Packages");
-                if (Directory.Exists(wingetPackagesDir))
-                {
-                    try
+                    string sdkAdb = Path.Combine(localAppData, "Android", "Sdk", "platform-tools", "adb.exe");
+                    if (File.Exists(sdkAdb))
                     {
-                        var scrcpyDir = Directory.GetDirectories(wingetPackagesDir, "Genymobile.scrcpy*")
-                            .FirstOrDefault();
-                        if (scrcpyDir != null)
+                        resolvedPath = Path.GetFullPath(sdkAdb);
+                        return true;
+                    }
+
+                    string wingetPackagesDir = Path.Combine(localAppData, "Microsoft", "WinGet", "Packages");
+                    if (Directory.Exists(wingetPackagesDir))
+                    {
+                        try
                         {
-                            var match = Directory.GetFiles(scrcpyDir, "adb.exe", SearchOption.AllDirectories)
+                            var scrcpyDir = Directory.GetDirectories(wingetPackagesDir, "Genymobile.scrcpy*")
                                 .FirstOrDefault();
-                            if (match != null && File.Exists(match))
+                            if (scrcpyDir != null)
                             {
-                                resolvedPath = Path.GetFullPath(match);
-                                return true;
+                                var match = Directory.GetFiles(scrcpyDir, "adb.exe", SearchOption.AllDirectories)
+                                    .FirstOrDefault();
+                                if (match != null && File.Exists(match))
+                                {
+                                    resolvedPath = Path.GetFullPath(match);
+                                    return true;
+                                }
                             }
                         }
+                        catch { }
                     }
-                    catch { }
-                }
 
-                string wingetLinks = Path.Combine(localAppData, "Microsoft", "WinGet", "Links", "adb.exe");
-                if (File.Exists(wingetLinks))
+                    string wingetLinks = Path.Combine(localAppData, "Microsoft", "WinGet", "Links", "adb.exe");
+                    if (File.Exists(wingetLinks))
+                    {
+                        resolvedPath = Path.GetFullPath(wingetLinks);
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                string[] unixCandidates =
                 {
-                    resolvedPath = Path.GetFullPath(wingetLinks);
-                    return true;
+                    "/usr/bin/adb",
+                    "/usr/local/bin/adb",
+                    Path.Combine(home, "Android", "Sdk", "platform-tools", "adb"),
+                    Path.Combine(home, ".android-sdk", "platform-tools", "adb"),
+                    "/opt/android-sdk/platform-tools/adb"
+                };
+
+                foreach (var unixPath in unixCandidates)
+                {
+                    if (File.Exists(unixPath))
+                    {
+                        resolvedPath = Path.GetFullPath(unixPath);
+                        return true;
+                    }
                 }
             }
 
-            resolvedPath = "adb.exe";
+            resolvedPath = adbBin;
             return false;
         }
 
@@ -280,7 +339,10 @@ namespace ScrcpyDex.Core.IO
                     Path.Combine(dir.FullName, "publish", "scrcpydex-server.jar"),
                     Path.Combine(dir.FullName, "tests", "server", "scrcpydex-server.jar"),
                     Path.Combine(dir.FullName, "scrcpydex-server.jar"),
-                    Path.Combine(dir.FullName, "client", "server", "scrcpydex-server.jar")
+                    Path.Combine(dir.FullName, "client", "server", "scrcpydex-server.jar"),
+                    "/usr/share/scrcpydex/server/scrcpydex-server.jar",
+                    "/usr/local/share/scrcpydex/server/scrcpydex-server.jar",
+                    "/opt/scrcpydex/server/scrcpydex-server.jar"
                 };
 
                 foreach (var candidate in candidates)
@@ -295,7 +357,14 @@ namespace ScrcpyDex.Core.IO
                 dir = dir.Parent;
             }
 
-            // 2. Check AppData / LocalApplicationData cache
+            // 2. Check platform cache / LocalApplicationData directory
+            string cacheJar = Path.Combine(DefaultPlatformPaths.Instance.GetCacheDirectory(), "server", "scrcpydex-server.jar");
+            if (File.Exists(cacheJar))
+            {
+                resolvedPath = Path.GetFullPath(cacheJar);
+                return true;
+            }
+
             string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             if (!string.IsNullOrEmpty(localAppData))
             {
@@ -333,7 +402,8 @@ namespace ScrcpyDex.Core.IO
             {
                 var assembly = typeof(ScrcpyPathResolver).Assembly;
                 Stream? stream = assembly.GetManifestResourceStream("scrcpydex-server.jar")
-                              ?? assembly.GetManifestResourceStream("ScrcpyDex.WinUI.scrcpydex-server.jar");
+                              ?? assembly.GetManifestResourceStream("ScrcpyDex.WinUI.scrcpydex-server.jar")
+                              ?? assembly.GetManifestResourceStream("ScrcpyDex.Core.scrcpydex-server.jar");
 
                 if (stream == null)
                 {
@@ -351,9 +421,7 @@ namespace ScrcpyDex.Core.IO
 
                 using (stream)
                 {
-                    string targetDir = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                        "ScrcpyDeX", "server");
+                    string targetDir = Path.Combine(DefaultPlatformPaths.Instance.GetCacheDirectory(), "server");
 
                     if (!Directory.Exists(targetDir))
                     {
@@ -374,6 +442,66 @@ namespace ScrcpyDex.Core.IO
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Queries the installed scrcpy version by executing '{scrcpy} --version'.
+        /// Returns parsed System.Version, or null if execution or parsing fails.
+        /// </summary>
+        public static Version? QueryScrcpyVersion(string? scrcpyPath = null)
+        {
+            try
+            {
+                string executable = !string.IsNullOrWhiteSpace(scrcpyPath)
+                    ? scrcpyPath
+                    : ResolveScrcpyExecutable();
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = executable,
+                    Arguments = "--version",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using var proc = Process.Start(psi);
+                if (proc == null) return null;
+
+                string stdout = proc.StandardOutput.ReadToEnd();
+                proc.WaitForExit(3000);
+
+                return ParseScrcpyVersion(stdout);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Parses the version string from 'scrcpy --version' output (e.g., 'scrcpy 2.4' or 'scrcpy 5.0 <https://...>').
+        /// </summary>
+        public static Version? ParseScrcpyVersion(string? versionOutput)
+        {
+            if (string.IsNullOrWhiteSpace(versionOutput)) return null;
+
+            var match = Regex.Match(versionOutput, @"scrcpy\s+v?(\d+(\.\d+)+)", RegexOptions.IgnoreCase);
+            if (match.Success && Version.TryParse(match.Groups[1].Value, out var ver))
+            {
+                return ver;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Checks whether the resolved scrcpy satisfies the minimum version required for ScrcpyDeX (v2.4+).
+        /// </summary>
+        public static bool IsScrcpyVersionSupported(Version? version)
+        {
+            return version != null && version >= new Version(2, 4);
         }
 
         /// <summary>

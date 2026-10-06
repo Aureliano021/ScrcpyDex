@@ -20,6 +20,7 @@ using ScrcpyDex.Core.Adb;
 using ScrcpyDex.Core.Configuration;
 using ScrcpyDex.Core.IO;
 using ScrcpyDex.Core.Lifecycle;
+using ScrcpyDex.Core.Platform;
 using ScrcpyDex.Models;
 using ScrcpyDex.Services;
 
@@ -30,6 +31,11 @@ namespace ScrcpyDex
         [STAThread]
         public static int Main(string[] args)
         {
+            if (OperatingSystem.IsWindows())
+            {
+                PlatformLifetimeManager.Default = ProcessJobTracker.Default;
+            }
+
             if (args != null && args.Length > 0 && (args[0] == "--test" || args[0] == "--self-test"))
             {
                 return RunSelfTests();

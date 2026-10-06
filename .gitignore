@@ -13,6 +13,9 @@ bin/
 src/**/obj/
 src/**/bin/
 src/**/.vs/
+tests/**/obj/
+tests/**/bin/
+tests/**/.vs/
 client/obj/
 client/bin/
 client/.vs/

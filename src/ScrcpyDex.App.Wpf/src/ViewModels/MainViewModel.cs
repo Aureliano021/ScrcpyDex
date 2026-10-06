@@ -288,7 +288,14 @@ namespace ScrcpyDex.ViewModels
 
             _settings = new ScrcpyDeXSettings();
             _settings.SettingChanged += OnSettingChanged;
-            DiagnosticLogs = new BoundedRingBuffer<string>(1000, Application.Current?.Dispatcher);
+            Action<Action>? dispatcherInvoke = Application.Current?.Dispatcher != null
+                ? action =>
+                {
+                    if (Application.Current.Dispatcher.CheckAccess()) action();
+                    else Application.Current.Dispatcher.BeginInvoke(action);
+                }
+                : null;
+            DiagnosticLogs = new BoundedRingBuffer<string>(1000, dispatcherInvoke);
             FilteredLogs = CollectionViewSource.GetDefaultView(DiagnosticLogs);
             FilteredLogs.Filter = FilterLogItem;
 

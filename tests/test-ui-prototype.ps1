@@ -90,13 +90,14 @@ Assert-Test "run-scrcpydex.ps1 accepts custom parameters" {
 
 # 6. C# Source Architecture Check
 Assert-Test "C# client source models and services compiled structure" {
-    $csharpDir = Join-Path $rootDir "src\ScrcpyDex.App.Wpf\src"
-    if (-not (Test-Path $csharpDir)) { $csharpDir = Join-Path $rootDir "client\src" }
+    $coreDir = Join-Path $rootDir "src\ScrcpyDex.Core"
+    $wpfDir = Join-Path $rootDir "src\ScrcpyDex.App.Wpf\src"
+    $csharpDir = if (Test-Path $coreDir) { $coreDir } else { Join-Path $rootDir "client\src" }
     (Test-Path (Join-Path $csharpDir "Models\DisplayConfig.cs")) -and
     (Test-Path (Join-Path $csharpDir "Models\DeviceInfo.cs")) -and
     (Test-Path (Join-Path $csharpDir "Services\ConfigStore.cs")) -and
     (Test-Path (Join-Path $csharpDir "Services\AdbService.cs")) -and
-    (Test-Path (Join-Path $csharpDir "ViewModels\MainViewModel.cs"))
+    ((Test-Path (Join-Path $wpfDir "ViewModels\MainViewModel.cs")) -or (Test-Path (Join-Path $rootDir "client\src\ViewModels\MainViewModel.cs")))
 }
 
 # 7. Native Zero-Flash Windows Launchers Validation
