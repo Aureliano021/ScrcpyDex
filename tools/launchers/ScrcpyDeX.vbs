@@ -4,7 +4,10 @@ Set WshShell = CreateObject("WScript.Shell")
 Set fso = CreateObject("Scripting.FileSystemObject")
 scriptDir = fso.GetParentFolderName(WScript.ScriptFullName)
 rootDir = fso.GetParentFolderName(fso.GetParentFolderName(scriptDir))
-ps1File = rootDir & "\client\ScrcpyDeX-WinUI.ps1"
+ps1File = rootDir & "\src\ScrcpyDex.App.Wpf\ScrcpyDeX-WinUI.ps1"
+If Not fso.FileExists(ps1File) Then
+    ps1File = rootDir & "\client\ScrcpyDeX-WinUI.ps1"
+End If
 If Not fso.FileExists(ps1File) Then
     ps1File = scriptDir & "\client\ScrcpyDeX-WinUI.ps1"
 End If

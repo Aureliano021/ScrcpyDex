@@ -43,13 +43,20 @@ public class WinUIDwm {
 # 3. Path Resolution & Binaries Discovery
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 if (-not $scriptDir) { $scriptDir = (Get-Location).Path }
-$rootDir = if (Test-Path (Join-Path $scriptDir "run-scrcpydex.ps1")) { $scriptDir } else { Split-Path -Parent $scriptDir }
+$currDir = $scriptDir
+while ($currDir -and -not (Test-Path (Join-Path $currDir "config\settings.json"))) {
+    $parentDir = Split-Path -Parent $currDir
+    if (-not $parentDir -or $parentDir -eq $currDir) { break }
+    $currDir = $parentDir
+}
+$rootDir = if ($currDir -and (Test-Path (Join-Path $currDir "config\settings.json"))) { $currDir } else { Split-Path -Parent (Split-Path -Parent $scriptDir) }
 
 $configDir = Join-Path $rootDir "config"
 $configLocal = Join-Path $configDir "settings.json"
 $appDataDir = Join-Path $env:APPDATA "ScrcpyDeX"
 $configAppData = Join-Path $appDataDir "settings.json"
-$runScript = Join-Path $rootDir "run-scrcpydex.ps1"
+$runScript = Join-Path $rootDir "tools\launchers\run-scrcpydex.ps1"
+if (-not (Test-Path $runScript)) { $runScript = Join-Path $rootDir "run-scrcpydex.ps1" }
 $stopScript = Join-Path $rootDir "stop-dex.bat"
 $assetsDir = Join-Path $rootDir "assets"
 
