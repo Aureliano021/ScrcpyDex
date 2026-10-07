@@ -1,0 +1,38 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="using:ScrcpyDex.App.Converters"
+             x:Class="ScrcpyDex.App.App"
+             RequestedThemeVariant="Dark">
+    <Application.Resources>
+        <converters:StatusToBrushConverter x:Key="StatusToBrushConverter" />
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <converters:LogEntryBrushConverter x:Key="LogEntryBrushConverter" />
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+        
+        <!-- Global Card Styling -->
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="#1E1E1E" />
+            <Setter Property="BorderBrush" Value="#2D2D2D" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="16" />
+        </Style>
+        
+        <Style Selector="TextBlock.cardHeader">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#E0E0E0" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+        
+        <Style Selector="TextBlock.label">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#A0A0A0" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+    </Application.Styles>
+</Application>

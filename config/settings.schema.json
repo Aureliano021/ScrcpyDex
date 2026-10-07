@@ -5,6 +5,12 @@
   "type": "object",
   "properties": {
     "version": { "type": "string" },
+    "language": {
+      "type": "string",
+      "enum": ["en", "pt-BR", "es", "de", "fr", "zh"],
+      "default": "en",
+      "description": "User interface language preference"
+    },
     "display": {
       "type": "object",
       "properties": {
