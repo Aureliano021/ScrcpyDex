@@ -53,7 +53,7 @@ Both sockets operate with `TCP_NODELAY = true` to immediately flush buffers upon
 
 ## 2. Binary Control Protocol Specification
 
-The ScrcpyDeX binary protocol is defined in [`ScrcpyDex/docs/PROTOCOL.md`](file:///c:/Users/aurel/OneDrive/Documents/scrcpy-dex/ScrcpyDex/docs/PROTOCOL.md). Every packet begins with a single-byte identifier followed by a strongly-typed binary payload:
+The ScrcpyDeX binary protocol is defined in [`docs/PROTOCOL.md`](../PROTOCOL.md). Every packet begins with a single-byte identifier followed by a strongly-typed binary payload:
 
 ```
 ┌───────────────────────┬────────────────────────────────────────┐
