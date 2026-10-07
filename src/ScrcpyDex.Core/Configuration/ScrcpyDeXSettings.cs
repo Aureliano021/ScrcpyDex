@@ -22,6 +22,15 @@ namespace ScrcpyDex.Core.Configuration
         [JsonPropertyName("version")]
         public string Version { get; set; } = "1.1";
 
+        private string _language = "en";
+
+        [JsonPropertyName("language")]
+        public string Language
+        {
+            get => _language;
+            set => SetProperty(ref _language, value ?? "en");
+        }
+
         private DisplaySection _display = new DisplaySection();
         private AudioSection _audio = new AudioSection();
         private InputSection _input = new InputSection();
@@ -105,6 +114,13 @@ namespace ScrcpyDex.Core.Configuration
 
         public ScrcpyDeXSettings()
         {
+            PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(Language) || e.PropertyName == nameof(Version))
+                {
+                    SettingChanged?.Invoke(this, e);
+                }
+            };
             AttachEvents();
         }
 

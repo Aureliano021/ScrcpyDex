@@ -1,0 +1,378 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ScrcpyDex.App.ViewModels"
+        xmlns:models="using:ScrcpyDex.Models"
+        xmlns:io="using:ScrcpyDex.Core.IO"
+        xmlns:converters="using:ScrcpyDex.App.Converters"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1040" d:DesignHeight="740"
+        x:Class="ScrcpyDex.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="ScrcpyDeX — Samsung DeX PC Client"
+        Width="1040" Height="740"
+        MinWidth="800" MinHeight="600"
+        WindowStartupLocation="CenterScreen"
+        Background="#141414">
+
+    <Grid RowDefinitions="Auto, *">
+        <!-- Top Header Banner -->
+        <Border Grid.Row="0"
+                Background="#1B1C1E"
+                BorderBrush="#2D2F33"
+                BorderThickness="0,0,0,1"
+                Padding="20,12">
+            <Grid ColumnDefinitions="Auto, *, Auto">
+                <!-- Branding -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Spacing="10">
+                    <TextBlock Text="ScrcpyDeX"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="#FFFFFF"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="Samsung DeX Direct Streaming"
+                               FontSize="14"
+                               FontWeight="Normal"
+                               Foreground="#58A6FF"
+                               VerticalAlignment="Center" />
+                    <Border Background="#1F6FEB"
+                            CornerRadius="4"
+                            Padding="6,2"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="v1.1 Avalonia"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Foreground="#FFFFFF" />
+                    </Border>
+                </StackPanel>
+
+                <!-- Status Warning (if any) -->
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding StatusWarning, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            Spacing="8">
+                    <Border Background="#3A2500"
+                            BorderBrush="#FFB900"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="10,4">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="⚠" Foreground="#FFD54F" FontWeight="Bold" />
+                            <TextBlock Text="{Binding StatusWarning}" Foreground="#FFE082" FontSize="11.5" VerticalAlignment="Center" />
+                            <Button Content="Browse..."
+                                    Command="{Binding BrowseScrcpyPathCommand}"
+                                    Padding="6,2"
+                                    FontSize="11"
+                                    Margin="4,0,0,0" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Live Status Badge -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Spacing="10">
+                    <Border Background="#212428"
+                            BorderBrush="#383D44"
+                            BorderThickness="1"
+                            CornerRadius="14"
+                            Padding="12,5">
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Border Width="10"
+                                    Height="10"
+                                    CornerRadius="5"
+                                    Background="{Binding ConnectionState, Converter={StaticResource StatusToBrushConverter}}"
+                                    VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding SessionStatusText}"
+                                       FontSize="12"
+                                       FontWeight="Medium"
+                                       Foreground="#E6EDF3"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Body: Two Column Layout -->
+        <Grid Grid.Row="1" ColumnDefinitions="420, *" Margin="16">
+            <!-- Left Column: Controls & Configuration -->
+            <ScrollViewer Grid.Column="0" Margin="0,0,12,0">
+                <StackPanel Spacing="12">
+                    <!-- Card 1: Device Selector -->
+                    <Border Classes="card">
+                        <StackPanel Spacing="10">
+                            <Grid ColumnDefinitions="*, Auto">
+                                <TextBlock Grid.Column="0"
+                                           Text="ADB Device Connection"
+                                           Classes="cardHeader"
+                                           Margin="0" />
+                                <Button Grid.Column="1"
+                                        Content="Refresh"
+                                        Command="{Binding RefreshDevicesCommand}"
+                                        Padding="10,4"
+                                        FontSize="11.5" />
+                            </Grid>
+
+                            <TextBlock Text="Target Device:" Classes="label" />
+                            <ComboBox ItemsSource="{Binding DeviceList}"
+                                      SelectedItem="{Binding SelectedDevice}"
+                                      HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="models:DeviceInfo">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <TextBlock Text="{Binding Model}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Serial, StringFormat='({0})'}" Foreground="#8B949E" />
+                                            <TextBlock Text="{Binding State, StringFormat='[{0}]'}" Foreground="#58A6FF" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <!-- Selected Device Summary Info -->
+                            <Border Background="#16181A"
+                                    BorderBrush="#25282C"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="10,6">
+                                <TextBlock Text="{Binding SelectedDeviceSummary}"
+                                           FontSize="11.5"
+                                           Foreground="#8B949E"
+                                           TextWrapping="Wrap" />
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 2: Display Configuration -->
+                    <Border Classes="card">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Display &amp; Video Stream" Classes="cardHeader" />
+
+                            <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto, Auto, Auto">
+                                <!-- Resolution -->
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,6,8">
+                                    <TextBlock Text="Resolution:" Classes="label" />
+                                    <ComboBox ItemsSource="{Binding AvailableResolutions}"
+                                              SelectedItem="{Binding SelectedResolution}"
+                                              HorizontalAlignment="Stretch" />
+                                </StackPanel>
+
+                                <!-- FPS -->
+                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="6,0,0,8">
+                                    <TextBlock Text="Target FPS:" Classes="label" />
+                                    <ComboBox ItemsSource="{Binding AvailableFps}"
+                                              SelectedItem="{Binding SelectedFps}"
+                                              HorizontalAlignment="Stretch" />
+                                </StackPanel>
+
+                                <!-- Video Codec -->
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,6,8">
+                                    <TextBlock Text="Video Codec:" Classes="label" />
+                                    <ComboBox ItemsSource="{Binding AvailableCodecs}"
+                                              SelectedItem="{Binding SelectedCodec}"
+                                              HorizontalAlignment="Stretch" />
+                                </StackPanel>
+
+                                <!-- Bitrate Readout -->
+                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="6,0,0,8">
+                                    <TextBlock Text="Bitrate:" Classes="label" />
+                                    <TextBlock Text="{Binding BitrateMbps, StringFormat='{}{0} Mbps'}"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="#58A6FF"
+                                               VerticalAlignment="Center"
+                                               Margin="0,6,0,0" />
+                                </StackPanel>
+
+                                <!-- Bitrate Slider -->
+                                <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,4,0,0">
+                                    <Slider Minimum="4"
+                                            Maximum="30"
+                                            Value="{Binding BitrateMbps}"
+                                            TickFrequency="1"
+                                            IsSnapToTickEnabled="True" />
+                                    <Grid ColumnDefinitions="Auto, *, Auto">
+                                        <TextBlock Grid.Column="0" Text="4 Mbps" FontSize="10" Foreground="#6E7681" />
+                                        <TextBlock Grid.Column="1" Text="Default: 8 Mbps" HorizontalAlignment="Center" FontSize="10" Foreground="#6E7681" />
+                                        <TextBlock Grid.Column="2" Text="30 Mbps" FontSize="10" Foreground="#6E7681" />
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 3: Input & System Options -->
+                    <Border Classes="card">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Input &amp; Session Behavior" Classes="cardHeader" />
+
+                            <CheckBox IsChecked="{Binding MouseUhidEnabled}"
+                                      Content="Enable UHID Mouse Emulation (Linux /dev/uhid)" />
+                            <CheckBox IsChecked="{Binding StayAwake}"
+                                      Content="Stay Awake while connected" />
+                            <CheckBox IsChecked="{Binding TurnScreenOff}"
+                                      Content="Turn mobile screen off during session" />
+                            <CheckBox IsChecked="{Binding Fullscreen}"
+                                      Content="Launch session in fullscreen mode" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Action Buttons Panel -->
+                    <Border Classes="card" Background="#181B1E">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Session Controls" Classes="cardHeader" Margin="0,0,0,4" />
+
+                            <Grid ColumnDefinitions="*, *" Margin="0,0,0,4">
+                                <!-- Start Session -->
+                                <Button Grid.Column="0"
+                                        Command="{Binding StartSessionCommand}"
+                                        IsEnabled="{Binding CanStart}"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Center"
+                                        Height="40"
+                                        Margin="0,0,4,0"
+                                        Background="#238636"
+                                        Foreground="#FFFFFF"
+                                        FontWeight="SemiBold">
+                                    <TextBlock Text="▶  Start DeX Session" VerticalAlignment="Center" />
+                                </Button>
+
+                                <!-- Stop Session -->
+                                <Button Grid.Column="1"
+                                        Command="{Binding StopSessionCommand}"
+                                        IsEnabled="{Binding CanStop}"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Center"
+                                        Height="40"
+                                        Margin="4,0,0,0"
+                                        Background="#D29922"
+                                        Foreground="#FFFFFF"
+                                        FontWeight="SemiBold">
+                                    <TextBlock Text="■  Stop Session" VerticalAlignment="Center" />
+                                </Button>
+                            </Grid>
+
+                            <!-- Emergency Kill Switch -->
+                            <Button Command="{Binding EmergencyKillCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Center"
+                                    Height="34"
+                                    Background="#DA3633"
+                                    Foreground="#FFFFFF"
+                                    FontWeight="Bold"
+                                    ToolTip.Tip="Immediately terminates all scrcpy and ADB processes with SIGKILL">
+                                <TextBlock Text="⚡  Emergency Kill Switch" VerticalAlignment="Center" />
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Right Column: Live Log Stream Terminal / Telemetry -->
+            <Border Grid.Column="1"
+                    Background="#0D1117"
+                    BorderBrush="#21262D"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="0">
+                <Grid RowDefinitions="Auto, *, Auto">
+                    <!-- Terminal Top Bar -->
+                    <Border Grid.Row="0"
+                            Background="#161B22"
+                            BorderBrush="#21262D"
+                            BorderThickness="0,0,0,1"
+                            CornerRadius="8,8,0,0"
+                            Padding="12,8">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <TextBlock Text="CONSOLE"
+                                           FontSize="11"
+                                           FontWeight="Bold"
+                                           Foreground="#58A6FF"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Text="Process Telemetry &amp; ADB Logs"
+                                           FontSize="12"
+                                           Foreground="#8B949E"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                <Button Content="Clear Logs"
+                                        Command="{Binding ClearLogsCommand}"
+                                        Padding="8,3"
+                                        FontSize="11" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Terminal Log Stream Body -->
+                    <ScrollViewer Grid.Row="1"
+                                  Padding="10"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding LogEntries}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="io:ProcessLogEntry">
+                                    <Grid ColumnDefinitions="Auto, Auto, *" Margin="0,1">
+                                        <!-- Timestamp -->
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding Timestamp, StringFormat='[{0:HH:mm:ss.fff}]'}"
+                                                   FontFamily="Cascadia Code, Consolas, Courier New, monospace"
+                                                   FontSize="11.5"
+                                                   Foreground="#484F58"
+                                                   Margin="0,0,6,0" />
+
+                                        <!-- Level Tag -->
+                                        <Border Grid.Column="1"
+                                                CornerRadius="3"
+                                                Padding="4,0"
+                                                Margin="0,0,6,0"
+                                                Background="{Binding IsError, Converter={StaticResource LogEntryBrushConverter}}"
+                                                IsVisible="{Binding IsError}">
+                                            <TextBlock Text="ERR"
+                                                       FontSize="9.5"
+                                                       FontWeight="Bold"
+                                                       Foreground="#FFFFFF" />
+                                        </Border>
+
+                                        <!-- Log Text -->
+                                        <TextBlock Grid.Column="2"
+                                                   Text="{Binding Text}"
+                                                   FontFamily="Cascadia Code, Consolas, Courier New, monospace"
+                                                   FontSize="11.5"
+                                                   Foreground="{Binding Converter={StaticResource LogEntryBrushConverter}}"
+                                                   TextWrapping="Wrap" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!-- Terminal Bottom Status Bar -->
+                    <Border Grid.Row="2"
+                            Background="#161B22"
+                            BorderBrush="#21262D"
+                            BorderThickness="0,1,0,0"
+                            CornerRadius="0,0,8,8"
+                            Padding="12,6">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding ScrcpyPath, StringFormat='scrcpy binary: {0}'}"
+                                       FontSize="11"
+                                       Foreground="#8B949E"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" />
+
+                            <Button Grid.Column="1"
+                                    Content="Configure scrcpy..."
+                                    Command="{Binding BrowseScrcpyPathCommand}"
+                                    Padding="8,3"
+                                    FontSize="11"
+                                    VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
