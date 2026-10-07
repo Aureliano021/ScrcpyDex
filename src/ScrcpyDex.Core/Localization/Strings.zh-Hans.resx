@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" msdata:Ordinal="0" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- App Branding & Titles -->
+  <data name="App_Title" xml:space="preserve">
+    <value>ScrcpyDeX — 设置</value>
+  </data>
+  <data name="App_Subtitle" xml:space="preserve">
+    <value>电脑端直接流式传输</value>
+  </data>
+  <data name="App_Description" xml:space="preserve">
+    <value>通过 Linux /dev/uhid 鼠标捕获的直接 USB 桌面会话</value>
+  </data>
+  <data name="App_VersionBadge" xml:space="preserve">
+    <value>v1.1 Fluent</value>
+  </data>
+  <data name="App_AutoSaved" xml:space="preserve">
+    <value>已自动保存</value>
+  </data>
+  <data name="App_About" xml:space="preserve">
+    <value>关于与法律信息</value>
+  </data>
+  <data name="App_LegalNotices" xml:space="preserve">
+    <value>法律声明与许可</value>
+  </data>
+  <data name="App_NonAffiliationNotice" xml:space="preserve">
+    <value>非隶属关系声明与商标免责声明</value>
+  </data>
+
+  <!-- Navigation Tabs -->
+  <data name="Tab_Display" xml:space="preserve">
+    <value>显示与视频</value>
+  </data>
+  <data name="Tab_AudioInput" xml:space="preserve">
+    <value>音频与输入</value>
+  </data>
+  <data name="Tab_DeviceSystem" xml:space="preserve">
+    <value>设备与系统</value>
+  </data>
+  <data name="Tab_Logs" xml:space="preserve">
+    <value>日志</value>
+  </data>
+  <data name="Tab_About" xml:space="preserve">
+    <value>关于与法律信息</value>
+  </data>
+
+  <!-- Device Selection & State -->
+  <data name="DeviceSelector_Title" xml:space="preserve">
+    <value>目标设备</value>
+  </data>
+  <data name="DeviceSelector_Refresh" xml:space="preserve">
+    <value>刷新设备</value>
+  </data>
+  <data name="DeviceSelector_NoDevices" xml:space="preserve">
+    <value>未检测到设备。请通过 USB 连接三星 Galaxy 设备。</value>
+  </data>
+  <data name="DeviceSelector_Unauthorized" xml:space="preserve">
+    <value>检测到设备（未授权）。请解锁手机屏幕并允许 USB 调试。</value>
+  </data>
+  <data name="DeviceSelector_Connected" xml:space="preserve">
+    <value>{0} 已连接</value>
+  </data>
+  <data name="DeviceSelector_Connecting" xml:space="preserve">
+    <value>正在连接...</value>
+  </data>
+  <data name="DeviceSelector_Disconnected" xml:space="preserve">
+    <value>已断开连接</value>
+  </data>
+  <data name="DeviceSelector_Details" xml:space="preserve">
+    <value>{0} {1} ({2}) • {3} • {4}</value>
+  </data>
+  <data name="DeviceSelector_SurfaceId" xml:space="preserve">
+    <value>Surface ID #{0}</value>
+  </data>
+  <data name="DeviceSelector_SurfacePending" xml:space="preserve">
+    <value>Surface 等待中</value>
+  </data>
+  <data name="DeviceSelector_AllocatedVia" xml:space="preserve">
+    <value>通过 Android DisplayManager 分配</value>
+  </data>
+
+  <!-- Display Settings -->
+  <data name="Display_Header" xml:space="preserve">
+    <value>视频流与分辨率配置</value>
+  </data>
+  <data name="Display_Resolution" xml:space="preserve">
+    <value>显示分辨率</value>
+  </data>
+  <data name="Display_Resolution_Desc" xml:space="preserve">
+    <value>向 One UI 桌面合成器公开的虚拟显示分辨率</value>
+  </data>
+  <data name="Display_Fps" xml:space="preserve">
+    <value>目标刷新率 (FPS)</value>
+  </data>
+  <data name="Display_Fps_Desc" xml:space="preserve">
+    <value>视频流帧率上限（默认 60 FPS，高刷 120 FPS）</value>
+  </data>
+  <data name="Display_Bitrate" xml:space="preserve">
+    <value>视频码率</value>
+  </data>
+  <data name="Display_Bitrate_Desc" xml:space="preserve">
+    <value>压缩视频流的目标带宽分配（推荐 8 Mbps）</value>
+  </data>
+  <data name="Display_Codec" xml:space="preserve">
+    <value>硬件视频编解码器</value>
+  </data>
+  <data name="Display_Codec_Desc" xml:space="preserve">
+    <value>压缩格式（H.264 延迟低；H.265 压缩率高）</value>
+  </data>
+  <data name="Display_WindowMode" xml:space="preserve">
+    <value>窗口呈现模式</value>
+  </data>
+  <data name="Display_WindowMode_Desc" xml:space="preserve">
+    <value>主机 Windows 桌面上的视口呈现风格</value>
+  </data>
+
+  <!-- Audio Settings -->
+  <data name="Audio_Header" xml:space="preserve">
+    <value>音频转发与延迟余量</value>
+  </data>
+  <data name="Audio_Enabled" xml:space="preserve">
+    <value>将音频转发至电脑</value>
+  </data>
+  <data name="Audio_Enabled_Desc" xml:space="preserve">
+    <value>将设备音频实时流式传输至默认 Windows 输出扬声器</value>
+  </data>
+  <data name="Audio_Buffer" xml:space="preserve">
+    <value>音频延迟缓冲区</value>
+  </data>
+  <data name="Audio_Buffer_Desc" xml:space="preserve">
+    <value>音频缓冲区余量（毫秒，推荐 50ms 以防止欠载）</value>
+  </data>
+  <data name="Audio_Buffer_Format" xml:space="preserve">
+    <value>{0} 毫秒</value>
+  </data>
+
+  <!-- Input Settings -->
+  <data name="Input_Header" xml:space="preserve">
+    <value>输入捕获与外设转发</value>
+  </data>
+  <data name="Input_MouseUhid" xml:space="preserve">
+    <value>鼠标驱动子系统</value>
+  </data>
+  <data name="Input_MouseUhid_Desc" xml:space="preserve">
+    <value>uhid: Linux /dev/uhid 模式（推荐）。sdk: Android 注入模式。</value>
+  </data>
+  <data name="Input_ReleaseKey" xml:space="preserve">
+    <value>鼠标捕获释放键</value>
+  </data>
+  <data name="Input_ReleaseKey_Desc" xml:space="preserve">
+    <value>用于解除光标焦点并将鼠标控制权交还 Windows 的键盘按键</value>
+  </data>
+  <data name="Input_ForwardGamepad" xml:space="preserve">
+    <value>转发游戏手柄</value>
+  </data>
+  <data name="Input_ForwardGamepad_Desc" xml:space="preserve">
+    <value>将 Xbox、DualSense 和 DirectInput 控制器直接路由到三星 DeX 游戏</value>
+  </data>
+  <data name="Input_StayAwake" xml:space="preserve">
+    <value>USB 连接时保持常亮</value>
+  </data>
+  <data name="Input_StayAwake_Desc" xml:space="preserve">
+    <value>连接到电脑时获取 Android 唤醒锁以防止锁屏中断</value>
+  </data>
+  <data name="Input_TurnScreenOff" xml:space="preserve">
+    <value>关闭手机实体屏幕</value>
+  </data>
+  <data name="Input_TurnScreenOff_Desc" xml:space="preserve">
+    <value>在流式传输 DeX 时熄灭实体 OLED 屏幕以节省电量并防止烧屏</value>
+  </data>
+  <data name="Input_Fullscreen" xml:space="preserve">
+    <value>全屏模式</value>
+  </data>
+  <data name="Input_Fullscreen_Desc" xml:space="preserve">
+    <value>以独占或无边框全屏模式启动 scrcpy 会话</value>
+  </data>
+
+  <!-- Device & Paths Settings -->
+  <data name="Device_Header" xml:space="preserve">
+    <value>设备电源与系统信息</value>
+  </data>
+  <data name="Device_AutoConnect" xml:space="preserve">
+    <value>插入 USB 时自动连接</value>
+  </data>
+  <data name="Device_AutoConnect_Desc" xml:space="preserve">
+    <value>插入已授权手机时自动启动三星 DeX 会话</value>
+  </data>
+  <data name="Paths_Header" xml:space="preserve">
+    <value>可执行文件与系统路径</value>
+  </data>
+  <data name="Paths_Scrcpy" xml:space="preserve">
+    <value>scrcpy 可执行文件路径</value>
+  </data>
+  <data name="Paths_Scrcpy_Desc" xml:space="preserve">
+    <value>scrcpy.exe 自定义文件系统路径（留空则自动检测）</value>
+  </data>
+  <data name="Paths_Scrcpy_Placeholder" xml:space="preserve">
+    <value>系统自动检测（留空）</value>
+  </data>
+  <data name="Paths_Scrcpy_Resolved" xml:space="preserve">
+    <value>已解析: {0}</value>
+  </data>
+  <data name="Paths_Scrcpy_NotFound" xml:space="preserve">
+    <value>状态: 未检测到 scrcpy 可执行文件</value>
+  </data>
+  <data name="Paths_ResetDefault" xml:space="preserve">
+    <value>恢复默认配置</value>
+  </data>
+  <data name="Paths_ResetDefault_Desc" xml:space="preserve">
+    <value>将所有显示、音频、输入、设备和路径设置恢复为出厂默认值</value>
+  </data>
+
+  <!-- Actions -->
+  <data name="Action_StartSession" xml:space="preserve">
+    <value>启动 DeX 会话</value>
+  </data>
+  <data name="Action_StopSession" xml:space="preserve">
+    <value>断开连接</value>
+  </data>
+  <data name="Action_EmergencyKill" xml:space="preserve">
+    <value>强制关闭</value>
+  </data>
+  <data name="Action_Browse" xml:space="preserve">
+    <value>浏览...</value>
+  </data>
+  <data name="Action_Refresh" xml:space="preserve">
+    <value>刷新</value>
+  </data>
+  <data name="Action_Reset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Action_ResetDefaults" xml:space="preserve">
+    <value>重置默认值</value>
+  </data>
+  <data name="Action_Copy" xml:space="preserve">
+    <value>复制</value>
+  </data>
+  <data name="Action_Clear" xml:space="preserve">
+    <value>清除</value>
+  </data>
+  <data name="Action_ViewLogs" xml:space="preserve">
+    <value>查看日志</value>
+  </data>
+  <data name="Action_ConfigurePath" xml:space="preserve">
+    <value>配置路径...</value>
+  </data>
+
+  <!-- Status Messages -->
+  <data name="Status_Idle" xml:space="preserve">
+    <value>三星 DeX 准备就绪</value>
+  </data>
+  <data name="Status_Handshaking" xml:space="preserve">
+    <value>正在协商 DeX 会话...</value>
+  </data>
+  <data name="Status_Connecting" xml:space="preserve">
+    <value>正在连接设备...</value>
+  </data>
+  <data name="Status_Connected" xml:space="preserve">
+    <value>设备已连接</value>
+  </data>
+  <data name="Status_DeployingServer" xml:space="preserve">
+    <value>正在部署 scrcpydex-server.jar...</value>
+  </data>
+  <data name="Status_Streaming" xml:space="preserve">
+    <value>流式传输进行中</value>
+  </data>
+  <data name="Status_Stopping" xml:space="preserve">
+    <value>正在终止 DeX 会话...</value>
+  </data>
+  <data name="Status_Error" xml:space="preserve">
+    <value>遇到错误</value>
+  </data>
+  <data name="Status_ScrcpyMissing" xml:space="preserve">
+    <value>主机上未找到 scrcpy 可执行文件</value>
+  </data>
+  <data name="Status_AdbUnauthorized" xml:space="preserve">
+    <value>设备未授权。请检查手机屏幕。</value>
+  </data>
+
+  <!-- Diagnostic & Doctor Messages -->
+  <data name="Doctor_Title" xml:space="preserve">
+    <value>系统健康检查</value>
+  </data>
+  <data name="Doctor_AdbFound" xml:space="preserve">
+    <value>在以下位置检测到 ADB: {0}</value>
+  </data>
+  <data name="Doctor_AdbMissing" xml:space="preserve">
+    <value>在 PATH 或标准目录中未找到 Android Debug Bridge (adb)。</value>
+  </data>
+  <data name="Doctor_ScrcpyFound" xml:space="preserve">
+    <value>在以下位置检测到 scrcpy: {0}（版本 {1}）</value>
+  </data>
+  <data name="Doctor_ScrcpyMissing" xml:space="preserve">
+    <value>未找到 scrcpy。请安装 scrcpy v2.4 或更高版本。</value>
+  </data>
+  <data name="Doctor_UdevOk" xml:space="preserve">
+    <value>用于 Android USB 设备访问的 udev 规则已正确配置。</value>
+  </data>
+  <data name="Doctor_UdevMissing" xml:space="preserve">
+    <value>缺少用于 Android USB 设备访问的 udev 规则。USB 权限可能会失败。</value>
+  </data>
+  <data name="Doctor_VaapiOk" xml:space="preserve">
+    <value>VA-API 硬件视频加速可用且正常运行。</value>
+  </data>
+  <data name="Doctor_VaapiMissing" xml:space="preserve">
+    <value>VA-API 硬件加速不可用；正在回退到软件解码。</value>
+  </data>
+  <data name="Doctor_UhidOk" xml:space="preserve">
+    <value>/dev/uhid 内核接口可用于硬件鼠标捕获。</value>
+  </data>
+  <data name="Doctor_UhidMissing" xml:space="preserve">
+    <value>/dev/uhid 接口不可访问。请使用适当权限或 udev 规则运行。</value>
+  </data>
+  <data name="Doctor_DisplayServerX11" xml:space="preserve">
+    <value>运行在 X11 显示服务器上。</value>
+  </data>
+  <data name="Doctor_DisplayServerWayland" xml:space="preserve">
+    <value>运行在 Wayland 显示服务器上。</value>
+  </data>
+
+  <!-- Logs & Filters -->
+  <data name="Logs_Title" xml:space="preserve">
+    <value>日志</value>
+  </data>
+  <data name="Logs_FilterPlaceholder" xml:space="preserve">
+    <value>过滤日志...</value>
+  </data>
+  <data name="Logs_CopyTooltip" xml:space="preserve">
+    <value>复制所有日志到剪贴板</value>
+  </data>
+  <data name="Logs_ClearTooltip" xml:space="preserve">
+    <value>清除日志历史记录</value>
+  </data>
+
+  <!-- General -->
+  <data name="General_Language" xml:space="preserve">
+    <value>语言</value>
+  </data>
+  <data name="General_Language_Desc" xml:space="preserve">
+    <value>选择用户界面显示语言</value>
+  </data>
+</root>
