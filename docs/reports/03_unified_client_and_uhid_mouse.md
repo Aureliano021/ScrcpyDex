@@ -171,7 +171,7 @@ For manual overrides or recovering from interrupted terminal sessions, a non-int
 
 ## 5. Hardware Validation & Performance Benchmarks
 
-All Stage 3 components were rigorously validated on the **Samsung Galaxy S23 (`SM-S911B`)** running **One UI 8.5 / Android 16 (`RQCW201XFDX`)**:
+All Stage 3 components were rigorously validated on the **Samsung Galaxy S23 (`SM-S911B`)** running **One UI 8.5 / Android 16 (`<DEVICE_SERIAL>`)**:
 
 | Benchmark Parameter | Observed Performance |
 | :--- | :--- |

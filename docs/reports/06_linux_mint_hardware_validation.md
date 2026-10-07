@@ -72,15 +72,15 @@ Validation was conducted on physical hardware under real desktop operating condi
 | **Kernel GPU Driver** | `i915` | Linux Direct Rendering Manager (DRM/KMS) |
 | **VA-API Driver** | Intel i965 Driver | `/usr/lib/x86_64-linux-gnu/dri/i965_drv_video.so` (VA-API 1.20) |
 | **Display Server** | X.Org X Server 1.21.1 | Display `:0`, MIT-MAGIC-COOKIE-1 authentication |
-| **Desktop Environment** | Cinnamon Desktop | Session running under local user `imw-itupeva` (UID 1000) |
-| **User Group Permissions** | `imw-itupeva` in `plugdev` | Confirmed group membership for unprivileged USB access |
+| **Desktop Environment** | Cinnamon Desktop | Session running under local user `<username>` (UID 1000) |
+| **User Group Permissions** | `<username>` in `plugdev` | Confirmed group membership for unprivileged USB access |
 
 ### 2.2 Target Mobile Device Specification
 
 | Parameter | Specification | Notes |
 |---|---|---|
 | **Device Model** | Samsung Galaxy S23 (`SM-S911B`) | International European/Global Variant |
-| **Device Serial** | `RQCW201XFDX` | Identified over ADB enumeration |
+| **Device Serial** | `<DEVICE_SERIAL>` | Identified over ADB enumeration (Redacted) |
 | **Android Version** | Android 16 | API Level 36 |
 | **Software Platform** | Samsung One UI 8.5 | Official Samsung firmware |
 | **USB Physical Link** | High-Speed USB (USB 2.0/3.0 OTG) | Physical data cable connection to host |
@@ -130,19 +130,19 @@ The activation sequence on Linux replicated the Android reflection protocol impl
 1. **Server Binary Push:**
    The compiled JAR artifact `scrcpydex-server.jar` was transferred to the device staging directory:
    ```bash
-   adb -s "RQCW201XFDX" push "/opt/scrcpydex/scrcpydex-server.jar" "/data/local/tmp/scrcpydex-server.jar"
+   adb -s "<DEVICE_SERIAL>" push "/opt/scrcpydex/scrcpydex-server.jar" "/data/local/tmp/scrcpydex-server.jar"
    ```
 
 2. **Session Reset & Cleanup:**
    Prior to initiation, residual display resources from earlier testing sessions were released:
    ```bash
-   adb -s "RQCW201XFDX" shell "CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process /data/local/tmp com.scrcpydex.server.Server disconnect"
+   adb -s "<DEVICE_SERIAL>" shell "CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process /data/local/tmp com.scrcpydex.server.Server disconnect"
    ```
 
 3. **Daemon Activation:**
    The server daemon was executed in the background under Android's `shell` user context (UID 2000):
    ```bash
-   adb -s "RQCW201XFDX" shell "CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process /data/local/tmp com.scrcpydex.server.Server activate" > "/tmp/scrcpydex_activator.log" 2>&1 &
+   adb -s "<DEVICE_SERIAL>" shell "CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process /data/local/tmp com.scrcpydex.server.Server activate" > "/tmp/scrcpydex_activator.log" 2>&1 &
    ```
 
 4. **Loopback Handshake & Display Allocation:**
@@ -187,12 +187,12 @@ Once Display ID 9 was confirmed active, the streaming client was initiated under
 
 ```bash
 export DISPLAY=:0
-export XAUTHORITY=/home/imw-itupeva/.Xauthority
+export XAUTHORITY=/home/<username>/.Xauthority
 export XDG_RUNTIME_DIR=/run/user/1000
 export LIBVA_DRIVER_NAME=i965
 
 /usr/local/bin/scrcpy \
-    -s "RQCW201XFDX" \
+    -s "<DEVICE_SERIAL>" \
     --display-id=9 \
     --mouse=uhid \
     --video-codec=h264 \
@@ -231,10 +231,10 @@ Process metrics were captured during sustained 1920x1080 @ 60 FPS streaming with
 
 ```
 Process Hierarchy and Resource Usage:
-root        4334  0.0  0.1   9960  3756 ?        Ss   18:12   0:00 /bin/bash /opt/scrcpydex/start-dex.sh RQCW201XFDX
-root        4340  0.0  0.2  89704  8496 ?        S    18:12   0:00 adb -s RQCW201XFDX shell CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process ... activate
-imw-itu+    4354  4.4  2.9 1077344 105712 ?      SLsl 18:12   0:01 /usr/local/bin/scrcpy -s RQCW201XFDX --display-id=9 --mouse=uhid --video-codec=h264 ...
-imw-itu+    4379  0.0  0.1  87864  6068 ?        S    18:12   0:00 /opt/scrcpy/adb -s RQCW201XFDX shell CLASSPATH=/data/local/tmp/scrcpy-server.jar app_process ... 5.0
+root        4334  0.0  0.1   9960  3756 ?        Ss   18:12   0:00 /bin/bash /opt/scrcpydex/start-dex.sh <DEVICE_SERIAL>
+root        4340  0.0  0.2  89704  8496 ?        S    18:12   0:00 adb -s <DEVICE_SERIAL> shell CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process ... activate
+<user>+     4354  4.4  2.9 1077344 105712 ?      SLsl 18:12   0:01 /usr/local/bin/scrcpy -s <DEVICE_SERIAL> --display-id=9 --mouse=uhid --video-codec=h264 ...
+<user>+     4379  0.0  0.1  87864  6068 ?        S    18:12   0:00 /opt/scrcpy/adb -s <DEVICE_SERIAL> shell CLASSPATH=/data/local/tmp/scrcpy-server.jar app_process ... 5.0
 
 System Aggregate CPU & Memory (top):
 top - 18:13:26 up 24 min,  1 user,  load average: 0.14, 0.28, 0.21
@@ -325,7 +325,7 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="04e8", MODE="0660", GROUP="plugdev", TAG+="ua
 ```
 
 #### User Group Membership:
-The host user must belong to the `plugdev` group (or distribution equivalent such as `adbusers`). On the test system, the local desktop account `imw-itupeva` was verified as a member of `plugdev`. A startup health check in Phase 2 (`ScrcpyDex.Cli`) must verify that the user has write access to USB nodes or warn with actionable configuration commands.
+The host user must belong to the `plugdev` group (or distribution equivalent such as `adbusers`). On the test system, the local desktop account was verified as a member of `plugdev`. A startup health check in Phase 2 (`ScrcpyDex.Cli`) must verify that the user has write access to USB nodes or warn with actionable configuration commands.
 
 ### 6.3 Display Server Matrix & Wayland Status
 
