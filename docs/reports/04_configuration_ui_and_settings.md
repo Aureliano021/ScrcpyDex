@@ -122,7 +122,7 @@ Stored atomically at `%APPDATA%\ScrcpyDeX\settings.json`:
    - Eliminated unsafe cross-thread callbacks (`Add_OutputDataReceived`) on thread pool threads. Replaced with a safe UI-thread `DispatcherTimer` polling dedicated log files via `FileShare.ReadWrite`.
    - Resolved `Start-Process` parameter collision by separating stdout and stderr into separate files (`scrcpydex_session.log` and `scrcpydex_session_err.log`).
 2. **Zero-Flash Native Launcher:**
-   - Compiled [`ScrcpyDeX.exe`](file:///c:/Users/aurel/OneDrive/Documents/scrcpy-dex/ScrcpyDex/ScrcpyDeX.exe) using Microsoft's C# compiler with `/target:winexe` (`IMAGE_SUBSYSTEM_WINDOWS_GUI`). No black terminal windows are allocated by Windows upon launching.
+   - Compiled [`ScrcpyDeX.exe`](../../ScrcpyDeX.exe) using Microsoft's C# compiler with `/target:winexe` (`IMAGE_SUBSYSTEM_WINDOWS_GUI`). No black terminal windows are allocated by Windows upon launching.
 3. **Instant Teardown & Contextual Kill Switch:**
    - Replaced asynchronous script spawning in `Stop-DeXSession` with immediate synchronous termination: `taskkill /F /IM scrcpy.exe /T`, process tree termination, and direct ADB IPC `disconnect` signal to Android `system_server`. Restores the phone in under 300ms.
    - Kill switch button starts hidden (`Visibility="Collapsed"`) and displays only while a DeX session is active.
@@ -139,7 +139,7 @@ Stored atomically at `%APPDATA%\ScrcpyDeX\settings.json`:
 
 ## 5. Automated Verification Suite (7/7 Passed)
 
-Validation script [`test-ui-prototype.ps1`](file:///c:/Users/aurel/OneDrive/Documents/scrcpy-dex/ScrcpyDex/test-ui-prototype.ps1) verified 100% compliance:
+Validation script [`test-ui-prototype.ps1`](../../test-ui-prototype.ps1) verified 100% compliance:
 
 ```text
 =================================================
