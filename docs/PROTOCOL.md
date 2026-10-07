@@ -1,125 +1,124 @@
-# Protocolo de Comunicação — ScrcpyDeX (SSOT)
+# Communication Protocol — ScrcpyDeX (SSOT)
 
-**Status:** Especificação Técnica Normativa  
-**Versão do Protocolo:** `1.0`  
-**Transporte Recomendado:** TCP via túnel `adb forward` exclusivamente sobre cabo USB (`127.0.0.1`)
+**Status:** Normative Technical Specification  
+**Protocol Version:** `1.0`  
+**Recommended Transport:** TCP via `adb forward` tunnel exclusively over USB cable (`127.0.0.1`)
 
 > [!WARNING]
-> **Aviso de Segurança e Transporte:**  
-> O canal de controle utiliza conexões diretas via sockets locais (`127.0.0.1`) e não incorpora criptografia ou autenticação por token em nível de aplicação. Por essa razão, **o transporte suportado e recomendado é exclusivamente local através do túnel `adb forward` via cabo USB**. O uso de ADB via Wi-Fi em redes abertas, públicas ou compartilhadas **não é recomendado**, pois entidades na mesma rede poderiam interagir com o daemon ADB.
+> **Security & Transport Advisory:**  
+> The control channel uses direct connections via local sockets (`127.0.0.1`) and does not incorporate application-layer encryption or token authentication. For this reason, **the supported and recommended transport is exclusively local via the `adb forward` tunnel over a USB cable**. Using ADB over Wi-Fi on open, public, or shared networks **is not recommended**, as entities on the same network could interact with the ADB daemon.
 
-Este documento é a **Fonte Normativa de Referência (Single Source of Truth - SSOT)** para a especificação do protocolo entre clientes ScrcpyDeX e o servidor Android (`scrcpydex-server.jar`).
+This document serves as the **Single Source of Truth (SSOT)** for the protocol specification between ScrcpyDeX clients and the Android server (`scrcpydex-server.jar`).
 
 ---
 
-## 1. Topologia de Conexão
+## 1. Connection Topology
 
-São estabelecidas **duas portas TCP independentes** entre PC e Celular para garantir que o tráfego pesado de vídeo não afete a latência dos comandos de controle e input.
+**Two independent TCP ports** are established between the PC and the mobile device to ensure that heavy video streaming traffic does not impact the latency of control and input commands.
 
 ```
-       PC Windows (Client)                        Galaxy S23 (Server)
+       Host PC (Client)                           Target Device (Server)
 ┌─────────────────────────────────┐           ┌─────────────────────────────────┐
 │                                 │           │                                 │
 │  [VideoDecoderService]          │           │  [VideoCapture]                 │
-│  Porta Local TCP: 27183 ◄───────┼─ adb fwd ─┼─ Porta Local: 27183             │
-│  (Stream Contínuo H.264)        │           │  (MediaCodec NAL units)         │
+│  Local TCP Port: 27183 ◄────────┼─ adb fwd ─┼─ Local Port: 27183              │
+│  (Continuous H.264 Stream)      │           │  (MediaCodec NAL units)         │
 │                                 │           │                                 │
 │  [InputService / AdbService]    │           │  [ControlChannel]               │
-│  Porta Local TCP: 27184 ◄───────┼─ adb fwd ─┼─ Porta Local: 27184             │
-│  (Mensagens Bidirecionais)      │           │  (InputHandler / State Machine) │
+│  Local TCP Port: 27184 ◄────────┼─ adb fwd ─┼─ Local Port: 27184              │
+│  (Bidirectional Messages)       │           │  (InputHandler / State Machine) │
 │                                 │           │                                 │
 └─────────────────────────────────┘           └─────────────────────────────────┘
 ```
 
-Ambos os sockets usam `TCP_NODELAY = true` (algoritmo de Nagle desativado) para latência mínima.
+Both sockets configure `TCP_NODELAY = true` (Nagle's algorithm disabled) for minimal latency.
 
 ---
 
-## 2. Canal A: Stream de Vídeo (Porta 27183)
+## 2. Channel A: Video Stream (Port 27183)
 
-* **Direção:** Servidor ➔ Cliente (Unidirecional)
-* **Formato:** Fluxo contínuo raw H.264/H.265 em formato padrão Annex B (com demarcadores de início NAL `0x00 0x00 0x00 0x01` ou `0x00 0x00 0x01` gerados diretamente pelo `MediaCodec`).
+* **Direction:** Server ➔ Client (Unidirectional)
+* **Format:** Continuous raw H.264/H.265 stream in standard Annex B format (with NAL start codes `0x00 0x00 0x00 0x01` or `0x00 0x00 0x01` generated directly by `MediaCodec`).
 
-### Vantagens do formato Annex B:
-1. **Compatibilidade nativa com ferramentas padrão:** Permite teste e inspeção imediata via `ffplay -f h264 tcp://127.0.0.1:27183`.
-2. **Desacoplamento no Cliente:** O decodificador FFmpeg no Windows consome os bytes diretamente através de `av_parser_parse2()`, que realiza a divisão de pacotes por hardware/software sem sobrecarga de cabeçalhos proprietários.
-
+### Advantages of Annex B format:
+1. **Native compatibility with standard tools:** Enables immediate testing and inspection via `ffplay -f h264 tcp://127.0.0.1:27183`.
+2. **Client decoupling:** The FFmpeg decoder on Windows consumes bytes directly via `av_parser_parse2()`, performing hardware/software packet division without proprietary header overhead.
 
 ---
 
-## 3. Canal B: Canal de Controle e Input (Porta 27184)
+## 3. Channel B: Control and Input Channel (Port 27184)
 
-* **Direção:** Bidirecional (Cliente ⇄ Servidor)
-* **Estrutura Básica de Toda Mensagem:**
+* **Direction:** Bidirectional (Client ⇄ Server)
+* **Basic Message Structure:**
 ```
 ┌───────────────────────┬────────────────────────────────────────┐
-│ Tipo da Msg (1 byte)  │ Payload Específico (tamanho variável)  │
-│ uint8                 │ Definido por MSG_TYPE                  │
+│ Message Type (1 byte) │ Specific Payload (variable size)       │
+│ uint8                 │ Defined by MSG_TYPE                    │
 └───────────────────────┴────────────────────────────────────────┘
 ```
 
-### 3.1. Mensagens Servidor ➔ Cliente (Eventos & Telemetria)
+### 3.1. Server ➔ Client Messages (Events & Telemetry)
 
-| Código | Nome | Tamanho Payload | Descrição dos Campos |
+| Code | Name | Payload Size | Field Description |
 | :--- | :--- | :--- | :--- |
-| `0x01` | `MSG_DEX_READY` | 4 bytes | `int32 displayId` — Emitido quando o DeX foi ativado e o ID do display está confirmado. |
-| `0x02` | `MSG_DISPLAY_INFO`| 12 bytes | `int32 width`, `int32 height`, `int32 dpi` — Resolução e densidade reais do DeX. |
-| `0x03` | `MSG_HEARTBEAT` | 0 bytes | Keep-alive periódico de liveness. |
-| `0xFF` | `MSG_ERROR` | 2 + N bytes | `uint16 strLen`, `utf8[strLen] message` — Erro fatal no servidor antes do encerramento. |
+| `0x01` | `MSG_DEX_READY` | 4 bytes | `int32 displayId` — Emitted when DeX has been activated and the display ID is confirmed. |
+| `0x02` | `MSG_DISPLAY_INFO`| 12 bytes | `int32 width`, `int32 height`, `int32 dpi` — Actual resolution and density of DeX. |
+| `0x03` | `MSG_HEARTBEAT` | 0 bytes | Periodic keep-alive for connection liveness. |
+| `0xFF` | `MSG_ERROR` | 2 + N bytes | `uint16 strLen`, `utf8[strLen] message` — Fatal server error prior to shutdown. |
 
-#### Detalhamento de `MSG_DISPLAY_INFO` (`0x02`):
+#### Details of `MSG_DISPLAY_INFO` (`0x02`):
 ```
 [0x02] [4b: Width] [4b: Height] [4b: DPI]
-Exemplo (1080p @ 160 dpi):
+Example (1080p @ 160 dpi):
 02 00 00 07 80 00 00 04 38 00 00 00 A0
 ```
 
 ---
 
-### 3.2. Mensagens Cliente ➔ Servidor (Comandos & Input)
+## 3.2. Client ➔ Server Messages (Commands & Input)
 
-| Código | Nome | Tamanho Payload | Descrição dos Campos |
+| Code | Name | Payload Size | Field Description |
 | :--- | :--- | :--- | :--- |
-| `0x10` | `MSG_MOUSE_MOVE` | 8 bytes | `int32 x`, `int32 y` — Posição do cursor nas coordenadas do DeX. |
+| `0x10` | `MSG_MOUSE_MOVE` | 8 bytes | `int32 x`, `int32 y` — Cursor position in DeX coordinates. |
 | `0x11` | `MSG_MOUSE_BUTTON` | 10 bytes | `int32 x`, `int32 y`, `uint8 button`, `uint8 action` |
 | `0x12` | `MSG_KEY_EVENT` | 5 bytes | `int32 keyCode`, `uint8 action` (0=Down, 1=Up) |
 | `0x13` | `MSG_SCROLL` | 16 bytes | `int32 x`, `int32 y`, `float32 hScroll`, `float32 vScroll` |
-| `0x20` | `MSG_SET_CONFIG` | 2 + N bytes | `uint16 jsonLen`, `utf8[jsonLen] jsonPayload` — Configurações iniciais (resolução, bitrate, codec). |
-| `0xFE` | `MSG_DISCONNECT` | 0 bytes | Solicitação de desligamento limpo do DeX e do servidor. |
+| `0x20` | `MSG_SET_CONFIG` | 2 + N bytes | `uint16 jsonLen`, `utf8[jsonLen] jsonPayload` — Initial configuration (resolution, bitrate, codec). |
+| `0xFE` | `MSG_DISCONNECT` | 0 bytes | Request for clean shutdown of DeX and the server daemon. |
 
-#### Detalhamento de Botões do Mouse (`MSG_MOUSE_BUTTON`):
-* `button`: `1` = Botão Esquerdo, `2` = Botão Direito, `4` = Botão Central.
+#### Details of Mouse Buttons (`MSG_MOUSE_BUTTON`):
+* `button`: `1` = Primary / Left Button, `2` = Secondary / Right Button, `4` = Middle Button.
 * `action`: `0` = `ACTION_DOWN`, `1` = `ACTION_UP`.
 
 ---
 
-## 4. Sequência de Handshake
+## 4. Handshake Sequence
 
 ```mermaid
 sequenceDiagram
-    participant C as Cliente (Windows)
-    participant S as Servidor (Galaxy S23)
+    participant C as Client (Host PC)
+    participant S as Server (Target Device)
 
-    Note over C,S: 1. Conexão TCP nas portas 27183 e 27184
+    Note over C,S: 1. TCP connection established on ports 27183 and 27184
     C->>S: MSG_SET_CONFIG (0x20) { "width": 1920, "height": 1080, "bitrate": 8000000, "fps": 60, "codec": "h264" }
-    Note over S: DexActivator inicia loopback e aguarda DisplayListener
+    Note over S: DexActivator starts loopback and awaits DisplayListener
     S->>C: MSG_DEX_READY (0x01) { displayId: 7 }
     S->>C: MSG_DISPLAY_INFO (0x02) { width: 1920, height: 1080, dpi: 160 }
-    Note over S: VideoCapture inicia streaming na porta 27183
-    S-->>C: Stream H.264 (Porta 27183) [Tamanho][NAL]...
-    Note over C: Client renderiza frames e inicia captura de input
+    Note over S: VideoCapture starts streaming on port 27183
+    S-->>C: Stream H.264 (Port 27183) [Size][NAL]...
+    Note over C: Client renders frames and initiates input capture
     C->>S: MSG_MOUSE_MOVE (0x10) { x: 500, y: 300 }
     C->>S: MSG_KEY_EVENT (0x12) { keyCode: 29, action: 0 }
     
-    Note over C,S: Encerramento
+    Note over C,S: Teardown & Disconnect
     C->>S: MSG_DISCONNECT (0xFE)
-    Note over S: Cleanup desconecta WiFi Display e desliga
+    Note over S: Cleanup disconnects display session and exits
 ```
 
 ---
 
-## 5. Regra de Versionamento
+## 5. Versioning Rules
 
-Qualquer alteração neste protocolo exige:
-1. Incremento de versão neste documento.
-2. Atualização correspondente nas classes de serialização (`MessageReader`/`MessageWriter`) em ambas as linguagens (Java e C#).
+Any modification to this protocol requires:
+1. Version increment in this document.
+2. Corresponding updates to the serialization classes (`MessageReader`/`MessageWriter`) across both language runtimes (Java and C#).

@@ -378,7 +378,7 @@ The local ADB server runs a loopback TCP daemon on `127.0.0.1:5037`. Communicati
    - Wire payload: `0012host:track-devices`
 3. Server responds with `OKAY` (4 bytes) if accepted.
 4. Server leaves the socket open and pushes status updates whenever a device connects, disconnects, or changes state (`device`, `offline`, `unauthorized`):
-   - `001D192.168.1.50:5555	device\n`
+   - `001D<HOST_IP>:5555	device\n` (or USB: `0012<DEVICE_SERIAL>	device\n`)
 
 ```csharp
 using System;
