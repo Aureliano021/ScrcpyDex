@@ -148,10 +148,10 @@
     <value>Resolución de pantalla virtual expuesta al compositor de escritorio One UI</value>
   </data>
   <data name="Display_Fps" xml:space="preserve">
-    <value>Frecuencia de Actualización Objetivo (FPS)</value>
+    <value>Tasa de Refresco Objetivo (FPS)</value>
   </data>
   <data name="Display_Fps_Desc" xml:space="preserve">
-    <value>Límite de fotogramas para el flujo de vídeo (60 FPS predeterminado, 120 FPS alta frecuencia)</value>
+    <value>Límite de fotogramas para el flujo de vídeo (60 FPS predeterminado, 120 FPS alta tasa de refresco)</value>
   </data>
   <data name="Display_Bitrate" xml:space="preserve">
     <value>Tasa de Bits de Vídeo</value>
@@ -206,7 +206,7 @@
     <value>Tecla de Liberación del Ratón</value>
   </data>
   <data name="Input_ReleaseKey_Desc" xml:space="preserve">
-    <value>Tecla del teclado para desvincular el cursor y devolver el control al escritorio</value>
+    <value>Tecla del teclado para desvincular el cursor y devolver el control del ratón al escritorio de Windows</value>
   </data>
   <data name="Input_ForwardGamepad" xml:space="preserve">
     <value>Reenviar Mandos de Juego</value>
@@ -218,13 +218,13 @@
     <value>Permanecer Activo en USB</value>
   </data>
   <data name="Input_StayAwake_Desc" xml:space="preserve">
-    <value>Adquiere wakelock de Android mientras está conectado a la PC para evitar el bloqueo</value>
+    <value>Adquiere un wakelock de Android mientras está conectado a la PC para evitar el bloqueo de pantalla</value>
   </data>
   <data name="Input_TurnScreenOff" xml:space="preserve">
     <value>Apagar Pantalla Física del Teléfono</value>
   </data>
   <data name="Input_TurnScreenOff_Desc" xml:space="preserve">
-    <value>Apaga la pantalla OLED física del teléfono durante DeX para ahorrar batería y evitar quemaduras</value>
+    <value>Apaga la pantalla OLED física del teléfono durante DeX para ahorrar batería y evitar el quemado de pantalla</value>
   </data>
   <data name="Input_Fullscreen" xml:space="preserve">
     <value>Modo Pantalla Completa</value>
@@ -276,7 +276,7 @@
     <value>Desconectar</value>
   </data>
   <data name="Action_EmergencyKill" xml:space="preserve">
-    <value>Forzar Cierre</value>
+    <value>Cierre Forzado</value>
   </data>
   <data name="Action_Browse" xml:space="preserve">
     <value>Examinar...</value>
@@ -317,7 +317,7 @@
     <value>Dispositivo conectado</value>
   </data>
   <data name="Status_DeployingServer" xml:space="preserve">
-    <value>Implementando scrcpydex-server.jar...</value>
+    <value>Desplegando scrcpydex-server.jar...</value>
   </data>
   <data name="Status_Streaming" xml:space="preserve">
     <value>Transmisión activa</value>
@@ -352,10 +352,10 @@
     <value>No se encontró scrcpy. Instale scrcpy v2.4 o posterior.</value>
   </data>
   <data name="Doctor_UdevOk" xml:space="preserve">
-    <value>Las reglas udev para el acceso a dispositivos USB Android están configuradas.</value>
+    <value>Las reglas udev para el acceso a dispositivos USB Android están configuradas correctamente.</value>
   </data>
   <data name="Doctor_UdevMissing" xml:space="preserve">
-    <value>Faltan las reglas udev para dispositivos USB Android. Los permisos pueden fallar.</value>
+    <value>Faltan las reglas udev para el acceso a dispositivos USB Android. Los permisos de USB pueden fallar.</value>
   </data>
   <data name="Doctor_VaapiOk" xml:space="preserve">
     <value>La aceleración de vídeo por hardware VA-API está disponible y operativa.</value>

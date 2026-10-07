@@ -64,7 +64,7 @@
     <value>ScrcpyDeX — Paramètres</value>
   </data>
   <data name="App_Subtitle" xml:space="preserve">
-    <value>Streaming Direct vers PC</value>
+    <value>Diffusion directe sur PC</value>
   </data>
   <data name="App_Description" xml:space="preserve">
     <value>Session de bureau USB directe avec capture de souris Linux /dev/uhid</value>
@@ -82,7 +82,7 @@
     <value>Mentions légales &amp; Licences</value>
   </data>
   <data name="App_NonAffiliationNotice" xml:space="preserve">
-    <value>Avis de non-affiliation &amp; Marques déposées</value>
+    <value>Avis de non-affiliation &amp; mentions relatives aux marques déposées</value>
   </data>
 
   <!-- Navigation Tabs -->
@@ -113,7 +113,7 @@
     <value>Aucun appareil détecté. Connectez un appareil Samsung Galaxy via USB.</value>
   </data>
   <data name="DeviceSelector_Unauthorized" xml:space="preserve">
-    <value>Appareil détecté (Non autorisé). Déverrouillez l'écran du téléphone et autorisez le débogage USB.</value>
+    <value>Appareil détecté (non autorisé). Déverrouillez l'écran du téléphone et autorisez le débogage USB.</value>
   </data>
   <data name="DeviceSelector_Connected" xml:space="preserve">
     <value>{0} Connecté</value>
@@ -134,7 +134,7 @@
     <value>Surface en attente</value>
   </data>
   <data name="DeviceSelector_AllocatedVia" xml:space="preserve">
-    <value>Alloué via Android DisplayManager</value>
+    <value>Allouée via Android DisplayManager</value>
   </data>
 
   <!-- Display Settings -->
@@ -157,7 +157,7 @@
     <value>Débit binaire vidéo</value>
   </data>
   <data name="Display_Bitrate_Desc" xml:space="preserve">
-    <value>Bande passante allouée au flux vidéo compressé (8 Mbps recommandé)</value>
+    <value>Bande passante allouée au flux vidéo compressé (8 Mbps recommandés)</value>
   </data>
   <data name="Display_Codec" xml:space="preserve">
     <value>Codec vidéo matériel</value>
@@ -169,7 +169,7 @@
     <value>Mode de présentation de la fenêtre</value>
   </data>
   <data name="Display_WindowMode_Desc" xml:space="preserve">
-    <value>Style de présentation de la fenêtre sur le bureau Windows</value>
+    <value>Style de présentation de la fenêtre sur le bureau Windows hôte</value>
   </data>
 
   <!-- Audio Settings -->
@@ -186,7 +186,7 @@
     <value>Tampon de latence audio</value>
   </data>
   <data name="Audio_Buffer_Desc" xml:space="preserve">
-    <value>Marge du tampon audio en millisecondes (50 ms recommandé pour éviter les sous-charges)</value>
+    <value>Marge du tampon audio en millisecondes (50 ms recommandés pour éviter les ruptures de tampon)</value>
   </data>
   <data name="Audio_Buffer_Format" xml:space="preserve">
     <value>{0} ms</value>
@@ -203,10 +203,10 @@
     <value>uhid : mode Linux /dev/uhid (recommandé). sdk : mode d'injection Android.</value>
   </data>
   <data name="Input_ReleaseKey" xml:space="preserve">
-    <value>Touche de libération de la souris</value>
+    <value>Touche de libération du curseur</value>
   </data>
   <data name="Input_ReleaseKey_Desc" xml:space="preserve">
-    <value>Touche du clavier pour libérer le curseur et rendre le contrôle à Windows</value>
+    <value>Touche du clavier pour libérer le curseur et rendre le contrôle de la souris au bureau Windows</value>
   </data>
   <data name="Input_ForwardGamepad" xml:space="preserve">
     <value>Rediriger les manettes de jeu</value>
@@ -215,16 +215,16 @@
     <value>Acheminer les manettes Xbox, DualSense et DirectInput directement vers les jeux Samsung DeX</value>
   </data>
   <data name="Input_StayAwake" xml:space="preserve">
-    <value>Rester éveillé sur USB</value>
+    <value>Maintien en éveil via USB</value>
   </data>
   <data name="Input_StayAwake_Desc" xml:space="preserve">
-    <value>Maintient le wakelock Android lors de la connexion au PC pour éviter le verrouillage</value>
+    <value>Acquiert un wakelock d'alimentation Android lors de la connexion au PC pour empêcher le verrouillage de l'écran</value>
   </data>
   <data name="Input_TurnScreenOff" xml:space="preserve">
     <value>Éteindre l'écran physique du téléphone</value>
   </data>
   <data name="Input_TurnScreenOff_Desc" xml:space="preserve">
-    <value>Éteint l'écran OLED du téléphone pendant DeX pour économiser la batterie et éviter le marquage</value>
+    <value>Éteint l'écran OLED physique du téléphone pendant la diffusion DeX pour économiser la batterie et éviter le marquage d'écran</value>
   </data>
   <data name="Input_Fullscreen" xml:space="preserve">
     <value>Mode plein écran</value>
@@ -238,7 +238,7 @@
     <value>Alimentation de l'appareil &amp; Informations système</value>
   </data>
   <data name="Device_AutoConnect" xml:space="preserve">
-    <value>Connexion automatique à l'insertion de l'USB</value>
+    <value>Connexion automatique lors du branchement USB</value>
   </data>
   <data name="Device_AutoConnect_Desc" xml:space="preserve">
     <value>Lance automatiquement la session Samsung DeX lorsqu'un téléphone autorisé est branché</value>
@@ -265,7 +265,7 @@
     <value>Restaurer la configuration par défaut</value>
   </data>
   <data name="Paths_ResetDefault_Desc" xml:space="preserve">
-    <value>Rétablir tous les paramètres d'affichage, audio, entrée, appareil et chemins aux valeurs d'usine</value>
+    <value>Rétablir tous les paramètres d'affichage, audio, d'entrée, d'appareil et de chemins aux valeurs par défaut initiales</value>
   </data>
 
   <!-- Actions -->
@@ -276,7 +276,7 @@
     <value>Déconnecter</value>
   </data>
   <data name="Action_EmergencyKill" xml:space="preserve">
-    <value>Forcer la fermeture</value>
+    <value>Arrêt forcé</value>
   </data>
   <data name="Action_Browse" xml:space="preserve">
     <value>Parcourir...</value>
@@ -297,7 +297,7 @@
     <value>Effacer</value>
   </data>
   <data name="Action_ViewLogs" xml:space="preserve">
-    <value>Voir les journaux</value>
+    <value>Afficher les journaux</value>
   </data>
   <data name="Action_ConfigurePath" xml:space="preserve">
     <value>Configurer le chemin...</value>
@@ -320,7 +320,7 @@
     <value>Déploiement de scrcpydex-server.jar...</value>
   </data>
   <data name="Status_Streaming" xml:space="preserve">
-    <value>Streaming actif</value>
+    <value>Diffusion active</value>
   </data>
   <data name="Status_Stopping" xml:space="preserve">
     <value>Fermeture de la session DeX...</value>
@@ -340,22 +340,22 @@
     <value>Vérification de l'état du système</value>
   </data>
   <data name="Doctor_AdbFound" xml:space="preserve">
-    <value>ADB détecté sous : {0}</value>
+    <value>ADB détecté à l'emplacement : {0}</value>
   </data>
   <data name="Doctor_AdbMissing" xml:space="preserve">
     <value>Android Debug Bridge (adb) est introuvable dans le PATH ou les répertoires standard.</value>
   </data>
   <data name="Doctor_ScrcpyFound" xml:space="preserve">
-    <value>scrcpy détecté sous : {0} (version {1})</value>
+    <value>scrcpy détecté à l'emplacement : {0} (version {1})</value>
   </data>
   <data name="Doctor_ScrcpyMissing" xml:space="preserve">
-    <value>scrcpy est introuvable. Veuillez installer scrcpy v2.4 ou supérieur.</value>
+    <value>scrcpy est introuvable. Veuillez installer scrcpy v2.4 ou une version ultérieure.</value>
   </data>
   <data name="Doctor_UdevOk" xml:space="preserve">
     <value>Les règles udev pour l'accès aux appareils USB Android sont correctement configurées.</value>
   </data>
   <data name="Doctor_UdevMissing" xml:space="preserve">
-    <value>Les règles udev pour les appareils USB Android sont manquantes. Les permissions peuvent échouer.</value>
+    <value>Les règles udev pour l'accès aux appareils USB Android sont manquantes. Les autorisations d'accès USB peuvent échouer.</value>
   </data>
   <data name="Doctor_VaapiOk" xml:space="preserve">
     <value>L'accélération vidéo matérielle VA-API est disponible et opérationnelle.</value>
@@ -367,7 +367,7 @@
     <value>L'interface noyau /dev/uhid est accessible pour la capture matérielle de la souris.</value>
   </data>
   <data name="Doctor_UhidMissing" xml:space="preserve">
-    <value>L'interface /dev/uhid n'est pas accessible. Exécutez avec les permissions ou règles udev appropriées.</value>
+    <value>L'interface /dev/uhid n'est pas accessible. Exécutez avec les autorisations ou règles udev appropriées.</value>
   </data>
   <data name="Doctor_DisplayServerX11" xml:space="preserve">
     <value>Exécution sur le serveur d'affichage X11.</value>
