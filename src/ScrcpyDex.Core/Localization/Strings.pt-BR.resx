@@ -151,7 +151,7 @@
     <value>Taxa de Atualização Alvo (FPS)</value>
   </data>
   <data name="Display_Fps_Desc" xml:space="preserve">
-    <value>Limite de quadros para fluxo de vídeo (padrão 60 FPS, 120 FPS alta taxa)</value>
+    <value>Limite de taxa de quadros para o fluxo de vídeo (padrão 60 FPS, 120 FPS para alta taxa de atualização)</value>
   </data>
   <data name="Display_Bitrate" xml:space="preserve">
     <value>Taxa de Bits de Vídeo</value>
@@ -169,7 +169,7 @@
     <value>Modo de Apresentação da Janela</value>
   </data>
   <data name="Display_WindowMode_Desc" xml:space="preserve">
-    <value>Estilo de apresentação da janela no desktop Windows</value>
+    <value>Estilo de apresentação da janela na área de trabalho do Windows</value>
   </data>
 
   <!-- Audio Settings -->
@@ -206,7 +206,7 @@
     <value>Tecla de Liberação do Mouse</value>
   </data>
   <data name="Input_ReleaseKey_Desc" xml:space="preserve">
-    <value>Tecla do teclado para desvincular o cursor e devolver o controle ao Windows</value>
+    <value>Tecla do teclado para desvincular o foco do cursor e devolver o controle do mouse à área de trabalho do Windows</value>
   </data>
   <data name="Input_ForwardGamepad" xml:space="preserve">
     <value>Encaminhar Controles de Jogo</value>
@@ -215,10 +215,10 @@
     <value>Encaminha controles Xbox, DualSense e DirectInput diretamente para jogos no Samsung DeX</value>
   </data>
   <data name="Input_StayAwake" xml:space="preserve">
-    <value>Permanecer Ativo na USB</value>
+    <value>Permanecer Ativo via USB</value>
   </data>
   <data name="Input_StayAwake_Desc" xml:space="preserve">
-    <value>Mantém wakelock no Android conectado ao PC para evitar bloqueio de tela</value>
+    <value>Mantém o wakelock do Android ativo enquanto conectado ao PC para evitar bloqueio de tela</value>
   </data>
   <data name="Input_TurnScreenOff" xml:space="preserve">
     <value>Desligar Tela Física do Celular</value>
@@ -250,7 +250,7 @@
     <value>Caminho do Executável scrcpy</value>
   </data>
   <data name="Paths_Scrcpy_Desc" xml:space="preserve">
-    <value>Caminho customizado no sistema para scrcpy.exe (deixe em branco para detecção automática)</value>
+    <value>Caminho personalizado no sistema de arquivos para scrcpy.exe (deixe em branco para detecção automática)</value>
   </data>
   <data name="Paths_Scrcpy_Placeholder" xml:space="preserve">
     <value>Detectado automaticamente no sistema (deixe em branco)</value>
@@ -265,7 +265,7 @@
     <value>Restaurar Configurações Padrão</value>
   </data>
   <data name="Paths_ResetDefault_Desc" xml:space="preserve">
-    <value>Reverte configurações de vídeo, áudio, entrada, dispositivo e caminhos para os padrões de fábrica</value>
+    <value>Restaura todas as configurações de tela, áudio, entrada, dispositivo e caminhos para os padrões de fábrica</value>
   </data>
 
   <!-- Actions -->
@@ -337,7 +337,7 @@
 
   <!-- Diagnostic & Doctor Messages -->
   <data name="Doctor_Title" xml:space="preserve">
-    <value>Verificação de Saúde do Sistema</value>
+    <value>Verificação de Integridade do Sistema</value>
   </data>
   <data name="Doctor_AdbFound" xml:space="preserve">
     <value>ADB detectado em: {0}</value>
@@ -355,25 +355,25 @@
     <value>Regras udev para acesso a dispositivos Android via USB estão configuradas.</value>
   </data>
   <data name="Doctor_UdevMissing" xml:space="preserve">
-    <value>Regras udev para acesso a dispositivos Android via USB estão ausentes. Permissões podem falhar.</value>
+    <value>Regras udev para acesso a dispositivos Android via USB estão ausentes. As permissões de USB podem falhar.</value>
   </data>
   <data name="Doctor_VaapiOk" xml:space="preserve">
     <value>Aceleração de vídeo por hardware VA-API está disponível e operacional.</value>
   </data>
   <data name="Doctor_VaapiMissing" xml:space="preserve">
-    <value>Aceleração de vídeo VA-API não está disponível; usando decodificação por software.</value>
+    <value>Aceleração por hardware VA-API não está disponível; alternando para decodificação por software.</value>
   </data>
   <data name="Doctor_UhidOk" xml:space="preserve">
     <value>Interface do kernel /dev/uhid está acessível para captura de mouse via hardware.</value>
   </data>
   <data name="Doctor_UhidMissing" xml:space="preserve">
-    <value>Interface /dev/uhid não está acessível. Execute com permissões apropriadas ou regras udev.</value>
+    <value>Interface /dev/uhid não está acessível. Execute com as permissões apropriadas ou regras udev.</value>
   </data>
   <data name="Doctor_DisplayServerX11" xml:space="preserve">
-    <value>Executando em servidor de exibição X11.</value>
+    <value>Executando no servidor de exibição X11.</value>
   </data>
   <data name="Doctor_DisplayServerWayland" xml:space="preserve">
-    <value>Executando em servidor de exibição Wayland.</value>
+    <value>Executando no servidor de exibição Wayland.</value>
   </data>
 
   <!-- Logs & Filters -->

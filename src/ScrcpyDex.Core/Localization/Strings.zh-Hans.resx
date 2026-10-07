@@ -67,7 +67,7 @@
     <value>电脑端直接流式传输</value>
   </data>
   <data name="App_Description" xml:space="preserve">
-    <value>通过 Linux /dev/uhid 鼠标捕获的直接 USB 桌面会话</value>
+    <value>基于 Linux /dev/uhid 鼠标捕获的 USB 直连桌面会话</value>
   </data>
   <data name="App_VersionBadge" xml:space="preserve">
     <value>v1.1 Fluent</value>
@@ -145,13 +145,13 @@
     <value>显示分辨率</value>
   </data>
   <data name="Display_Resolution_Desc" xml:space="preserve">
-    <value>向 One UI 桌面合成器公开的虚拟显示分辨率</value>
+    <value>向 One UI 桌面合成器提供的虚拟显示分辨率</value>
   </data>
   <data name="Display_Fps" xml:space="preserve">
     <value>目标刷新率 (FPS)</value>
   </data>
   <data name="Display_Fps_Desc" xml:space="preserve">
-    <value>视频流帧率上限（默认 60 FPS，高刷 120 FPS）</value>
+    <value>视频流帧率上限（默认 60 FPS，高刷新率 120 FPS）</value>
   </data>
   <data name="Display_Bitrate" xml:space="preserve">
     <value>视频码率</value>
@@ -169,7 +169,7 @@
     <value>窗口呈现模式</value>
   </data>
   <data name="Display_WindowMode_Desc" xml:space="preserve">
-    <value>主机 Windows 桌面上的视口呈现风格</value>
+    <value>主机 Windows 桌面上的视口呈现方式</value>
   </data>
 
   <!-- Audio Settings -->
@@ -186,7 +186,7 @@
     <value>音频延迟缓冲区</value>
   </data>
   <data name="Audio_Buffer_Desc" xml:space="preserve">
-    <value>音频缓冲区余量（毫秒，推荐 50ms 以防止欠载）</value>
+    <value>音频缓冲区余量（毫秒，推荐 50ms 以防止缓冲区欠载）</value>
   </data>
   <data name="Audio_Buffer_Format" xml:space="preserve">
     <value>{0} 毫秒</value>
@@ -206,7 +206,7 @@
     <value>鼠标捕获释放键</value>
   </data>
   <data name="Input_ReleaseKey_Desc" xml:space="preserve">
-    <value>用于解除光标焦点并将鼠标控制权交还 Windows 的键盘按键</value>
+    <value>用于解除光标焦点并将鼠标控制权交还 Windows 桌面的键盘按键</value>
   </data>
   <data name="Input_ForwardGamepad" xml:space="preserve">
     <value>转发游戏手柄</value>
@@ -355,7 +355,7 @@
     <value>用于 Android USB 设备访问的 udev 规则已正确配置。</value>
   </data>
   <data name="Doctor_UdevMissing" xml:space="preserve">
-    <value>缺少用于 Android USB 设备访问的 udev 规则。USB 权限可能会失败。</value>
+    <value>缺少用于 Android USB 设备访问的 udev 规则。USB 访问可能因权限不足而失败。</value>
   </data>
   <data name="Doctor_VaapiOk" xml:space="preserve">
     <value>VA-API 硬件视频加速可用且正常运行。</value>
@@ -367,7 +367,7 @@
     <value>/dev/uhid 内核接口可用于硬件鼠标捕获。</value>
   </data>
   <data name="Doctor_UhidMissing" xml:space="preserve">
-    <value>/dev/uhid 接口不可访问。请使用适当权限或 udev 规则运行。</value>
+    <value>/dev/uhid 接口不可访问。请以适当权限运行或配置 udev 规则。</value>
   </data>
   <data name="Doctor_DisplayServerX11" xml:space="preserve">
     <value>运行在 X11 显示服务器上。</value>
