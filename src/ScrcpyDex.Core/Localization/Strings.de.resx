@@ -67,7 +67,7 @@
     <value>Direktes PC-Streaming</value>
   </data>
   <data name="App_Description" xml:space="preserve">
-    <value>Direkte USB-Desktop-Sitzung mit Linux /dev/uhid-Maussteuerung</value>
+    <value>Direkte USB-Desktop-Sitzung mit Linux /dev/uhid-Mauserfassung</value>
   </data>
   <data name="App_VersionBadge" xml:space="preserve">
     <value>v1.1 Fluent</value>
@@ -82,7 +82,7 @@
     <value>Rechtliche Hinweise &amp; Lizenzierung</value>
   </data>
   <data name="App_NonAffiliationNotice" xml:space="preserve">
-    <value>Hinweis zur Nicht-Zugehörigkeit &amp; Marken-Haftungsausschluss</value>
+    <value>Hinweis auf Nichtzugehörigkeit &amp; Marken-Haftungsausschluss</value>
   </data>
 
   <!-- Navigation Tabs -->
@@ -113,10 +113,10 @@
     <value>Kein Gerät erkannt. Schließen Sie ein Samsung Galaxy-Gerät über USB an.</value>
   </data>
   <data name="DeviceSelector_Unauthorized" xml:space="preserve">
-    <value>Gerät erkannt (Nicht autorisiert). Entsperren Sie das Telefondisplay und autorisieren Sie USB-Debugging.</value>
+    <value>Gerät erkannt (nicht autorisiert). Entsperren Sie den Telefonbildschirm und autorisieren Sie USB-Debugging.</value>
   </data>
   <data name="DeviceSelector_Connected" xml:space="preserve">
-    <value>{0} Verbunden</value>
+    <value>{0} verbunden</value>
   </data>
   <data name="DeviceSelector_Connecting" xml:space="preserve">
     <value>Verbindung wird hergestellt...</value>
@@ -151,13 +151,13 @@
     <value>Ziel-Bildwiederholrate (FPS)</value>
   </data>
   <data name="Display_Fps_Desc" xml:space="preserve">
-    <value>Bildfrequenzbegrenzung für den Videostream (Standard 60 FPS, 120 FPS hohe Bildrate)</value>
+    <value>Bildfrequenzbegrenzung für den Videostream (Standard 60 FPS, 120 FPS hohe Bildwiederholrate)</value>
   </data>
   <data name="Display_Bitrate" xml:space="preserve">
     <value>Video-Bitrate</value>
   </data>
   <data name="Display_Bitrate_Desc" xml:space="preserve">
-    <value>Zugewiesene Bandbreite für den komprimierten Videostream (8 Mbps empfohlen)</value>
+    <value>Zielbandbreite für den komprimierten Videostream (8 Mbps empfohlen)</value>
   </data>
   <data name="Display_Codec" xml:space="preserve">
     <value>Hardware-Videocodec</value>
@@ -186,7 +186,7 @@
     <value>Audio-Latenzpuffer</value>
   </data>
   <data name="Audio_Buffer_Desc" xml:space="preserve">
-    <value>Audiopuffer-Marge in Millisekunden (50 ms empfohlen zur Vermeidung von Pufferunterläufen)</value>
+    <value>Audiopuffer-Reserve in Millisekunden (50 ms empfohlen zur Vermeidung von Pufferunterläufen)</value>
   </data>
   <data name="Audio_Buffer_Format" xml:space="preserve">
     <value>{0} ms</value>
@@ -206,7 +206,7 @@
     <value>Mausfreigabetaste</value>
   </data>
   <data name="Input_ReleaseKey_Desc" xml:space="preserve">
-    <value>Tastaturtaste zum Freigeben des Cursors und Zurückgeben der Maussteuerung an Windows</value>
+    <value>Tastaturtaste zum Freigeben des Cursors und Zurückgeben der Maussteuerung an den Windows-Desktop</value>
   </data>
   <data name="Input_ForwardGamepad" xml:space="preserve">
     <value>Gamepad-Controller weiterleiten</value>
@@ -224,7 +224,7 @@
     <value>Physischen Telefonbildschirm ausschalten</value>
   </data>
   <data name="Input_TurnScreenOff_Desc" xml:space="preserve">
-    <value>Schaltet das OLED-Telefondisplay während DeX aus, um Akku zu sparen und Einbrennen zu vermeiden</value>
+    <value>Schaltet das OLED-Telefondisplay während des DeX-Streamings aus, um Akku zu sparen und Einbrennen zu vermeiden</value>
   </data>
   <data name="Input_Fullscreen" xml:space="preserve">
     <value>Vollbildmodus</value>
@@ -235,10 +235,10 @@
 
   <!-- Device & Paths Settings -->
   <data name="Device_Header" xml:space="preserve">
-    <value>Geräteleistung &amp; Systeminformationen</value>
+    <value>Geräte-Energieverwaltung &amp; Systeminformationen</value>
   </data>
   <data name="Device_AutoConnect" xml:space="preserve">
-    <value>Automatisch beim Einstecken von USB verbinden</value>
+    <value>Automatisch beim Anschließen per USB verbinden</value>
   </data>
   <data name="Device_AutoConnect_Desc" xml:space="preserve">
     <value>Startet automatisch die Samsung DeX-Sitzung, wenn ein autorisiertes Telefon angeschlossen wird</value>
@@ -276,7 +276,7 @@
     <value>Trennen</value>
   </data>
   <data name="Action_EmergencyKill" xml:space="preserve">
-    <value>Beenden erzwingen</value>
+    <value>Sofort beenden</value>
   </data>
   <data name="Action_Browse" xml:space="preserve">
     <value>Durchsuchen...</value>
@@ -329,10 +329,10 @@
     <value>Fehler aufgetreten</value>
   </data>
   <data name="Status_ScrcpyMissing" xml:space="preserve">
-    <value>scrcpy-Programmdatei auf Host nicht gefunden</value>
+    <value>scrcpy-Programmdatei auf dem Host nicht gefunden</value>
   </data>
   <data name="Status_AdbUnauthorized" xml:space="preserve">
-    <value>Gerät nicht autorisiert. Überprüfen Sie das Telefondisplay.</value>
+    <value>Gerät nicht autorisiert. Prüfen Sie den Telefonbildschirm.</value>
   </data>
 
   <!-- Diagnostic & Doctor Messages -->
@@ -343,7 +343,7 @@
     <value>ADB erkannt unter: {0}</value>
   </data>
   <data name="Doctor_AdbMissing" xml:space="preserve">
-    <value>Android Debug Bridge (adb) wurde weder im PATH noch in Standardverzeichnissen gefunden.</value>
+    <value>Android Debug Bridge (adb) wurde weder im PATH noch in den Standardverzeichnissen gefunden.</value>
   </data>
   <data name="Doctor_ScrcpyFound" xml:space="preserve">
     <value>scrcpy erkannt unter: {0} (Version {1})</value>
@@ -355,7 +355,7 @@
     <value>udev-Regeln für Android-USB-Gerätezugriff sind ordnungsgemäß konfiguriert.</value>
   </data>
   <data name="Doctor_UdevMissing" xml:space="preserve">
-    <value>udev-Regeln für Android-USB-Gerätezugriff fehlen. USB-Berechtigungen könnten fehlschlagen.</value>
+    <value>udev-Regeln für den Android-USB-Gerätezugriff fehlen. Der USB-Zugriff könnte fehlschlagen.</value>
   </data>
   <data name="Doctor_VaapiOk" xml:space="preserve">
     <value>VA-API-Hardware-Videobeschleunigung ist verfügbar und funktionsfähig.</value>
@@ -364,16 +364,16 @@
     <value>VA-API-Hardwarebeschleunigung ist nicht verfügbar; Rückgriff auf Software-Decodierung.</value>
   </data>
   <data name="Doctor_UhidOk" xml:space="preserve">
-    <value>/dev/uhid-Kernelschnittstelle ist für Hardware-Mauserfassung zugänglich.</value>
+    <value>/dev/uhid-Kernelschnittstelle ist für die Hardware-Mauserfassung zugänglich.</value>
   </data>
   <data name="Doctor_UhidMissing" xml:space="preserve">
     <value>/dev/uhid-Schnittstelle ist nicht zugänglich. Mit entsprechenden Berechtigungen oder udev-Regeln ausführen.</value>
   </data>
   <data name="Doctor_DisplayServerX11" xml:space="preserve">
-    <value>Wird auf X11-Display-Server ausgeführt.</value>
+    <value>Wird auf einem X11-Display-Server ausgeführt.</value>
   </data>
   <data name="Doctor_DisplayServerWayland" xml:space="preserve">
-    <value>Wird auf Wayland-Display-Server ausgeführt.</value>
+    <value>Wird auf einem Wayland-Display-Server ausgeführt.</value>
   </data>
 
   <!-- Logs & Filters -->
