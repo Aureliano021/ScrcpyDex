@@ -86,6 +86,18 @@ namespace ScrcpyDex.Core.Tests
 
             string refresh = manager["Action_Refresh"];
             Assert.False(string.IsNullOrWhiteSpace(refresh));
+
+            string mainWindowTitle = manager["MainWindow_Title"];
+            Assert.False(string.IsNullOrWhiteSpace(mainWindowTitle));
+
+            string displayHeader = manager["Display_CardHeader"];
+            Assert.False(string.IsNullOrWhiteSpace(displayHeader));
+
+            string quickHeader = manager["QuickOptions_Header"];
+            Assert.False(string.IsNullOrWhiteSpace(quickHeader));
+
+            string telemetryBattery = manager["Telemetry_Battery"];
+            Assert.False(string.IsNullOrWhiteSpace(telemetryBattery));
         }
 
         [Fact]
