@@ -14,17 +14,21 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ScrcpyDex.App.Services;
 using ScrcpyDex.Core.Adb;
 using ScrcpyDex.Core.Collections;
 using ScrcpyDex.Core.Configuration;
@@ -49,6 +53,7 @@ namespace ScrcpyDex.App.ViewModels
         private readonly AdbDeviceTracker _deviceTracker;
         private readonly SemaphoreSlim _sessionLock = new SemaphoreSlim(1, 1);
         private IStorageProvider? _storageProvider;
+        private DispatcherTimer? _telemetryTimer;
         private bool _isDisposed;
 
         #region Observable Properties - Device & Session State
@@ -56,8 +61,23 @@ namespace ScrcpyDex.App.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CanStart))]
         [NotifyPropertyChangedFor(nameof(SelectedDeviceSummary))]
+        [NotifyPropertyChangedFor(nameof(HasSelectedDevice))]
+        [NotifyPropertyChangedFor(nameof(DeviceDisplayName))]
+        [NotifyPropertyChangedFor(nameof(DeviceModelCode))]
+        [NotifyPropertyChangedFor(nameof(DeviceFrameLabel))]
+        [NotifyPropertyChangedFor(nameof(DeviceSerialDisplay))]
+        [NotifyPropertyChangedFor(nameof(ConnectionStatusText))]
+        [NotifyPropertyChangedFor(nameof(ConnectionStatusColor))]
+        [NotifyPropertyChangedFor(nameof(ConnectionStatusBackground))]
+        [NotifyPropertyChangedFor(nameof(ConnectionDetailsText))]
+        [NotifyPropertyChangedFor(nameof(HardwareModelDisplay))]
+        [NotifyPropertyChangedFor(nameof(HasDeviceImage))]
         [NotifyCanExecuteChangedFor(nameof(StartSessionCommand))]
         private DeviceInfo? _selectedDevice;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasDeviceImage))]
+        private Bitmap? _deviceImage;
 
         [ObservableProperty]
         private ObservableCollection<DeviceInfo> _deviceList = new ObservableCollection<DeviceInfo>();
@@ -85,38 +105,88 @@ namespace ScrcpyDex.App.ViewModels
 
         #endregion
 
+        #region Observable Properties - Hardware Telemetry
+
+        [ObservableProperty]
+        private string _batteryLevel = "--";
+
+        [ObservableProperty]
+        private string _batteryTemperature = "--";
+
+        [ObservableProperty]
+        private string _usbLinkSpeed = "--";
+
+        [ObservableProperty]
+        private string _estimatedLatencyMs = "--";
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HardwareModelDisplay))]
+        private string _hardwareModel = "--";
+
+        #endregion
+
         #region Observable Properties - Display & Stream Settings
 
         [ObservableProperty]
-        private string _selectedResolution = "1920x1080";
+        private string _selectedResolution = "2560x1080 (Ultrawide DeX)";
 
         public IReadOnlyList<string> AvailableResolutions { get; } = new[]
         {
-            "1920x1080",
-            "2560x1440",
-            "1600x900",
-            "3840x2160"
+            "1600x900 (HD+)",
+            "1920x1080 (FHD)",
+            "2560x1080 (Ultrawide DeX)",
+            "2560x1440 (QHD)",
+            "3440x1440 (UWQHD 34\")",
+            "3840x2160 (4K UHD)",
+            "Native Screen Resolution"
         };
 
         [ObservableProperty]
         private int _selectedFps = 60;
 
-        public IReadOnlyList<int> AvailableFps { get; } = new[] { 30, 60, 120 };
+        public IReadOnlyList<int> AvailableFps { get; } = new[] { 30, 60, 90, 120 };
 
         [ObservableProperty]
-        private int _bitrateMbps = 8;
+        private int _bitrateMbps = 18;
 
         [ObservableProperty]
-        private string _selectedCodec = "h264";
+        private string _bitrateStatusHint = "18 Mbps • Ideal Performance Balance";
+
+        [ObservableProperty]
+        private string _selectedCodec = "h265";
 
         public IReadOnlyList<string> AvailableCodecs { get; } = new[] { "h264", "h265", "av1" };
 
+        [ObservableProperty]
+        private string _selectedAudioCodec = "Opus 48kHz Stereo";
+
+        public IReadOnlyList<string> AvailableAudioCodecs { get; } = new[]
+        {
+            "Disabled",
+            "AAC 44.1kHz",
+            "Opus 48kHz Stereo",
+            "RAW PCM"
+        };
+
+        [ObservableProperty]
+        private string _selectedRenderDriver = "Auto (Direct3D 11 / OpenGL)";
+
+        public IReadOnlyList<string> AvailableRenderDrivers { get; } = new[]
+        {
+            "Auto (Direct3D 11 / OpenGL)",
+            "Direct3D 11",
+            "OpenGL"
+        };
+
         #endregion
 
-        #region Observable Properties - Input & Window Settings
+        #region Observable Properties - Input & Session Flags
 
         [ObservableProperty]
         private bool _mouseUhidEnabled = true;
+
+        [ObservableProperty]
+        private bool _forwardShortcuts = true;
 
         [ObservableProperty]
         private bool _stayAwake = false;
@@ -126,6 +196,12 @@ namespace ScrcpyDex.App.ViewModels
 
         [ObservableProperty]
         private bool _fullscreen = false;
+
+        [ObservableProperty]
+        private bool _isRecording = false;
+
+        [ObservableProperty]
+        private bool _lowLatencyAudio = true;
 
         #endregion
 
@@ -148,19 +224,45 @@ namespace ScrcpyDex.App.ViewModels
 
         public string StatusBadgeColor => ConnectionState switch
         {
-            SessionState.StreamingActive => "#4CAF50",
+            SessionState.StreamingActive => "#10B981",
             SessionState.DeviceConnecting or
             SessionState.ServerDeploying or
             SessionState.DisplayNegotiating or
-            SessionState.Teardown => "#FF9800",
-            SessionState.Error => "#F44336",
-            SessionState.Idle => "#9E9E9E",
-            _ => "#9E9E9E"
+            SessionState.Teardown => "#F59E0B",
+            SessionState.Error => "#E11D48",
+            SessionState.Idle => "#64748B",
+            _ => "#64748B"
         };
 
         public string SelectedDeviceSummary => SelectedDevice != null
-            ? $"{SelectedDevice.Model} ({SelectedDevice.Serial}) — {SelectedDevice.State}"
+            ? $"{SelectedDevice.MarketingName} ({SelectedDevice.Serial}) — {SelectedDevice.State}"
             : "No device selected";
+
+        public bool HasSelectedDevice => SelectedDevice != null && SelectedDevice.IsConnected;
+
+        public string DeviceDisplayName => SelectedDevice != null ? SelectedDevice.MarketingName : "No Device Connected";
+
+        public string DeviceModelCode => SelectedDevice != null ? SelectedDevice.ModelCode : "--";
+
+        public string DeviceFrameLabel => SelectedDevice != null ? SelectedDevice.FrameLabel : "OFFLINE";
+
+        public string DeviceSerialDisplay => SelectedDevice?.Serial ?? string.Empty;
+
+        public string ConnectionStatusText => HasSelectedDevice ? "Connected" : "Disconnected";
+
+        public string ConnectionStatusColor => HasSelectedDevice ? "#10B981" : "#64748B";
+
+        public string ConnectionStatusBackground => HasSelectedDevice ? "#132E27" : "#1E293B";
+
+        public string ConnectionDetailsText => HasSelectedDevice
+            ? "USB Link Active • Direct Link"
+            : "Connect phone via USB with USB debugging enabled";
+
+        public string HardwareModelDisplay => HasSelectedDevice && !string.IsNullOrWhiteSpace(HardwareModel) && HardwareModel != "--"
+            ? HardwareModel
+            : "Hardware detection idle";
+
+        public bool HasDeviceImage => DeviceImage != null;
 
         #endregion
 
@@ -193,6 +295,7 @@ namespace ScrcpyDex.App.ViewModels
             _executionService.LogReceived += OnExecutionLogReceived;
 
             InitializeConfigurationAndDiscovery();
+            StartTelemetryTimer();
         }
 
         public void SetStorageProvider(IStorageProvider storageProvider)
@@ -239,6 +342,19 @@ namespace ScrcpyDex.App.ViewModels
             });
         }
 
+        private void StartTelemetryTimer()
+        {
+            _telemetryTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(5)
+            };
+            _telemetryTimer.Tick += async (s, e) =>
+            {
+                await UpdateDeviceTelemetryAsync().ConfigureAwait(false);
+            };
+            _telemetryTimer.Start();
+        }
+
         private void ApplyLoadedSettings(ScrcpyDeXSettings settings)
         {
             if (AvailableResolutions.Contains(settings.Display.Resolution))
@@ -252,7 +368,7 @@ namespace ScrcpyDex.App.ViewModels
             }
 
             int bitrateInMbps = settings.Display.Bitrate / 1_000_000;
-            if (bitrateInMbps >= 4 && bitrateInMbps <= 30)
+            if (bitrateInMbps >= 4 && bitrateInMbps <= 60)
             {
                 BitrateMbps = bitrateInMbps;
             }
@@ -263,9 +379,27 @@ namespace ScrcpyDex.App.ViewModels
             }
 
             MouseUhidEnabled = settings.Input.MouseDriver.Equals("uhid", StringComparison.OrdinalIgnoreCase);
+            ForwardShortcuts = settings.Input.ForwardShortcuts;
             StayAwake = settings.Device.StayAwake;
             TurnScreenOff = settings.Device.TurnScreenOff;
             Fullscreen = settings.Display.WindowMode.Equals("fullscreen", StringComparison.OrdinalIgnoreCase);
+
+            if (!string.IsNullOrWhiteSpace(settings.Display.RenderDriver))
+            {
+                string driver = settings.Display.RenderDriver.Trim();
+                if (driver.Equals("direct3d11", StringComparison.OrdinalIgnoreCase))
+                {
+                    SelectedRenderDriver = AvailableRenderDrivers.FirstOrDefault(d => d.Contains("Direct3D")) ?? AvailableRenderDrivers[0];
+                }
+                else if (driver.Equals("opengl", StringComparison.OrdinalIgnoreCase))
+                {
+                    SelectedRenderDriver = AvailableRenderDrivers.FirstOrDefault(d => d.Contains("OpenGL")) ?? AvailableRenderDrivers[0];
+                }
+                else
+                {
+                    SelectedRenderDriver = AvailableRenderDrivers[0];
+                }
+            }
 
             if (!string.IsNullOrWhiteSpace(settings.Paths.ScrcpyPath))
             {
@@ -282,8 +416,10 @@ namespace ScrcpyDex.App.ViewModels
                 settings.Display.Fps = SelectedFps;
                 settings.Display.Bitrate = BitrateMbps * 1_000_000;
                 settings.Display.Codec = SelectedCodec;
+                settings.Display.RenderDriver = ResolveEffectiveRenderDriver();
                 settings.Display.WindowMode = Fullscreen ? "fullscreen" : "normal";
                 settings.Input.MouseDriver = MouseUhidEnabled ? "uhid" : "aoa";
+                settings.Input.ForwardShortcuts = ForwardShortcuts;
                 settings.Device.StayAwake = StayAwake;
                 settings.Device.TurnScreenOff = TurnScreenOff;
                 settings.Paths.ScrcpyPath = ScrcpyPath;
@@ -314,6 +450,231 @@ namespace ScrcpyDex.App.ViewModels
                     LogEntries.Push(new ProcessLogEntry(DateTime.Now, "Warning: scrcpy binary was not found. Please configure its location.", true));
                 }
             });
+        }
+
+        partial void OnSelectedDeviceChanged(DeviceInfo? value)
+        {
+            UpdateDeviceImage(value);
+            _ = Task.Run(async () =>
+            {
+                await UpdateDeviceTelemetryAsync().ConfigureAwait(false);
+            });
+        }
+
+        public void UpdateDeviceImage(DeviceInfo? device)
+        {
+            DeviceImage = DeviceImageService.GetDeviceImage(device);
+        }
+
+        partial void OnBitrateMbpsChanged(int value)
+        {
+            BitrateStatusHint = value switch
+            {
+                <= 8 => $"{value} Mbps • Low Latency & High Compression",
+                <= 16 => $"{value} Mbps • Balanced for Standard USB / Wi-Fi",
+                <= 24 => $"{value} Mbps • Ideal Performance Balance",
+                <= 35 => $"{value} Mbps • High Quality Definition",
+                _ => $"{value} Mbps • Maximum Fidelity (Direct USB 3.0+)"
+            };
+        }
+
+        public async Task UpdateDeviceTelemetryAsync()
+        {
+            if (SelectedDevice == null || SelectedDevice.State != "device")
+            {
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    BatteryLevel = "--";
+                    BatteryTemperature = "--";
+                    EstimatedLatencyMs = "--";
+                    UsbLinkSpeed = "--";
+                    HardwareModel = "--";
+                });
+                return;
+            }
+
+            string serial = SelectedDevice.Serial;
+            try
+            {
+                // 1. Measure latency and verify active connection
+                var sw = Stopwatch.StartNew();
+                var pingResult = await _adbService.RunCommandAsync($"-s {serial} shell echo 1").ConfigureAwait(false);
+                sw.Stop();
+
+                if (!pingResult.Succeeded)
+                {
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        EstimatedLatencyMs = "--";
+                    });
+                    return;
+                }
+
+                string latency = $"{Math.Max(1, sw.ElapsedMilliseconds)} ms";
+
+                // 2. Query dumpsys battery
+                var battResult = await _adbService.RunCommandAsync($"-s {serial} shell dumpsys battery").ConfigureAwait(false);
+                string level = "--";
+                string temp = "--";
+
+                if (battResult.Succeeded && !string.IsNullOrWhiteSpace(battResult.Output))
+                {
+                    var levelMatch = Regex.Match(battResult.Output, @"level:\s*(\d+)");
+                    if (levelMatch.Success)
+                    {
+                        level = $"{levelMatch.Groups[1].Value}%";
+                    }
+
+                    var tempMatch = Regex.Match(battResult.Output, @"temperature:\s*(\d+)");
+                    if (tempMatch.Success && double.TryParse(tempMatch.Groups[1].Value, out double rawTemp))
+                    {
+                        temp = $"{rawTemp / 10.0:F1}°C";
+                    }
+                }
+
+                // 3. Hardware Model / SoC
+                string hardware = HardwareModel;
+                if (SelectedDevice.Model.Contains("S23") || SelectedDevice.Model.Contains("SM-S911") || SelectedDevice.Model.Contains("SM-S918"))
+                {
+                    hardware = "Adreno 740 • Snapdragon 8 Gen 2";
+                }
+                else
+                {
+                    var socResult = await _adbService.RunCommandAsync($"-s {serial} shell getprop ro.soc.model").ConfigureAwait(false);
+                    string soc = socResult.Output?.Trim() ?? "";
+                    if (string.IsNullOrWhiteSpace(soc))
+                    {
+                        var chipResult = await _adbService.RunCommandAsync($"-s {serial} shell getprop ro.board.platform").ConfigureAwait(false);
+                        soc = chipResult.Output?.Trim() ?? "";
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(soc))
+                    {
+                        hardware = FormatSocName(soc);
+                    }
+                    else if (hardware == "--")
+                    {
+                        hardware = "Hardware Accelerated";
+                    }
+                }
+
+                string linkSpeed = await DetectUsbLinkSpeedAsync(serial).ConfigureAwait(false);
+
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    BatteryLevel = level;
+                    BatteryTemperature = temp;
+                    EstimatedLatencyMs = latency;
+                    HardwareModel = hardware;
+                    UsbLinkSpeed = linkSpeed;
+                });
+            }
+            catch
+            {
+                // Non-blocking telemetry query fallback
+            }
+        }
+
+        private async Task<string> DetectUsbLinkSpeedAsync(string serial)
+        {
+            if (serial.Contains(':'))
+            {
+                return "Wi-Fi";
+            }
+
+            try
+            {
+                // Query Linux USB Device Controller current speed via sysfs
+                var udcResult = await _adbService.RunCommandAsync($"-s {serial} shell \"cat /sys/class/udc/*/current_speed 2>/dev/null\"").ConfigureAwait(false);
+                string speedRaw = udcResult.Output?.Trim().ToLowerInvariant() ?? "";
+                if (speedRaw.Contains("super-speed-plus"))
+                {
+                    return "10 Gbps";
+                }
+                if (speedRaw.Contains("super-speed") || speedRaw.Contains("superspeed"))
+                {
+                    return "5 Gbps";
+                }
+                if (speedRaw.Contains("high-speed") || speedRaw.Contains("highspeed"))
+                {
+                    return "480 Mbps";
+                }
+                if (speedRaw.Contains("full-speed") || speedRaw.Contains("fullspeed"))
+                {
+                    return "12 Mbps";
+                }
+
+                // Fallback: dumpsys usb
+                var usbDump = await _adbService.RunCommandAsync($"-s {serial} shell dumpsys usb").ConfigureAwait(false);
+                string dumpText = usbDump.Output?.ToLowerInvariant() ?? "";
+                if (dumpText.Contains("super-speed-plus")) return "10 Gbps";
+                if (dumpText.Contains("super-speed") || dumpText.Contains("superspeed")) return "5 Gbps";
+                if (dumpText.Contains("high-speed") || dumpText.Contains("highspeed")) return "480 Mbps";
+
+                return "USB Link";
+            }
+            catch
+            {
+                return "USB Link";
+            }
+        }
+
+        private static string FormatSocName(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return "Adreno 740 • Snapdragon 8 Gen 2";
+            string lower = raw.ToLowerInvariant();
+            if (lower.Contains("sm8550") || lower.Contains("kalama")) return "Adreno 740 • Snapdragon 8 Gen 2";
+            if (lower.Contains("sm8650") || lower.Contains("pineapple")) return "Adreno 750 • Snapdragon 8 Gen 3";
+            if (lower.Contains("sm8450") || lower.Contains("taro")) return "Adreno 730 • Snapdragon 8 Gen 1";
+            if (lower.Contains("sm8350") || lower.Contains("lahaina")) return "Adreno 660 • Snapdragon 888";
+            if (lower.Contains("sm8250") || lower.Contains("kona")) return "Adreno 650 • Snapdragon 865";
+            if (lower.Contains("exynos 2400") || lower.Contains("s5e9945")) return "Xclipse 940 • Exynos 2400";
+            if (lower.Contains("exynos 2200") || lower.Contains("s5e9925")) return "Xclipse 920 • Exynos 2200";
+            if (lower.Contains("exynos")) return $"Mali/Xclipse • Samsung {raw}";
+            if (lower.Contains("snapdragon")) return $"Adreno GPU • {raw}";
+            return $"Hardware Accelerated • {raw}";
+        }
+
+        public string BuildCliCommandPreview()
+        {
+            string display = SelectedResolution;
+            int parenIdx = display.IndexOf('(');
+            if (parenIdx > 0) display = display.Substring(0, parenIdx).Trim();
+            string resParam = display.Contains('x', StringComparison.OrdinalIgnoreCase)
+                ? $"--max-size={display.Split(new[] { 'x', 'X' })[0].Trim()} "
+                : "";
+
+            string targetSerial = SelectedDevice != null ? $"-s {SelectedDevice.Serial} " : "";
+            string recParam = IsRecording ? $"--record=\"DeX_Recording_{DateTime.Now:yyyyMMdd_HHmmss}.mp4\" " : "";
+            string screenOffParam = TurnScreenOff ? "--turn-screen-off " : "";
+            string stayAwakeParam = StayAwake ? "--stay-awake " : "";
+            string uhidParam = MouseUhidEnabled ? "--mouse=uhid " : "";
+            string kbdParam = ForwardShortcuts ? "--keyboard=uhid " : "";
+            string fsParam = Fullscreen ? "--fullscreen " : "";
+
+            string effectiveDriver = ResolveEffectiveRenderDriver();
+            string driverParam = (effectiveDriver == "auto" && OperatingSystem.IsWindows())
+                ? ""
+                : $"--render-driver={(effectiveDriver == "auto" ? "opengl" : effectiveDriver)} ";
+
+            return $"scrcpy {targetSerial}--video-codec={SelectedCodec} {resParam}-b {BitrateMbps}M --max-fps={SelectedFps} {driverParam}{uhidParam}{kbdParam}{screenOffParam}{stayAwakeParam}{fsParam}{recParam}--window-title=\"ScrcpyDeX\"".Replace("  ", " ").Trim();
+        }
+
+        private string ResolveEffectiveRenderDriver()
+        {
+            if (SelectedRenderDriver.StartsWith("Auto", StringComparison.OrdinalIgnoreCase))
+            {
+                return "auto";
+            }
+            if (SelectedRenderDriver.Contains("Direct3D", StringComparison.OrdinalIgnoreCase))
+            {
+                return OperatingSystem.IsWindows() ? "direct3d11" : "opengl";
+            }
+            if (SelectedRenderDriver.Contains("OpenGL", StringComparison.OrdinalIgnoreCase))
+            {
+                return "opengl";
+            }
+            return "auto";
         }
 
         #region Event Handlers
@@ -349,15 +710,24 @@ namespace ScrcpyDex.App.ViewModels
         {
             Dispatcher.UIThread.Post(() =>
             {
-                LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"scrcpy process terminated with exit code {exitCode}", exitCode != 0));
+                LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"scrcpy window closed (exit code: {exitCode})", exitCode != 0));
             });
-            _ = _stateMachine.FireAsync(SessionTrigger.ProcessExited, $"Process exited ({exitCode})");
+
+            _ = Task.Run(async () =>
+            {
+                await PerformFullTeardownAsync($"scrcpy window closed ({exitCode})").ConfigureAwait(false);
+            });
         }
 
         private void OnExecutionErrorOccurred(object? sender, string error)
         {
             Dispatcher.UIThread.Post(() =>
             {
+                if (error.Contains("D3D11CreateDevice", StringComparison.OrdinalIgnoreCase) ||
+                    (error.Contains("Could not create renderer", StringComparison.OrdinalIgnoreCase) && error.Contains("direct3d", StringComparison.OrdinalIgnoreCase)))
+                {
+                    StatusWarning = "D3D11 unsupported: Switch Render Driver to OpenGL";
+                }
                 LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Execution error: {error}", true));
             });
             _ = _stateMachine.FireAsync(SessionTrigger.ErrorOccurred, error);
@@ -379,27 +749,151 @@ namespace ScrcpyDex.App.ViewModels
         private void UpdateDevicesList(IReadOnlyList<DeviceInfo> devices)
         {
             var previousSerial = SelectedDevice?.Serial;
-            DeviceList.Clear();
+
+            if (devices == null || devices.Count == 0)
+            {
+                DeviceList.Clear();
+                SelectedDevice = null;
+                UpdateDeviceImage(null);
+                BatteryLevel = "--";
+                BatteryTemperature = "--";
+                EstimatedLatencyMs = "--";
+                UsbLinkSpeed = "--";
+                HardwareModel = "--";
+                SessionStatusText = "No ADB devices detected. Connect phone via USB with USB debugging enabled.";
+                return;
+            }
+
+            // Update DeviceList in place to prevent clearing ComboBox selection to null
+            for (int i = DeviceList.Count - 1; i >= 0; i--)
+            {
+                if (!devices.Any(d => d.Serial == DeviceList[i].Serial))
+                {
+                    DeviceList.RemoveAt(i);
+                }
+            }
 
             foreach (var d in devices)
             {
-                DeviceList.Add(d);
+                var existing = DeviceList.FirstOrDefault(x => x.Serial == d.Serial);
+                if (existing == null)
+                {
+                    DeviceList.Add(d);
+                }
+                else
+                {
+                    existing.Model = d.Model;
+                    existing.Manufacturer = d.Manufacturer;
+                    existing.State = d.State;
+                    existing.AndroidVersion = d.AndroidVersion;
+                    existing.OneUiVersion = d.OneUiVersion;
+                    existing.DeXDisplayId = d.DeXDisplayId;
+                }
             }
 
-            if (!string.IsNullOrEmpty(previousSerial))
-            {
-                SelectedDevice = DeviceList.FirstOrDefault(d => d.Serial == previousSerial);
-            }
+            var matched = !string.IsNullOrEmpty(previousSerial)
+                ? DeviceList.FirstOrDefault(d => d.Serial == previousSerial)
+                : null;
 
-            if (SelectedDevice == null && DeviceList.Count > 0)
+            SelectedDevice = matched ?? DeviceList.FirstOrDefault();
+            UpdateDeviceImage(SelectedDevice);
+
+            _ = Task.Run(async () =>
             {
-                SelectedDevice = DeviceList[0];
+                await EnrichUnknownDevicesAsync().ConfigureAwait(false);
+                await UpdateDeviceTelemetryAsync().ConfigureAwait(false);
+            });
+        }
+
+        private async Task EnrichUnknownDevicesAsync()
+        {
+            foreach (var dev in DeviceList.ToList())
+            {
+                if (dev.State == "device" && (dev.Model == "Unknown" || string.IsNullOrWhiteSpace(dev.AndroidVersion)))
+                {
+                    try
+                    {
+                        var enriched = await _adbService.QueryDeviceInfoAsync(dev.Serial).ConfigureAwait(false);
+                        if (enriched != null && enriched.Model != "Unknown" && !string.IsNullOrWhiteSpace(enriched.Model))
+                        {
+                            dev.Model = enriched.Model;
+                            dev.AndroidVersion = enriched.AndroidVersion;
+                            dev.OneUiVersion = enriched.OneUiVersion;
+                            dev.Manufacturer = enriched.Manufacturer;
+
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                UpdateDeviceImage(SelectedDevice);
+                                OnPropertyChanged(nameof(SelectedDevice));
+                                OnPropertyChanged(nameof(DeviceDisplayName));
+                                OnPropertyChanged(nameof(DeviceModelCode));
+                                OnPropertyChanged(nameof(DeviceFrameLabel));
+                                OnPropertyChanged(nameof(SelectedDeviceSummary));
+                                OnPropertyChanged(nameof(HasDeviceImage));
+                            });
+                        }
+                    }
+                    catch { }
+                }
             }
         }
 
         #endregion
 
         #region Commands
+
+        [RelayCommand]
+        public void SetBitratePreset(object? parameter)
+        {
+            if (parameter is int val)
+            {
+                BitrateMbps = val;
+            }
+            else if (parameter is string s && int.TryParse(s, out int parsed))
+            {
+                BitrateMbps = parsed;
+            }
+        }
+
+        [RelayCommand]
+        public void ToggleRecording()
+        {
+            IsRecording = !IsRecording;
+        }
+
+        [RelayCommand]
+        public async Task CopyCliCommandAsync()
+        {
+            try
+            {
+                string cmd = BuildCliCommandPreview();
+                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
+                {
+                    var clipboard = desktop.MainWindow.Clipboard;
+                    if (clipboard != null)
+                    {
+                        await clipboard.SetTextAsync(cmd).ConfigureAwait(false);
+                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"CLI command copied to clipboard: {cmd}", false));
+                        });
+                        return;
+                    }
+                }
+
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"CLI Command: {cmd}", false));
+                });
+            }
+            catch (Exception ex)
+            {
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Failed to copy CLI command: {ex.Message}", true));
+                });
+            }
+        }
 
         [RelayCommand]
         public async Task RefreshDevicesAsync()
@@ -469,7 +963,26 @@ namespace ScrcpyDex.App.ViewModels
                 LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"DeX virtual display allocated successfully (Display ID: {displayId.Value})", false));
                 await _stateMachine.FireAsync(SessionTrigger.ServerDeployed, $"Display ID: {displayId.Value} allocated").ConfigureAwait(false);
 
-                // Step 2: Build DisplayConfig and start scrcpy
+                // Step 2: Configure recording if enabled
+                string? recordFile = null;
+                if (IsRecording)
+                {
+                    try
+                    {
+                        string recDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyVideos), "ScrcpyDeX");
+                        Directory.CreateDirectory(recDir);
+                        recordFile = Path.Combine(recDir, $"DeX_Recording_{DateTime.Now:yyyyMMdd_HHmmss}.mp4");
+                        LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Recording enabled: {recordFile}", false));
+                    }
+                    catch (Exception ex)
+                    {
+                        LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Warning: Could not prepare recording directory: {ex.Message}", true));
+                    }
+                }
+
+                string? renderDriver = ResolveEffectiveRenderDriver();
+
+                // Step 3: Build DisplayConfig and start scrcpy
                 var displayConfig = new DisplayConfig
                 {
                     Resolution = SelectedResolution,
@@ -479,7 +992,11 @@ namespace ScrcpyDex.App.ViewModels
                     WindowMode = Fullscreen ? "fullscreen" : "normal",
                     MouseDriver = MouseUhidEnabled ? "uhid" : "aoa",
                     StayAwake = StayAwake,
-                    TurnScreenOff = TurnScreenOff
+                    TurnScreenOff = TurnScreenOff,
+                    RecordFile = recordFile,
+                    ForwardShortcuts = ForwardShortcuts,
+                    AudioEnabled = !SelectedAudioCodec.Equals("Disabled", StringComparison.OrdinalIgnoreCase),
+                    RenderDriver = renderDriver
                 };
 
                 bool execOk = await _executionService.StartAsync(displayConfig, SelectedDevice.Serial, displayId.Value).ConfigureAwait(false);
@@ -504,62 +1021,42 @@ namespace ScrcpyDex.App.ViewModels
         [RelayCommand]
         public async Task StopSessionAsync()
         {
-            if (!await _sessionLock.WaitAsync(0).ConfigureAwait(false))
-            {
-                return;
-            }
+            await PerformFullTeardownAsync("User requested session stop").ConfigureAwait(false);
+        }
 
+        private async Task PerformFullTeardownAsync(string reason)
+        {
+            await _sessionLock.WaitAsync().ConfigureAwait(false);
             try
             {
-                LogEntries.Push(new ProcessLogEntry(DateTime.Now, "Stopping DeX session...", false));
-                await _stateMachine.FireAsync(SessionTrigger.UserStop, "User requested session stop").ConfigureAwait(false);
-
-                await _executionService.StopAsync(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
-
-                if (SelectedDevice != null)
+                LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Teardown sequence initiated: {reason}", false));
+                if (_stateMachine.CurrentState != SessionState.Idle && _stateMachine.CurrentState != SessionState.Teardown)
                 {
-                    await _adbService.StopDeXSessionAsync(SelectedDevice.Serial).ConfigureAwait(false);
+                    await _stateMachine.FireAsync(SessionTrigger.UserStop, reason).ConfigureAwait(false);
                 }
 
-                await _stateMachine.FireAsync(SessionTrigger.Reset, "Session stopped cleanly").ConfigureAwait(false);
-                LogEntries.Push(new ProcessLogEntry(DateTime.Now, "DeX session stopped and cleaned up.", false));
+                // Step 1: Terminate PC-side scrcpy process cleanly, fallback to kill
+                await _executionService.StopAsync(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
+
+                // Step 2: Unregister virtual display and reset server on phone via ADB
+                string? serial = SelectedDevice?.Serial;
+                if (!string.IsNullOrWhiteSpace(serial))
+                {
+                    await _adbService.StopDeXSessionAsync(serial).ConfigureAwait(false);
+                }
+
+                // Step 3: Reset state machine to Idle
+                await _stateMachine.FireAsync(SessionTrigger.Reset, "Teardown completed cleanly").ConfigureAwait(false);
+                LogEntries.Push(new ProcessLogEntry(DateTime.Now, "DeX session fully stopped. Display restored to mobile.", false));
             }
             catch (Exception ex)
             {
-                LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Error stopping session: {ex.Message}", true));
-                await _stateMachine.FireAsync(SessionTrigger.ErrorOccurred, ex.Message).ConfigureAwait(false);
+                LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Error during session teardown: {ex.Message}", true));
+                await _stateMachine.FireAsync(SessionTrigger.Reset, "Teardown error fallback").ConfigureAwait(false);
             }
             finally
             {
                 _sessionLock.Release();
-            }
-        }
-
-        [RelayCommand]
-        public async Task EmergencyKillAsync()
-        {
-            try
-            {
-                LogEntries.Push(new ProcessLogEntry(DateTime.Now, "EMERGENCY KILL SWITCH TRIGGERED: Halting all processes immediately.", true));
-                await _stateMachine.EmergencyHaltAsync("User activated emergency kill switch").ConfigureAwait(false);
-
-                await _executionService.EmergencyKillAsync().ConfigureAwait(false);
-
-                if (SelectedDevice != null)
-                {
-                    try
-                    {
-                        await _adbService.StopDeXSessionAsync(SelectedDevice.Serial).ConfigureAwait(false);
-                    }
-                    catch { }
-                }
-
-                LogEntries.Push(new ProcessLogEntry(DateTime.Now, "All processes terminated. System reset to idle.", false));
-                await _stateMachine.FireAsync(SessionTrigger.Reset, "Emergency halt complete").ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Emergency kill exception: {ex.Message}", true));
             }
         }
 
@@ -640,6 +1137,7 @@ namespace ScrcpyDex.App.ViewModels
             if (_isDisposed) return;
             _isDisposed = true;
 
+            _telemetryTimer?.Stop();
             _stateMachine.StateChanged -= OnStateMachineStateChanged;
             _executionService.StreamingStarted -= OnExecutionStreamingStarted;
             _executionService.ProcessExited -= OnExecutionProcessExited;

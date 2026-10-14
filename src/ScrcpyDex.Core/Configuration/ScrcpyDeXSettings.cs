@@ -189,6 +189,11 @@ namespace ScrcpyDex.Core.Configuration
 
         [JsonPropertyName("renderDriver")]
         public string? RenderDriver { get => _renderDriver; set => SetProperty(ref _renderDriver, value); }
+
+        private string? _recordFile;
+
+        [JsonPropertyName("recordFile")]
+        public string? RecordFile { get => _recordFile; set => SetProperty(ref _recordFile, value); }
     }
 
     public sealed class AudioSection : ObservableObject
@@ -208,6 +213,7 @@ namespace ScrcpyDex.Core.Configuration
         private string _mouseDriver = "uhid";
         private string _releaseKey = "LeftAlt";
         private bool _forwardGamepad = false;
+        private bool _forwardShortcuts = true;
 
         [JsonPropertyName("mouseDriver")]
         public string MouseDriver { get => _mouseDriver; set => SetProperty(ref _mouseDriver, value); }
@@ -217,6 +223,9 @@ namespace ScrcpyDex.Core.Configuration
 
         [JsonPropertyName("forwardGamepad")]
         public bool ForwardGamepad { get => _forwardGamepad; set => SetProperty(ref _forwardGamepad, value); }
+
+        [JsonPropertyName("forwardShortcuts")]
+        public bool ForwardShortcuts { get => _forwardShortcuts; set => SetProperty(ref _forwardShortcuts, value); }
     }
 
     public sealed class DeviceSection : ObservableObject

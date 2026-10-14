@@ -81,8 +81,8 @@ namespace ScrcpyDex.Core.Adb
 
                     _stream = _tcpClient.GetStream();
 
-                    // Send "0012host:track-devices" (18 bytes = 0x0012)
-                    byte[] request = Encoding.ASCII.GetBytes("0012host:track-devices");
+                    // Send "0014host:track-devices-l" (20 bytes = 0x0014) to get detailed model tokens
+                    byte[] request = Encoding.ASCII.GetBytes("0014host:track-devices-l");
                     await _stream.WriteAsync(request, 0, request.Length, ct).ConfigureAwait(false);
 
                     // Read 4-byte status response (OKAY or FAIL)
@@ -92,9 +92,21 @@ namespace ScrcpyDex.Core.Adb
 
                     if (status != "OKAY")
                     {
-                        // ADB daemon returned FAIL or unrecognized response; back off and reconnect
-                        await Task.Delay(2000, ct).ConfigureAwait(false);
-                        continue;
+                        // Fall back to short format "0012host:track-devices" if long format is unsupported
+                        CleanupConnection();
+                        _tcpClient = new TcpClient();
+                        await _tcpClient.ConnectAsync(_host, _port, ct).ConfigureAwait(false);
+                        _stream = _tcpClient.GetStream();
+                        request = Encoding.ASCII.GetBytes("0012host:track-devices");
+                        await _stream.WriteAsync(request, 0, request.Length, ct).ConfigureAwait(false);
+                        await ReadExactlyAsync(_stream, responseStatus, 4, ct).ConfigureAwait(false);
+                        status = Encoding.ASCII.GetString(responseStatus);
+
+                        if (status != "OKAY")
+                        {
+                            await Task.Delay(2000, ct).ConfigureAwait(false);
+                            continue;
+                        }
                     }
 
                     // Loop reading device changes pushed by adb server
@@ -124,9 +136,11 @@ namespace ScrcpyDex.Core.Adb
                 }
                 catch (Exception)
                 {
-                    // Connection lost (e.g. adb server restarted or killed)
-                    // Wait 2 seconds before attempting reconnection
+                    // Connection lost (e.g. adb server restarted, killed, or network dropped)
                     CleanupConnection();
+                    // Notify that connected devices are currently unreachable
+                    DevicesChanged?.Invoke(this, Array.Empty<DeviceInfo>());
+
                     try
                     {
                         await Task.Delay(2000, ct).ConfigureAwait(false);
@@ -139,7 +153,7 @@ namespace ScrcpyDex.Core.Adb
             }
         }
 
-        private static List<DeviceInfo> ParseDeviceList(string raw)
+        public static List<DeviceInfo> ParseDeviceList(string raw)
         {
             var list = new List<DeviceInfo>();
             if (string.IsNullOrWhiteSpace(raw)) return list;
@@ -157,8 +171,25 @@ namespace ScrcpyDex.Core.Adb
                     {
                         string serial = parts[0];
                         string state = parts[1];
-                        string model = parts.Length > 2 ? parts[2] : "Unknown";
-                        list.Add(new DeviceInfo(serial, model, state));
+                        string rawModel = "Unknown";
+
+                        // Look for model:<value> in parts (track-devices-l format)
+                        for (int i = 2; i < parts.Length; i++)
+                        {
+                            if (parts[i].StartsWith("model:", StringComparison.OrdinalIgnoreCase))
+                            {
+                                rawModel = parts[i].Substring(6).Trim();
+                                break;
+                            }
+                        }
+
+                        // Fallback for short format where parts[2] might be model
+                        if (rawModel == "Unknown" && parts.Length > 2 && !parts[2].Contains(':'))
+                        {
+                            rawModel = parts[2];
+                        }
+
+                        list.Add(new DeviceInfo(serial, rawModel, state));
                     }
                 }
             }
