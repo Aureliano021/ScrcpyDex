@@ -117,5 +117,24 @@ namespace ScrcpyDex.Core.Tests
             string missing = manager.GetString("NonExistent_Key_For_Test_12345");
             Assert.Equal("NonExistent_Key_For_Test_12345", missing);
         }
+
+        [Theory]
+        [InlineData("en", "Language")]
+        [InlineData("pt-BR", "Idioma")]
+        [InlineData("es", "Idioma")]
+        [InlineData("de", "Sprache")]
+        [InlineData("fr", "Langue")]
+        [InlineData("zh-Hans", "语言")]
+        public void LocalizationManager_GeneralLanguage_ResolvesCorrectlyAcrossCultures(string cultureName, string expectedLanguageText)
+        {
+            var manager = LocalizationManager.Instance;
+            manager.SetCulture(cultureName);
+
+            string languageText = manager["General_Language"];
+            Assert.Equal(expectedLanguageText, languageText);
+
+            string descText = manager["General_Language_Desc"];
+            Assert.False(string.IsNullOrWhiteSpace(descText));
+        }
     }
 }

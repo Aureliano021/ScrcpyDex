@@ -34,6 +34,7 @@ using ScrcpyDex.Core.Collections;
 using ScrcpyDex.Core.Configuration;
 using ScrcpyDex.Core.IO;
 using ScrcpyDex.Core.Lifecycle;
+using ScrcpyDex.Core.Localization;
 using ScrcpyDex.Core.Platform;
 using ScrcpyDex.Models;
 using ScrcpyDex.Services;
@@ -102,6 +103,16 @@ namespace ScrcpyDex.App.ViewModels
 
         [ObservableProperty]
         private string? _statusWarning;
+
+        #endregion
+
+        #region Observable Properties - Localization
+
+        [ObservableProperty]
+        private string _currentLanguage = "en";
+
+        [ObservableProperty]
+        private string _currentLanguageCode = "EN";
 
         #endregion
 
@@ -305,6 +316,9 @@ namespace ScrcpyDex.App.ViewModels
 
         private void InitializeConfigurationAndDiscovery()
         {
+            // Initial language synchronization
+            SetLanguageInternal(LocalizationManager.Instance.CurrentCulture.Name);
+
             // Initial log banner
             LogEntries.Push(new ProcessLogEntry(DateTime.Now, "ScrcpyDeX client initialized. Ready.", false));
 
@@ -401,6 +415,11 @@ namespace ScrcpyDex.App.ViewModels
                 }
             }
 
+            if (!string.IsNullOrWhiteSpace(settings.Language))
+            {
+                SetLanguageInternal(settings.Language);
+            }
+
             if (!string.IsNullOrWhiteSpace(settings.Paths.ScrcpyPath))
             {
                 ScrcpyPath = settings.Paths.ScrcpyPath;
@@ -412,6 +431,7 @@ namespace ScrcpyDex.App.ViewModels
             try
             {
                 var settings = new ScrcpyDeXSettings();
+                settings.Language = CurrentLanguage;
                 settings.Display.Resolution = SelectedResolution;
                 settings.Display.Fps = SelectedFps;
                 settings.Display.Bitrate = BitrateMbps * 1_000_000;
@@ -1114,6 +1134,50 @@ namespace ScrcpyDex.App.ViewModels
         {
             LogEntries.ClearAll();
             LogEntries.Push(new ProcessLogEntry(DateTime.Now, "Terminal logs cleared.", false));
+        }
+
+        [RelayCommand]
+        public async Task ChangeLanguageAsync(string? cultureCode)
+        {
+            if (string.IsNullOrWhiteSpace(cultureCode))
+            {
+                return;
+            }
+
+            SetLanguageInternal(cultureCode);
+            await SaveCurrentSettingsAsync().ConfigureAwait(false);
+        }
+
+        private void SetLanguageInternal(string cultureCode)
+        {
+            LocalizationManager.Instance.SetCulture(cultureCode);
+            CurrentLanguage = LocalizationManager.Instance.CurrentCulture.Name;
+            CurrentLanguageCode = ResolveLanguageCode(CurrentLanguage);
+        }
+
+        private static string ResolveLanguageCode(string cultureCode)
+        {
+            if (cultureCode.StartsWith("pt", StringComparison.OrdinalIgnoreCase))
+            {
+                return "PT";
+            }
+            if (cultureCode.StartsWith("es", StringComparison.OrdinalIgnoreCase))
+            {
+                return "ES";
+            }
+            if (cultureCode.StartsWith("de", StringComparison.OrdinalIgnoreCase))
+            {
+                return "DE";
+            }
+            if (cultureCode.StartsWith("fr", StringComparison.OrdinalIgnoreCase))
+            {
+                return "FR";
+            }
+            if (cultureCode.StartsWith("zh", StringComparison.OrdinalIgnoreCase))
+            {
+                return "ZH";
+            }
+            return "EN";
         }
 
         private IStorageProvider? GetStorageProvider()

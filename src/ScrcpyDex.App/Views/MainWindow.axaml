@@ -59,18 +59,19 @@
                                VerticalAlignment="Center" />
                 </StackPanel>
 
-                <!-- Warning Alert (if any) -->
+                <!-- Right Header Actions (Warning Alert & Language Switcher) -->
                 <StackPanel Grid.Column="1"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
-                            IsVisible="{Binding StatusWarning, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            Spacing="8">
+                            Spacing="10">
+                    <!-- Warning Alert (if any) -->
                     <Border Background="#3A2500"
                             BorderBrush="#FFB900"
                             BorderThickness="1"
                             CornerRadius="4"
-                            Padding="8,2">
+                            Padding="8,2"
+                            IsVisible="{Binding StatusWarning, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <TextBlock Text="⚠" Foreground="#FFD54F" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" />
                             <TextBlock Text="{Binding StatusWarning}" Foreground="#FFE082" FontSize="11" VerticalAlignment="Center" />
@@ -81,6 +82,44 @@
                                     Margin="4,0,0,0" />
                         </StackPanel>
                     </Border>
+
+                    <!-- Language Switcher Button -->
+                    <Button Classes="chip"
+                            Padding="8,4"
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="{Binding [General_Language_Desc], Source={x:Static loc:LocalizationManager.Instance}}">
+                        <Button.Flyout>
+                            <MenuFlyout x:DataType="vm:MainWindowViewModel" Placement="BottomEdgeAlignedRight">
+                                <MenuItem Header="English (EN)"
+                                          Command="{Binding ChangeLanguageCommand}"
+                                          CommandParameter="en" />
+                                <MenuItem Header="Português (Brasil)"
+                                          Command="{Binding ChangeLanguageCommand}"
+                                          CommandParameter="pt-BR" />
+                                <MenuItem Header="Español (ES)"
+                                          Command="{Binding ChangeLanguageCommand}"
+                                          CommandParameter="es" />
+                                <MenuItem Header="Deutsch (DE)"
+                                          Command="{Binding ChangeLanguageCommand}"
+                                          CommandParameter="de" />
+                                <MenuItem Header="Français (FR)"
+                                          Command="{Binding ChangeLanguageCommand}"
+                                          CommandParameter="fr" />
+                                <MenuItem Header="简体中文 (ZH)"
+                                          Command="{Binding ChangeLanguageCommand}"
+                                          CommandParameter="zh-Hans" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="🌐" FontSize="11" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding CurrentLanguageCode}"
+                                       FontWeight="SemiBold"
+                                       FontSize="11"
+                                       VerticalAlignment="Center"
+                                       Foreground="#F1F5F9" />
+                            <TextBlock Text="▾" FontSize="9" VerticalAlignment="Center" Foreground="#64748B" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
