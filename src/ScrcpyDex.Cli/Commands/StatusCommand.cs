@@ -102,7 +102,7 @@ namespace ScrcpyDex.Cli.Commands
             var settings = await repo.LoadAsync(ct).ConfigureAwait(false);
 
             Console.WriteLine($"  Resolution:    {settings.Display?.Resolution ?? "1920x1080"}");
-            Console.WriteLine($"  Framerate:     {settings.Display?.Fps ?? 60} fps");
+            Console.WriteLine($"  Framerate:     {settings.Display?.Fps ?? 30} fps");
             Console.WriteLine($"  Bitrate:       {(settings.Display?.Bitrate ?? 8000000) / 1000000.0:F1} Mbps");
             Console.WriteLine($"  Video Codec:   {settings.Display?.Codec ?? "h264"}");
             Console.WriteLine($"  Render Driver: {settings.Display?.RenderDriver ?? (OperatingSystem.IsWindows() ? "direct3d11" : "opengl")}");

@@ -139,7 +139,7 @@ namespace ScrcpyDex.App.ViewModels
         #region Observable Properties - Display & Stream Settings
 
         [ObservableProperty]
-        private string _selectedResolution = "2560x1080 (Ultrawide DeX)";
+        private string _selectedResolution = "1920x1080 (FHD)";
 
         public IReadOnlyList<string> AvailableResolutions { get; } = new[]
         {
@@ -153,7 +153,7 @@ namespace ScrcpyDex.App.ViewModels
         };
 
         [ObservableProperty]
-        private int _selectedFps = 60;
+        private int _selectedFps = 30;
 
         public IReadOnlyList<int> AvailableFps { get; } = new[] { 30, 60, 90, 120 };
 
@@ -371,9 +371,15 @@ namespace ScrcpyDex.App.ViewModels
 
         private void ApplyLoadedSettings(ScrcpyDeXSettings settings)
         {
-            if (AvailableResolutions.Contains(settings.Display.Resolution))
+            if (!string.IsNullOrWhiteSpace(settings.Display.Resolution))
             {
-                SelectedResolution = settings.Display.Resolution;
+                var matchedRes = AvailableResolutions.FirstOrDefault(r =>
+                    r.Equals(settings.Display.Resolution, StringComparison.OrdinalIgnoreCase) ||
+                    r.StartsWith(settings.Display.Resolution, StringComparison.OrdinalIgnoreCase));
+                if (matchedRes != null)
+                {
+                    SelectedResolution = matchedRes;
+                }
             }
 
             if (AvailableFps.Contains(settings.Display.Fps))

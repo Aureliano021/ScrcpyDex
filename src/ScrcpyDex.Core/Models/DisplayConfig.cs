@@ -31,7 +31,7 @@ namespace ScrcpyDex.Models
         public int Dpi { get; set; } = 160;
 
         [JsonPropertyName("fps")]
-        public int Fps { get; set; } = 60;
+        public int Fps { get; set; } = 30;
 
         [JsonPropertyName("bitrate")]
         public int Bitrate { get; set; } = 8000000;
