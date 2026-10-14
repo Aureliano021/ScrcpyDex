@@ -35,7 +35,29 @@ flowchart LR
 
 ---
 
-## Section 1: Prerequisites & Upstream scrcpy Installation
+## Quick Start: Automated One-Step Setup
+
+For Ubuntu and Linux Mint users who prefer an automated installation without manually executing individual commands, run the setup optimizer script:
+
+```bash
+chmod +x scripts/setup-linux.sh scripts/run-linux.sh
+./scripts/setup-linux.sh
+```
+
+This single command automatically:
+1. Installs ADB and VA-API video decoding drivers (`mesa-va-drivers`, `intel-media-va-driver`).
+2. Configures Samsung udev rules (`/etc/udev/rules.d/51-android.rules`) and adds your user to the `plugdev` group.
+3. Downloads and configures upstream `scrcpy >= 2.4` directly if an incompatible distro package is detected.
+4. Verifies the .NET 8 runtime and tests device connectivity.
+
+Once finished, launch ScrcpyDeX with:
+```bash
+./scripts/run-linux.sh
+```
+
+---
+
+## Section 1: Manual Prerequisites & Configuration
 
 ### 1.1 Hardware and System Requirements
 

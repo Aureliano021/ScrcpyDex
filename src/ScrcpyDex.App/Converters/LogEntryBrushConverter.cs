@@ -24,8 +24,8 @@ namespace ScrcpyDex.App.Converters
     /// </summary>
     public sealed class LogEntryBrushConverter : IValueConverter
     {
-        private static readonly IBrush StandardBrush = new SolidColorBrush(Color.Parse("#CCCCCC"));
-        private static readonly IBrush ErrorBrush = new SolidColorBrush(Color.Parse("#FF6B6B"));
+        private static readonly IBrush StandardBrush = new SolidColorBrush(Color.Parse("#E2E8F0"));
+        private static readonly IBrush ErrorBrush = new SolidColorBrush(Color.Parse("#FB7185"));
 
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {

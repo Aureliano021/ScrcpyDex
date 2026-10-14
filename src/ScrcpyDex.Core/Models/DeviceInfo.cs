@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
+// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,6 +29,9 @@ namespace ScrcpyDex.Models
             set => State = value ? "device" : "offline";
         }
         public int DeXDisplayId { get; set; } = -1;
+        public string MarketingName => SamsungDeviceModelResolver.ResolveMarketingName(Model);
+        public string ModelCode => SamsungDeviceModelResolver.ExtractModelCode(Model, Serial);
+        public string FrameLabel => SamsungDeviceModelResolver.ResolveFrameLabel(Model);
 
         public DeviceInfo() { }
 

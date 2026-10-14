@@ -60,6 +60,12 @@ namespace ScrcpyDex.Models
         [JsonPropertyName("renderDriver")]
         public string? RenderDriver { get; set; }
 
+        [JsonPropertyName("recordFile")]
+        public string? RecordFile { get; set; }
+
+        [JsonPropertyName("forwardShortcuts")]
+        public bool ForwardShortcuts { get; set; } = true;
+
         public static DisplayConfig CreateDefault()
         {
             return new DisplayConfig();

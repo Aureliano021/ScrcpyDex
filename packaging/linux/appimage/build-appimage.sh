@@ -6,10 +6,16 @@
 
 set -euo pipefail
 
-VERSION="${1:-${SCRCPYDEX_VERSION:-1.1.0}}"
+VERSION="${1:-${SCRCPYDEX_VERSION:-2.0.0}}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 OUTPUT_DIR="${OUTPUT_DIR:-$REPO_ROOT/publish}"
+
+if [ -d "$REPO_ROOT/ScrcpyDex/src" ]; then
+    BASE_DIR="$REPO_ROOT/ScrcpyDex"
+else
+    BASE_DIR="$REPO_ROOT"
+fi
 
 echo "[ScrcpyDeX AppImage] Target version: $VERSION"
 echo "[ScrcpyDeX AppImage] Repository root: $REPO_ROOT"
@@ -57,10 +63,10 @@ if [ -f "$REPO_ROOT/packaging/linux/stop-dex.sh" ]; then
 fi
 
 # 3. Stage Binaries
-APP_CSPROJ="$REPO_ROOT/src/ScrcpyDex.App/ScrcpyDex.App.csproj"
+APP_CSPROJ="$BASE_DIR/src/ScrcpyDex.App/ScrcpyDex.App.csproj"
 if [ -f "$APP_CSPROJ" ] && command -v dotnet >/dev/null 2>&1; then
-    echo "[ScrcpyDeX AppImage] Publishing ScrcpyDex.App (linux-x64)..."
-    dotnet publish "$APP_CSPROJ" -c Release -r linux-x64 --self-contained false -o "$APPDIR/usr/lib/scrcpydex/app"
+    echo "[ScrcpyDeX AppImage] Publishing ScrcpyDex.App (self-contained linux-x64)..."
+    dotnet publish "$APP_CSPROJ" -c Release -r linux-x64 --self-contained true -o "$APPDIR/usr/lib/scrcpydex/app"
     cat << 'EOF' > "$APPDIR/usr/bin/scrcpydex"
 #!/bin/sh
 exec "$APPDIR/usr/lib/scrcpydex/app/ScrcpyDex.App" "$@"
@@ -76,10 +82,10 @@ EOF
     chmod 755 "$APPDIR/usr/bin/scrcpydex"
 fi
 
-CLI_CSPROJ="$REPO_ROOT/src/ScrcpyDex.Cli/ScrcpyDex.Cli.csproj"
+CLI_CSPROJ="$BASE_DIR/src/ScrcpyDex.Cli/ScrcpyDex.Cli.csproj"
 if [ -f "$CLI_CSPROJ" ] && command -v dotnet >/dev/null 2>&1; then
-    echo "[ScrcpyDeX AppImage] Publishing ScrcpyDex.Cli (linux-x64)..."
-    dotnet publish "$CLI_CSPROJ" -c Release -r linux-x64 --self-contained false -o "$APPDIR/usr/lib/scrcpydex/cli"
+    echo "[ScrcpyDeX AppImage] Publishing ScrcpyDex.Cli (self-contained linux-x64)..."
+    dotnet publish "$CLI_CSPROJ" -c Release -r linux-x64 --self-contained true -o "$APPDIR/usr/lib/scrcpydex/cli"
     CLI_BIN="$(find "$APPDIR/usr/lib/scrcpydex/cli" -maxdepth 1 -type f -executable -not -name "*.so" | head -n 1)"
     CLI_NAME="$(basename "${CLI_BIN:-scrcpy-dex}")"
     cat << EOF > "$APPDIR/usr/bin/scrcpydex-cli"

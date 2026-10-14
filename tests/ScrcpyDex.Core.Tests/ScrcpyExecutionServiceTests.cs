@@ -68,6 +68,24 @@ namespace ScrcpyDex.Core.Tests
         }
 
         [Fact]
+        public void BuildArgumentsList_RenderDriver_Auto_HandlesOperatingSystemNegotiation()
+        {
+            var settings = new ScrcpyDeXSettings();
+            settings.Display.RenderDriver = "auto";
+
+            List<string> args = ScrcpyExecutionService.BuildArgumentsList(settings);
+
+            if (OperatingSystem.IsWindows())
+            {
+                Assert.DoesNotContain(args, a => a.StartsWith("--render-driver"));
+            }
+            else
+            {
+                Assert.Contains("--render-driver=opengl", args);
+            }
+        }
+
+        [Fact]
         public void BuildArgumentsList_WithDisplayId_IncludesDisplayIdArgument()
         {
             var settings = new ScrcpyDeXSettings();
@@ -221,6 +239,41 @@ namespace ScrcpyDex.Core.Tests
             Assert.NotNull(settings.Device);
             Assert.True(settings.Device.TurnScreenOff);
             Assert.True(settings.Device.StayAwake);
+        }
+
+        [Fact]
+        public void BuildArgumentsList_WithRecordFile_IncludesRecordArgument()
+        {
+            var settings = new ScrcpyDeXSettings();
+            settings.Display.RecordFile = @"C:\Records\session.mp4";
+
+            List<string> args = ScrcpyExecutionService.BuildArgumentsList(settings);
+
+            Assert.Contains(@"--record=C:\Records\session.mp4", args);
+        }
+
+        [Fact]
+        public void BuildArgumentsList_WithForwardShortcuts_IncludesUhidKeyboard()
+        {
+            var settings = new ScrcpyDeXSettings();
+            settings.Input.ForwardShortcuts = true;
+
+            List<string> args = ScrcpyExecutionService.BuildArgumentsList(settings);
+
+            Assert.Contains("--keyboard=uhid", args);
+        }
+
+        [Fact]
+        public void BuildArgumentsList_WithLabeledResolution_ParsesMaxSizeCorrectly()
+        {
+            var settings = new ScrcpyDeXSettings();
+            settings.Display.Resolution = "2560x1080 (Ultrawide DeX)";
+            settings.Display.Width = null;
+            settings.Display.Height = null;
+
+            List<string> args = ScrcpyExecutionService.BuildArgumentsList(settings);
+
+            Assert.Contains("--max-size=2560", args);
         }
     }
 }

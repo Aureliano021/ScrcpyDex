@@ -14,10 +14,10 @@
     <StartupObject>ScrcpyDex.Program</StartupObject>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-    <Version>1.1.0</Version>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
-    <FileVersion>1.1.0.0</FileVersion>
-    <ProductVersion>1.1.0</ProductVersion>
+    <Version>2.0.0</Version>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <ProductVersion>2.0.0</ProductVersion>
   </PropertyGroup>
 
   <ItemGroup>

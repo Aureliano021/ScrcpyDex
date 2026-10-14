@@ -415,11 +415,32 @@ namespace ScrcpyDex.Services
                 args.Add(serial);
             }
 
-            // Rendering driver (direct3d11 on Windows, opengl on Linux/POSIX by default)
-            string renderDriver = !string.IsNullOrWhiteSpace(settings.Display?.RenderDriver)
-                ? settings.Display.RenderDriver
-                : (OperatingSystem.IsWindows() ? "direct3d11" : "opengl");
-            args.Add($"--render-driver={renderDriver}");
+            // Rendering driver negotiation
+            string? renderDriver = settings.Display?.RenderDriver;
+            if (string.Equals(renderDriver, "auto", StringComparison.OrdinalIgnoreCase))
+            {
+                // When "auto" is explicitly chosen:
+                // On Windows: omit --render-driver entirely so SDL2 chooses the best driver and automatically falls back if D3D11 is unsupported
+                // On Linux/POSIX: enforce opengl to prevent invalid driver selections
+                if (!OperatingSystem.IsWindows())
+                {
+                    args.Add("--render-driver=opengl");
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(renderDriver))
+            {
+                if (!OperatingSystem.IsWindows() && string.Equals(renderDriver, "direct3d11", StringComparison.OrdinalIgnoreCase))
+                {
+                    renderDriver = "opengl";
+                }
+                args.Add($"--render-driver={renderDriver}");
+            }
+            else
+            {
+                // Legacy default if RenderDriver is null/empty
+                string defaultDriver = OperatingSystem.IsWindows() ? "direct3d11" : "opengl";
+                args.Add($"--render-driver={defaultDriver}");
+            }
 
             // Hardware UHID mouse injection
             string mouseDriver = !string.IsNullOrWhiteSpace(settings.Input?.MouseDriver)
@@ -481,6 +502,18 @@ namespace ScrcpyDex.Services
                 args.Add($"--display-id={displayId.Value}");
             }
 
+            // Recording to MP4 file
+            if (!string.IsNullOrWhiteSpace(settings.Display?.RecordFile))
+            {
+                args.Add($"--record={settings.Display.RecordFile}");
+            }
+
+            // Keyboard shortcut forwarding (UHID)
+            if (settings.Input?.ForwardShortcuts == true)
+            {
+                args.Add("--keyboard=uhid");
+            }
+
             // Window mode
             string windowMode = settings.Display?.WindowMode?.ToLowerInvariant() ?? "normal";
             if (windowMode == "fullscreen")
@@ -510,6 +543,12 @@ namespace ScrcpyDex.Services
             if (!string.IsNullOrWhiteSpace(display.Resolution))
             {
                 string res = display.Resolution.Trim();
+                int parenIdx = res.IndexOf('(');
+                if (parenIdx > 0)
+                {
+                    res = res.Substring(0, parenIdx).Trim();
+                }
+
                 if (res.Contains('x', StringComparison.OrdinalIgnoreCase))
                 {
                     var parts = res.Split(new[] { 'x', 'X' }, StringSplitOptions.RemoveEmptyEntries);
@@ -543,7 +582,8 @@ namespace ScrcpyDex.Services
                     Bitrate = config.Bitrate,
                     Codec = config.Codec,
                     WindowMode = config.WindowMode,
-                    RenderDriver = config.RenderDriver
+                    RenderDriver = config.RenderDriver,
+                    RecordFile = config.RecordFile
                 },
                 Audio = new AudioSection
                 {
@@ -553,7 +593,8 @@ namespace ScrcpyDex.Services
                 Input = new InputSection
                 {
                     MouseDriver = config.MouseDriver,
-                    ReleaseKey = config.ReleaseKey
+                    ReleaseKey = config.ReleaseKey,
+                    ForwardShortcuts = config.ForwardShortcuts
                 },
                 Device = new DeviceSection
                 {
@@ -577,6 +618,14 @@ namespace ScrcpyDex.Services
             // Detect true fatal errors in process log stream (do not trigger on benign stderr logs or warnings)
             if (IsFatalErrorIndicator(entry.Text))
             {
+                if (entry.Text.Contains("D3D11CreateDevice", StringComparison.OrdinalIgnoreCase) ||
+                    (entry.Text.Contains("Could not create renderer", StringComparison.OrdinalIgnoreCase) && entry.Text.Contains("direct3d", StringComparison.OrdinalIgnoreCase)))
+                {
+                    LogReceived?.Invoke(this, new ProcessLogEntry(
+                        DateTime.Now,
+                        "Direct3D 11 renderer is not supported on this host graphics configuration. Try selecting 'OpenGL' as the Render Driver in settings.",
+                        true));
+                }
                 ErrorOccurred?.Invoke(this, entry.Text);
             }
         }
