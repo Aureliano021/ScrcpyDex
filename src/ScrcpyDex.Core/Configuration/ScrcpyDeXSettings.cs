@@ -152,11 +152,11 @@ namespace ScrcpyDex.Core.Configuration
 
     public sealed class DisplaySection : ObservableObject
     {
-        private string _resolution = "1920x1080";
+        private string _resolution = "1920x1080 (FHD)";
         private int? _width = 1920;
         private int? _height = 1080;
         private int? _dpi = 320;
-        private int _fps = 60;
+        private int _fps = 30;
         private int _bitrate = 8000000;
         private string _codec = "h264";
         private string _windowMode = "normal";

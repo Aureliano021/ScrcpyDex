@@ -456,7 +456,7 @@ namespace ScrcpyDex.Services
             }
 
             // Max FPS
-            int fps = settings.Display?.Fps ?? 60;
+            int fps = settings.Display?.Fps ?? 30;
             if (fps > 0)
             {
                 args.Add($"--max-fps={fps}");
