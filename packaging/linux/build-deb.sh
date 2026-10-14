@@ -6,10 +6,16 @@
 
 set -euo pipefail
 
-VERSION="${1:-${SCRCPYDEX_VERSION:-1.1.0}}"
+VERSION="${1:-${SCRCPYDEX_VERSION:-2.0.0}}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 OUTPUT_DIR="${OUTPUT_DIR:-$REPO_ROOT/publish}"
+
+if [ -d "$REPO_ROOT/ScrcpyDex/src" ]; then
+    BASE_DIR="$REPO_ROOT/ScrcpyDex"
+else
+    BASE_DIR="$REPO_ROOT"
+fi
 
 echo "[ScrcpyDeX Debian Packaging] Target version: $VERSION"
 echo "[ScrcpyDeX Debian Packaging] Repository root: $REPO_ROOT"
@@ -22,6 +28,14 @@ cleanup() {
 trap cleanup EXIT
 
 PKG_DIR="$STAGE_DIR/scrcpydex_${VERSION}_amd64"
+
+safe_cp() {
+    cat "$1" > "$2"
+}
+safe_cp_r() {
+    mkdir -p "$2"
+    (cd "$1" && tar cf - .) | (cd "$2" && tar xf -)
+}
 
 # 1. Create Filesystem Layout
 mkdir -p "$PKG_DIR/DEBIAN"
@@ -42,7 +56,7 @@ elif [ -f "$REPO_ROOT/publish/scrcpydex-server.jar" ]; then
 fi
 
 if [ -n "$SERVER_JAR" ] && [ -f "$SERVER_JAR" ]; then
-    cp "$SERVER_JAR" "$PKG_DIR/usr/share/scrcpydex/server/scrcpydex-server.jar"
+    safe_cp "$SERVER_JAR" "$PKG_DIR/usr/share/scrcpydex/server/scrcpydex-server.jar"
     # Create symlink for compatibility with existing candidate search paths
     ln -s "server/scrcpydex-server.jar" "$PKG_DIR/usr/share/scrcpydex/scrcpydex-server.jar"
 else
@@ -51,20 +65,30 @@ else
 fi
 
 if [ -f "$REPO_ROOT/packaging/linux/start-dex.sh" ]; then
-    cp "$REPO_ROOT/packaging/linux/start-dex.sh" "$PKG_DIR/usr/share/scrcpydex/start-dex.sh"
+    safe_cp "$REPO_ROOT/packaging/linux/start-dex.sh" "$PKG_DIR/usr/share/scrcpydex/start-dex.sh"
     chmod 755 "$PKG_DIR/usr/share/scrcpydex/start-dex.sh"
 fi
 
 if [ -f "$REPO_ROOT/packaging/linux/stop-dex.sh" ]; then
-    cp "$REPO_ROOT/packaging/linux/stop-dex.sh" "$PKG_DIR/usr/share/scrcpydex/stop-dex.sh"
+    safe_cp "$REPO_ROOT/packaging/linux/stop-dex.sh" "$PKG_DIR/usr/share/scrcpydex/stop-dex.sh"
     chmod 755 "$PKG_DIR/usr/share/scrcpydex/stop-dex.sh"
 fi
 
 # 3. Compile or Stage /usr/bin/scrcpydex (GUI App)
-APP_CSPROJ="$REPO_ROOT/src/ScrcpyDex.App/ScrcpyDex.App.csproj"
-if [ -f "$APP_CSPROJ" ] && command -v dotnet >/dev/null 2>&1; then
-    echo "[ScrcpyDeX Debian Packaging] Compiling ScrcpyDex.App..."
-    dotnet publish "$APP_CSPROJ" -c Release -r linux-x64 --self-contained false -o "$PKG_DIR/usr/lib/scrcpydex/app"
+mkdir -p "$PKG_DIR/usr/lib/scrcpydex/app"
+APP_CSPROJ="$BASE_DIR/src/ScrcpyDex.App/ScrcpyDex.App.csproj"
+if [ -d "$BASE_DIR/publish/staging/app" ] && [ -n "$(ls -A "$BASE_DIR/publish/staging/app" 2>/dev/null)" ]; then
+    echo "[ScrcpyDeX Debian Packaging] Staging pre-compiled ScrcpyDex.App from staging/app..."
+    safe_cp_r "$BASE_DIR/publish/staging/app" "$PKG_DIR/usr/lib/scrcpydex/app"
+    chmod 755 "$PKG_DIR/usr/lib/scrcpydex/app/ScrcpyDex.App" || true
+    cat << 'EOF' > "$PKG_DIR/usr/bin/scrcpydex"
+#!/bin/sh
+exec /usr/lib/scrcpydex/app/ScrcpyDex.App "$@"
+EOF
+    chmod 755 "$PKG_DIR/usr/bin/scrcpydex"
+elif [ -f "$APP_CSPROJ" ] && command -v dotnet >/dev/null 2>&1; then
+    echo "[ScrcpyDeX Debian Packaging] Compiling ScrcpyDex.App (self-contained linux-x64)..."
+    dotnet publish "$APP_CSPROJ" -c Release -r linux-x64 --self-contained true -o "$PKG_DIR/usr/lib/scrcpydex/app"
     cat << 'EOF' > "$PKG_DIR/usr/bin/scrcpydex"
 #!/bin/sh
 exec /usr/lib/scrcpydex/app/ScrcpyDex.App "$@"
@@ -81,9 +105,21 @@ EOF
 fi
 
 # 4. Compile or Stage /usr/bin/scrcpydex-cli (CLI Utility)
-if [ -f "$CLI_CSPROJ" ] && command -v dotnet >/dev/null 2>&1; then
-    echo "[ScrcpyDeX Debian Packaging] Compiling ScrcpyDex.Cli..."
-    dotnet publish "$CLI_CSPROJ" -c Release -r linux-x64 --self-contained false -o "$PKG_DIR/usr/lib/scrcpydex/cli"
+mkdir -p "$PKG_DIR/usr/lib/scrcpydex/cli"
+CLI_CSPROJ="$BASE_DIR/src/ScrcpyDex.Cli/ScrcpyDex.Cli.csproj"
+if [ -d "$BASE_DIR/publish/staging/cli" ] && [ -n "$(ls -A "$BASE_DIR/publish/staging/cli" 2>/dev/null)" ]; then
+    echo "[ScrcpyDeX Debian Packaging] Staging pre-compiled ScrcpyDex.Cli from staging/cli..."
+    safe_cp_r "$BASE_DIR/publish/staging/cli" "$PKG_DIR/usr/lib/scrcpydex/cli"
+    chmod 755 "$PKG_DIR/usr/lib/scrcpydex/cli/scrcpy-dex" || true
+    cat << 'EOF' > "$PKG_DIR/usr/bin/scrcpydex-cli"
+#!/bin/sh
+exec /usr/lib/scrcpydex/cli/scrcpy-dex "$@"
+EOF
+    chmod 755 "$PKG_DIR/usr/bin/scrcpydex-cli"
+    ln -sf "scrcpydex-cli" "$PKG_DIR/usr/bin/scrcpy-dex"
+elif [ -f "$CLI_CSPROJ" ] && command -v dotnet >/dev/null 2>&1; then
+    echo "[ScrcpyDeX Debian Packaging] Compiling ScrcpyDex.Cli (self-contained linux-x64)..."
+    dotnet publish "$CLI_CSPROJ" -c Release -r linux-x64 --self-contained true -o "$PKG_DIR/usr/lib/scrcpydex/cli"
     CLI_BIN="$(find "$PKG_DIR/usr/lib/scrcpydex/cli" -maxdepth 1 -type f -executable -not -name "*.so" | head -n 1)"
     CLI_NAME="$(basename "${CLI_BIN:-scrcpy-dex}")"
     cat << EOF > "$PKG_DIR/usr/bin/scrcpydex-cli"
@@ -112,8 +148,8 @@ fi
 
 # 5. Stage Udev Rules
 if [ -f "$REPO_ROOT/packaging/linux/51-android.rules" ]; then
-    cp "$REPO_ROOT/packaging/linux/51-android.rules" "$PKG_DIR/lib/udev/rules.d/51-android.rules"
-    chmod 644 "$PKG_DIR/lib/udev/rules.d/51-android.rules"
+    safe_cp "$REPO_ROOT/packaging/linux/51-android.rules" "$PKG_DIR/lib/udev/rules.d/69-scrcpydex.rules"
+    chmod 644 "$PKG_DIR/lib/udev/rules.d/69-scrcpydex.rules"
 fi
 
 # 6. Stage Desktop Launcher
@@ -124,7 +160,7 @@ fi
 
 # 7. Stage Application Icon
 if [ -f "$REPO_ROOT/assets/app_icon.png" ]; then
-    cp "$REPO_ROOT/assets/app_icon.png" "$PKG_DIR/usr/share/icons/hicolor/256x256/apps/scrcpydex.png"
+    safe_cp "$REPO_ROOT/assets/app_icon.png" "$PKG_DIR/usr/share/icons/hicolor/256x256/apps/scrcpydex.png"
     chmod 644 "$PKG_DIR/usr/share/icons/hicolor/256x256/apps/scrcpydex.png"
 fi
 
@@ -139,12 +175,12 @@ else
 fi
 
 if [ -f "$SCRIPT_DIR/debian/postinst" ]; then
-    cp "$SCRIPT_DIR/debian/postinst" "$PKG_DIR/DEBIAN/postinst"
+    safe_cp "$SCRIPT_DIR/debian/postinst" "$PKG_DIR/DEBIAN/postinst"
     chmod 755 "$PKG_DIR/DEBIAN/postinst"
 fi
 
 if [ -f "$SCRIPT_DIR/debian/prerm" ]; then
-    cp "$SCRIPT_DIR/debian/prerm" "$PKG_DIR/DEBIAN/prerm"
+    safe_cp "$SCRIPT_DIR/debian/prerm" "$PKG_DIR/DEBIAN/prerm"
     chmod 755 "$PKG_DIR/DEBIAN/prerm"
 fi
 

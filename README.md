@@ -35,10 +35,13 @@
 
 * **Runs Over USB (No Wi-Fi Needed):** Streams directly through standard ADB port forwards over a USB cable, bypassing wireless network congestion, bandwidth throttles, and local network restrictions.
 * **Cross-Platform Hardware Acceleration:** 60 FPS video decoding handled via `scrcpy` using Direct3D11 on Windows and OpenGL with VA-API hardware decoding on Linux (Intel i965/iHD, AMD radeonsi).
+* **"Galaxy DeX Studio" Desktop Client:** Cross-platform Avalonia UI featuring Deep Space Navy aesthetics, live hardware telemetry (battery level %, temperature °C, USB link speed, ping latency), bitrate preset chips, and MP4 session recording.
 * **Native Desktop Mouse Emulation (UHID):** Injects pointer events via Linux kernel `/dev/uhid` so Android recognizes a physical USB mouse—supporting native desktop cursor icons, hover states, fluid scroll wheel, and right-click context menus.
+* **Instant Device Recognition & Disconnect Handling:** Discovers Samsung Galaxy models via ADB `track-devices-l` and friendly model resolution (`SM-S911B` -> "Samsung Galaxy S23") immediately upon startup, resetting the interface instantly if unplugged.
 * **Audio Forwarding:** Captures DeX audio on the device and forwards it to PC speakers or headphones over USB (WASAPI on Windows, SDL/PipeWire/PulseAudio on Linux).
-* **Standard ADB Privileges (UID 2000):** Operates under standard development user context (`UID 2000 shell`) without root access — Knox warranty bit (`0x0`) remained untouched on the tested Galaxy S23 device.
-* **Automated Session Cleanup:** Closes the session, restores the phone screen to its previous state, and terminates background daemons automatically upon window close (Win32 Job Objects on Windows; POSIX process group signals on Linux).
+* **Multilingual Localization:** Runtime language selection across 6 languages (English, Portuguese, Spanish, German, French, Simplified Chinese).
+* **Standard ADB Privileges (UID 2000):** Operates under standard development user context (`UID 2000 shell`) without root access — Knox warranty bit (`0x0`) remained untouched on tested devices.
+* **Unified Graceful Session Teardown:** Closes the session, unregisters Samsung `system_server` virtual display buffers, restores the mobile display, and clears ADB tunnels automatically when closing the window (`Alt+F4` or `[X]`) or clicking **Stop Session**. No emergency kill switch needed.
 
 ---
 
@@ -100,28 +103,26 @@ scrcpydex config path
 
 ### Windows
 
-1. Download the Windows package (`ScrcpyDeX-v*-win-x64.zip`) from **[GitHub Releases](https://github.com/Aureliano021/ScrcpyDex/releases/latest)** and extract it.
+1. Download the Windows release archive (`ScrcpyDeX-v2.0.0-win-x64.zip`) from **[GitHub Releases](https://github.com/Aureliano021/ScrcpyDex/releases/latest)** and extract it.
 2. Connect your Samsung Galaxy phone via USB with USB debugging enabled.
-3. Launch **`ScrcpyDeX.exe`** (or run `ScrcpyDeX.bat`).
-4. Confirm your device is recognized by the status bar:
-
-   ![Device connected preview](assets/device_connected_preview.png)
-
-5. Click **Start DeX Session**.
-6. **Emergency Disconnect:** Run `.\stop-dex.bat` to terminate lingering sessions and reset ADB tunnels.
+3. Launch **`ScrcpyDex.App.exe`** (or `ScrcpyDeX.exe`).
+4. Confirm your device is recognized by the title bar and phone preview frame (model code and battery/temp telemetry).
+5. Click **START DEX SESSION** (`Ctrl+Enter`).
+6. To end the session and cleanly restore your phone screen, click **Stop Session** (`Ctrl+Shift+W`) or close the streaming window (`Alt+F4`).
 
 ### Linux (Ubuntu / Linux Mint)
 
-1. Ensure prerequisites are met: install official `scrcpy >= 2.4`, `adb`, and set up USB udev rules. See the [**Linux Setup Guide**](docs/LINUX_SETUP_GUIDE.md).
-2. Connect your Samsung Galaxy phone via USB and authorize the computer prompt.
-3. Verify your environment:
+1. Automated 1-step setup:
    ```bash
-   scrcpydex doctor
+   ./scripts/setup-linux.sh
    ```
-4. Start a DeX session via CLI or GUI:
-   * **CLI:** `scrcpydex start`
-   * **GUI:** `./ScrcpyDex.App` (or launch `scrcpydex-gui`)
-5. **Emergency Disconnect:** Run `scrcpydex stop` or execute `./packaging/linux/stop-dex.sh`.
+2. Connect your Samsung Galaxy phone via USB and authorize the RSA host prompt.
+3. Start a DeX session via GUI or CLI:
+   * **GUI:** `./scripts/run-linux.sh`
+   * **CLI:** `./scripts/run-linux.sh --cli start`
+4. To end the session and cleanly restore your phone screen, click **Stop Session** in the GUI, close the streaming window (`Alt+F4`), or execute `./scripts/run-linux.sh --cli stop`.
+
+For manual step-by-step installation, see the [**Linux Setup Guide**](docs/LINUX_SETUP_GUIDE.md).
 
 ---
 
@@ -129,10 +130,12 @@ scrcpydex config path
 
 | Action | Windows Shortcut | Linux Shortcut (X11 / Wayland) | Description |
 | :--- | :--- | :--- | :--- |
+| **Start DeX Session** | `Ctrl + Enter` | `Ctrl + Enter` | Launches the Samsung DeX streaming session on the selected target device. |
+| **Stop DeX Session** | `Ctrl + Shift + W` | `Ctrl + Shift + W` | Orderly teardown: unregisters virtual display on phone, restores mobile screen, and terminates stream. |
 | **Release Mouse Capture** | `Left Alt` or `Windows Key` | `Left Alt` | Releases the captured mouse cursor from the DeX window back to the host window manager. |
 | **Toggle Fullscreen** | `Alt + F` | `Alt + F` | Toggles borderless fullscreen display mode. |
-| **Close & Restore Phone** | `Alt + F4` or Click `[X]` | `Alt + F4` or Click `[X]` | Closes the DeX window and automatically tears down the session on the phone. |
-| **Emergency Disconnect** | `stop-dex.bat` | `scrcpydex stop` / `stop-dex.sh` | Terminal command to force-kill lingering host processes and restore mobile display. |
+| **Close & Restore Phone** | `Alt + F4` or Click `[X]` | `Alt + F4` or Click `[X]` | Closes the streaming window and automatically triggers the complete DeX teardown sequence. |
+| **Terminal Disconnect (Fallback)** | `stop-dex.bat` | `scrcpydex stop` / `stop-dex.sh` | Terminal utility to clean up lingering processes and reset ADB port forward tunnels. |
 
 ---
 
