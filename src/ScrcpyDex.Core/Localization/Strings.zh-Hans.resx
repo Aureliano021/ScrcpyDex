@@ -397,4 +397,126 @@
   <data name="General_Language_Desc" xml:space="preserve">
     <value>选择用户界面显示语言</value>
   </data>
+
+  <!-- MainWindow Avalonia UI -->
+  <data name="MainWindow_Title" xml:space="preserve">
+    <value>ScrcpyDeX — 三星 DeX 电脑客户端</value>
+  </data>
+  <data name="MainWindow_EngineTag" xml:space="preserve">
+    <value>引擎：scrcpy-core x64</value>
+  </data>
+  <data name="Device_DexModeReady" xml:space="preserve">
+    <value>DeX 模式就绪</value>
+  </data>
+  <data name="DeviceSelector_TargetLabel" xml:space="preserve">
+    <value>目标设备：</value>
+  </data>
+  <data name="DeviceSelector_NoDevicesPlaceholder" xml:space="preserve">
+    <value>未检测到设备</value>
+  </data>
+  <data name="Telemetry_Battery" xml:space="preserve">
+    <value>电池</value>
+  </data>
+  <data name="Telemetry_Temperature" xml:space="preserve">
+    <value>温度</value>
+  </data>
+  <data name="Telemetry_Link" xml:space="preserve">
+    <value>连接</value>
+  </data>
+  <data name="Telemetry_Latency" xml:space="preserve">
+    <value>延迟</value>
+  </data>
+  <data name="DeviceSelector_RescanTooltip" xml:space="preserve">
+    <value>重新扫描 ADB 设备与 USB 总线</value>
+  </data>
+  <data name="Action_Rescan" xml:space="preserve">
+    <value>重新扫描</value>
+  </data>
+  <data name="Action_StopSessionText" xml:space="preserve">
+    <value>停止会话</value>
+  </data>
+  <data name="Action_ConfigureScrcpyTooltip" xml:space="preserve">
+    <value>配置 scrcpy 可执行文件路径</value>
+  </data>
+  <data name="Action_ConfigureScrcpy" xml:space="preserve">
+    <value>配置 scrcpy...</value>
+  </data>
+  <data name="Display_CardHeader" xml:space="preserve">
+    <value>显示参数与编码器</value>
+  </data>
+  <data name="Display_ResolutionLabel" xml:space="preserve">
+    <value>显示分辨率：</value>
+  </data>
+  <data name="Display_TargetFrameRate" xml:space="preserve">
+    <value>目标帧率：</value>
+  </data>
+  <data name="Display_VideoCodec" xml:space="preserve">
+    <value>视频编解码器：</value>
+  </data>
+  <data name="Display_AudioStreamDriver" xml:space="preserve">
+    <value>音频流与驱动：</value>
+  </data>
+  <data name="Display_RenderingDriver" xml:space="preserve">
+    <value>渲染驱动后端：</value>
+  </data>
+  <data name="Display_RenderingDriverDesc" xml:space="preserve">
+    <value>支持零拷贝交换链的 D3D11 / OpenGL 硬件渲染</value>
+  </data>
+  <data name="Display_TransmissionBitrate" xml:space="preserve">
+    <value>传输码率：</value>
+  </data>
+  <data name="Display_BitratePresetRecommended" xml:space="preserve">
+    <value>24 Mbps (推荐)</value>
+  </data>
+  <data name="QuickOptions_Header" xml:space="preserve">
+    <value>快速会话选项</value>
+  </data>
+  <data name="QuickOptions_TurnScreenOff" xml:space="preserve">
+    <value>关闭手机屏幕</value>
+  </data>
+  <data name="QuickOptions_TurnScreenOff_Desc" xml:space="preserve">
+    <value>保护 OLED 屏幕并减少发热</value>
+  </data>
+  <data name="QuickOptions_NativeUhidMouse" xml:space="preserve">
+    <value>原生 UHID 鼠标</value>
+  </data>
+  <data name="QuickOptions_NativeUhidMouse_Desc" xml:space="preserve">
+    <value>零延迟原生指针模拟</value>
+  </data>
+  <data name="QuickOptions_ForwardShortcuts" xml:space="preserve">
+    <value>转发快捷键</value>
+  </data>
+  <data name="QuickOptions_ForwardShortcuts_Desc" xml:space="preserve">
+    <value>将 Alt+Tab、Win 键、Ctrl+W 传递至 DeX</value>
+  </data>
+  <data name="QuickOptions_StayAwake" xml:space="preserve">
+    <value>保持设备唤醒</value>
+  </data>
+  <data name="QuickOptions_StayAwake_Desc" xml:space="preserve">
+    <value>防止 Android 在会话期间休眠</value>
+  </data>
+  <data name="QuickOptions_LowLatencyAudio" xml:space="preserve">
+    <value>低延迟音频</value>
+  </data>
+  <data name="QuickOptions_LowLatencyAudio_Desc" xml:space="preserve">
+    <value>通过连续 Opus 缓冲区直连传输</value>
+  </data>
+  <data name="Console_Header" xml:space="preserve">
+    <value>SCRCPY / ADB 执行控制台</value>
+  </data>
+  <data name="Console_ActivePipe" xml:space="preserve">
+    <value>活动管道</value>
+  </data>
+  <data name="Console_CopyCli" xml:space="preserve">
+    <value>复制 CLI 命令</value>
+  </data>
+  <data name="Footer_AdbDaemon" xml:space="preserve">
+    <value>ADB 守护进程：{0}</value>
+  </data>
+  <data name="Footer_EncoderFormat" xml:space="preserve">
+    <value>编码器：{0}</value>
+  </data>
+  <data name="Footer_RoundtripLabel" xml:space="preserve">
+    <value>往返延迟：</value>
+  </data>
 </root>

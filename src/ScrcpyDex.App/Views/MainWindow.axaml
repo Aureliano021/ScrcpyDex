@@ -4,12 +4,13 @@
         xmlns:models="using:ScrcpyDex.Models"
         xmlns:io="using:ScrcpyDex.Core.IO"
         xmlns:converters="using:ScrcpyDex.App.Converters"
+        xmlns:loc="using:ScrcpyDex.Core.Localization"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1060" d:DesignHeight="680"
         x:Class="ScrcpyDex.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Title="ScrcpyDeX — Samsung DeX PC Client"
+        Title="{Binding [MainWindow_Title], Source={x:Static loc:LocalizationManager.Instance}}"
         Width="1060" Height="680"
         MinWidth="880" MinHeight="520"
         WindowStartupLocation="CenterScreen"
@@ -52,7 +53,7 @@
                                FontSize="11"
                                Foreground="#334155"
                                VerticalAlignment="Center" />
-                    <TextBlock Text="Engine: scrcpy-core x64"
+                    <TextBlock Text="{Binding [MainWindow_EngineTag], Source={x:Static loc:LocalizationManager.Instance}}"
                                FontSize="11"
                                Foreground="#94A3B8"
                                VerticalAlignment="Center" />
@@ -73,7 +74,7 @@
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <TextBlock Text="⚠" Foreground="#FFD54F" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" />
                             <TextBlock Text="{Binding StatusWarning}" Foreground="#FFE082" FontSize="11" VerticalAlignment="Center" />
-                            <Button Content="Browse..."
+                            <Button Content="{Binding [Action_Browse], Source={x:Static loc:LocalizationManager.Instance}}"
                                     Command="{Binding BrowseScrcpyPathCommand}"
                                     Padding="6,1"
                                     FontSize="10.5"
@@ -180,7 +181,7 @@
                                    FontSize="11.5"
                                    Foreground="#94A3B8" />
                         <TextBlock Text="•" Foreground="#475569" IsVisible="{Binding HasSelectedDevice}" />
-                        <TextBlock Text="DeX Mode Ready"
+                        <TextBlock Text="{Binding [Device_DexModeReady], Source={x:Static loc:LocalizationManager.Instance}}"
                                    FontSize="11.5"
                                    Foreground="#38BDF8"
                                    IsVisible="{Binding HasSelectedDevice}" />
@@ -196,13 +197,13 @@
 
                     <!-- Device Switcher (for multiple devices) -->
                     <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="Target:" Classes="label" VerticalAlignment="Center" Margin="0" />
+                        <TextBlock Text="{Binding [DeviceSelector_TargetLabel], Source={x:Static loc:LocalizationManager.Instance}}" Classes="label" VerticalAlignment="Center" Margin="0" />
                         <ComboBox ItemsSource="{Binding DeviceList}"
                                   SelectedItem="{Binding SelectedDevice}"
                                   MinWidth="240"
                                   Height="28"
                                   VerticalAlignment="Center"
-                                  PlaceholderText="No devices detected">
+                                  PlaceholderText="{Binding [DeviceSelector_NoDevicesPlaceholder], Source={x:Static loc:LocalizationManager.Instance}}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate x:DataType="models:DeviceInfo">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
@@ -226,7 +227,7 @@
                             Height="38"
                             MinWidth="70">
                         <StackPanel Spacing="1">
-                            <TextBlock Text="BATTERY" FontSize="9" FontWeight="Bold" Foreground="#64748B" />
+                            <TextBlock Text="{Binding [Telemetry_Battery], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9" FontWeight="Bold" Foreground="#64748B" />
                             <StackPanel Orientation="Horizontal" Spacing="3">
                                 <TextBlock Text="⚡" FontSize="10.5" Foreground="#10B981" />
                                 <TextBlock Text="{Binding BatteryLevel}" FontSize="12.5" FontWeight="Bold" Foreground="#10B981" />
@@ -243,7 +244,7 @@
                             Height="38"
                             MinWidth="70">
                         <StackPanel Spacing="1">
-                            <TextBlock Text="TEMP" FontSize="9" FontWeight="Bold" Foreground="#64748B" />
+                            <TextBlock Text="{Binding [Telemetry_Temperature], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9" FontWeight="Bold" Foreground="#64748B" />
                             <StackPanel Orientation="Horizontal" Spacing="3">
                                 <TextBlock Text="🌡️" FontSize="10.5" Foreground="#F59E0B" />
                                 <TextBlock Text="{Binding BatteryTemperature}" FontSize="12.5" FontWeight="Bold" Foreground="#F59E0B" />
@@ -260,7 +261,7 @@
                             Height="38"
                             MinWidth="70">
                         <StackPanel Spacing="1">
-                            <TextBlock Text="LINK" FontSize="9" FontWeight="Bold" Foreground="#64748B" />
+                            <TextBlock Text="{Binding [Telemetry_Link], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9" FontWeight="Bold" Foreground="#64748B" />
                             <StackPanel Orientation="Horizontal" Spacing="3">
                                 <TextBlock Text="🚀" FontSize="10.5" Foreground="#38BDF8" />
                                 <TextBlock Text="{Binding UsbLinkSpeed}" FontSize="12.5" FontWeight="Bold" Foreground="#38BDF8" />
@@ -277,7 +278,7 @@
                             Height="38"
                             MinWidth="70">
                         <StackPanel Spacing="1">
-                            <TextBlock Text="LATENCY" FontSize="9" FontWeight="Bold" Foreground="#64748B" />
+                            <TextBlock Text="{Binding [Telemetry_Latency], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9" FontWeight="Bold" Foreground="#64748B" />
                             <StackPanel Orientation="Horizontal" Spacing="3">
                                 <TextBlock Text="⏱" FontSize="10.5" Foreground="#10B981" />
                                 <TextBlock Text="{Binding EstimatedLatencyMs}" FontSize="12.5" FontWeight="Bold" Foreground="#10B981" />
@@ -288,10 +289,10 @@
                     <!-- Rescan Button -->
                     <Button Command="{Binding RefreshDevicesCommand}"
                             Classes="meterAction"
-                            ToolTip.Tip="Rescan ADB devices &amp; USB bus">
+                            ToolTip.Tip="{Binding [DeviceSelector_RescanTooltip], Source={x:Static loc:LocalizationManager.Instance}}">
                         <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
                             <TextBlock Text="⟳" FontSize="13" Foreground="#94A3B8" VerticalAlignment="Center" />
-                            <TextBlock Text="Rescan" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding [Action_Rescan], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -315,7 +316,7 @@
                         Margin="0,0,8,0">
                     <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
                         <TextBlock Text="▶" FontSize="11" VerticalAlignment="Center" />
-                        <TextBlock Text="START DEX SESSION" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding [Action_StartSession], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" />
                         <Border Classes="shortcutBadge"
                                 CornerRadius="3"
                                 Padding="4,1"
@@ -335,7 +336,7 @@
                         Margin="0,0,10,0">
                     <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                         <TextBlock Classes="stopIcon" Text="■" FontSize="11" VerticalAlignment="Center" />
-                        <TextBlock Text="Stop Session" FontSize="11.5" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding [Action_StopSessionText], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11.5" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
 
@@ -370,10 +371,10 @@
                         BorderBrush="#1E293B"
                         BorderThickness="1"
                         VerticalAlignment="Center"
-                        ToolTip.Tip="Configure scrcpy executable binary path">
+                        ToolTip.Tip="{Binding [Action_ConfigureScrcpyTooltip], Source={x:Static loc:LocalizationManager.Instance}}">
                     <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                         <TextBlock Text="⚙" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center" />
-                        <TextBlock Text="Configure scrcpy..." FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding [Action_ConfigureScrcpy], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
             </Grid>
@@ -387,7 +388,7 @@
                     Margin="0,0,5,0"
                     Padding="10">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="🖥 DISPLAY PARAMETERS &amp; ENCODER"
+                    <TextBlock Text="{Binding [Display_CardHeader], Source={x:Static loc:LocalizationManager.Instance}}"
                                Classes="cardHeader"
                                Margin="0,0,0,2" />
 
@@ -395,7 +396,7 @@
                     <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto, Auto">
                         <!-- Resolution -->
                         <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,6,6">
-                            <TextBlock Text="Display Resolution:" Classes="label" />
+                            <TextBlock Text="{Binding [Display_ResolutionLabel], Source={x:Static loc:LocalizationManager.Instance}}" Classes="label" />
                             <ComboBox ItemsSource="{Binding AvailableResolutions}"
                                       SelectedItem="{Binding SelectedResolution}"
                                       HorizontalAlignment="Stretch" />
@@ -403,7 +404,7 @@
 
                         <!-- FPS -->
                         <StackPanel Grid.Row="0" Grid.Column="1" Margin="6,0,0,6">
-                            <TextBlock Text="Target Frame Rate:" Classes="label" />
+                            <TextBlock Text="{Binding [Display_TargetFrameRate], Source={x:Static loc:LocalizationManager.Instance}}" Classes="label" />
                             <ComboBox ItemsSource="{Binding AvailableFps}"
                                       SelectedItem="{Binding SelectedFps}"
                                       HorizontalAlignment="Stretch" />
@@ -411,7 +412,7 @@
 
                         <!-- Video Codec -->
                         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,6,6">
-                            <TextBlock Text="Video Codec:" Classes="label" />
+                            <TextBlock Text="{Binding [Display_VideoCodec], Source={x:Static loc:LocalizationManager.Instance}}" Classes="label" />
                             <ComboBox ItemsSource="{Binding AvailableCodecs}"
                                       SelectedItem="{Binding SelectedCodec}"
                                       HorizontalAlignment="Stretch" />
@@ -419,7 +420,7 @@
 
                         <!-- Audio Stream -->
                         <StackPanel Grid.Row="1" Grid.Column="1" Margin="6,0,0,6">
-                            <TextBlock Text="Audio Stream &amp; Driver:" Classes="label" />
+                            <TextBlock Text="{Binding [Display_AudioStreamDriver], Source={x:Static loc:LocalizationManager.Instance}}" Classes="label" />
                             <ComboBox ItemsSource="{Binding AvailableAudioCodecs}"
                                       SelectedItem="{Binding SelectedAudioCodec}"
                                       HorizontalAlignment="Stretch" />
@@ -427,7 +428,7 @@
 
                         <!-- Rendering Driver Backend -->
                         <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,6,6">
-                            <TextBlock Text="Rendering Driver Backend:" Classes="label" />
+                            <TextBlock Text="{Binding [Display_RenderingDriver], Source={x:Static loc:LocalizationManager.Instance}}" Classes="label" />
                             <ComboBox ItemsSource="{Binding AvailableRenderDrivers}"
                                       SelectedItem="{Binding SelectedRenderDriver}"
                                       HorizontalAlignment="Stretch" />
@@ -442,7 +443,7 @@
                                 BorderThickness="1"
                                 CornerRadius="5"
                                 VerticalAlignment="Bottom">
-                            <TextBlock Text="D3D11 / OpenGL hardware rendering with Zero Copy swapchain"
+                            <TextBlock Text="{Binding [Display_RenderingDriverDesc], Source={x:Static loc:LocalizationManager.Instance}}"
                                        FontSize="10"
                                        Foreground="#64748B"
                                        VerticalAlignment="Center"
@@ -456,7 +457,7 @@
                     <!-- Transmission Bitrate Section -->
                     <StackPanel Spacing="3">
                         <Grid ColumnDefinitions="*, Auto">
-                            <TextBlock Text="Transmission Bitrate:" Classes="label" Grid.Column="0" VerticalAlignment="Center" Margin="0" />
+                            <TextBlock Text="{Binding [Display_TransmissionBitrate], Source={x:Static loc:LocalizationManager.Instance}}" Classes="label" Grid.Column="0" VerticalAlignment="Center" Margin="0" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="3">
                                 <TextBlock Text="{Binding BitrateMbps}"
                                            FontSize="13.5"
@@ -481,37 +482,37 @@
                         <!-- Quick Bitrate Preset Chips -->
                         <Grid ColumnDefinitions="*, *, *, *" Margin="0,2,0,0">
                             <Button Grid.Column="0"
-                                    Content="8 Mbps"
-                                    Command="{Binding SetBitratePresetCommand}"
-                                    CommandParameter="8"
-                                    Classes="chip"
-                                    Margin="0,0,3,0"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Center" />
+                                     Content="8 Mbps"
+                                     Command="{Binding SetBitratePresetCommand}"
+                                     CommandParameter="8"
+                                     Classes="chip"
+                                     Margin="0,0,3,0"
+                                     HorizontalAlignment="Stretch"
+                                     HorizontalContentAlignment="Center" />
                             <Button Grid.Column="1"
-                                    Content="16 Mbps"
-                                    Command="{Binding SetBitratePresetCommand}"
-                                    CommandParameter="16"
-                                    Classes="chip"
-                                    Margin="3,0,3,0"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Center" />
+                                     Content="16 Mbps"
+                                     Command="{Binding SetBitratePresetCommand}"
+                                     CommandParameter="16"
+                                     Classes="chip"
+                                     Margin="3,0,3,0"
+                                     HorizontalAlignment="Stretch"
+                                     HorizontalContentAlignment="Center" />
                             <Button Grid.Column="2"
-                                    Content="24 Mbps (Rec.)"
-                                    Command="{Binding SetBitratePresetCommand}"
-                                    CommandParameter="24"
-                                    Classes="chip"
-                                    Margin="3,0,3,0"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Center" />
+                                     Content="{Binding [Display_BitratePresetRecommended], Source={x:Static loc:LocalizationManager.Instance}}"
+                                     Command="{Binding SetBitratePresetCommand}"
+                                     CommandParameter="24"
+                                     Classes="chip"
+                                     Margin="3,0,3,0"
+                                     HorizontalAlignment="Stretch"
+                                     HorizontalContentAlignment="Center" />
                             <Button Grid.Column="3"
-                                    Content="50 Mbps"
-                                    Command="{Binding SetBitratePresetCommand}"
-                                    CommandParameter="50"
-                                    Classes="chip"
-                                    Margin="3,0,0,0"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Center" />
+                                     Content="50 Mbps"
+                                     Command="{Binding SetBitratePresetCommand}"
+                                     CommandParameter="50"
+                                     Classes="chip"
+                                     Margin="3,0,0,0"
+                                     HorizontalAlignment="Stretch"
+                                     HorizontalContentAlignment="Center" />
                         </Grid>
 
                         <!-- Dynamic Status Hint -->
@@ -529,7 +530,7 @@
                     Margin="5,0,0,0"
                     Padding="10">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="⚡ QUICK SESSION OPTIONS"
+                    <TextBlock Text="{Binding [QuickOptions_Header], Source={x:Static loc:LocalizationManager.Instance}}"
                                Classes="cardHeader"
                                Margin="0,0,0,2" />
 
@@ -537,8 +538,8 @@
                     <Border Classes="subcard" Padding="8,4">
                         <Grid ColumnDefinitions="*, Auto">
                             <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
-                                <TextBlock Text="Turn off mobile screen" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" />
-                                <TextBlock Text="Protects OLED panel &amp; reduces heat" FontSize="9.5" Foreground="#64748B" />
+                                <TextBlock Text="{Binding [QuickOptions_TurnScreenOff], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" />
+                                <TextBlock Text="{Binding [QuickOptions_TurnScreenOff_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" Foreground="#64748B" />
                             </StackPanel>
                             <ToggleSwitch Grid.Column="1"
                                           IsChecked="{Binding TurnScreenOff}"
@@ -550,8 +551,8 @@
                     <Border Classes="subcard" Padding="8,4">
                         <Grid ColumnDefinitions="*, Auto">
                             <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
-                                <TextBlock Text="Native UHID Mouse" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" />
-                                <TextBlock Text="Zero lag, native pointer emulation" FontSize="9.5" Foreground="#64748B" />
+                                <TextBlock Text="{Binding [QuickOptions_NativeUhidMouse], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" />
+                                <TextBlock Text="{Binding [QuickOptions_NativeUhidMouse_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" Foreground="#64748B" />
                             </StackPanel>
                             <ToggleSwitch Grid.Column="1"
                                           IsChecked="{Binding MouseUhidEnabled}"
@@ -563,8 +564,8 @@
                     <Border Classes="subcard" Padding="8,4">
                         <Grid ColumnDefinitions="*, Auto">
                             <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
-                                <TextBlock Text="Forward Shortcut Keys" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" />
-                                <TextBlock Text="Pass Alt+Tab, Win Key, Ctrl+W to DeX" FontSize="9.5" Foreground="#64748B" />
+                                <TextBlock Text="{Binding [QuickOptions_ForwardShortcuts], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" />
+                                <TextBlock Text="{Binding [QuickOptions_ForwardShortcuts_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" Foreground="#64748B" />
                             </StackPanel>
                             <ToggleSwitch Grid.Column="1"
                                           IsChecked="{Binding ForwardShortcuts}"
@@ -576,8 +577,8 @@
                     <Border Classes="subcard" Padding="8,4">
                         <Grid ColumnDefinitions="*, Auto">
                             <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
-                                <TextBlock Text="Stay Awake Device" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" />
-                                <TextBlock Text="Prevents Android sleep during session" FontSize="9.5" Foreground="#64748B" />
+                                <TextBlock Text="{Binding [QuickOptions_StayAwake], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" />
+                                <TextBlock Text="{Binding [QuickOptions_StayAwake_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" Foreground="#64748B" />
                             </StackPanel>
                             <ToggleSwitch Grid.Column="1"
                                           IsChecked="{Binding StayAwake}"
@@ -589,8 +590,8 @@
                     <Border Classes="subcard" Padding="8,4">
                         <Grid ColumnDefinitions="*, Auto">
                             <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
-                                <TextBlock Text="Low Latency Audio" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" />
-                                <TextBlock Text="Direct streaming via continuous Opus buffer" FontSize="9.5" Foreground="#64748B" />
+                                <TextBlock Text="{Binding [QuickOptions_LowLatencyAudio], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" />
+                                <TextBlock Text="{Binding [QuickOptions_LowLatencyAudio_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" Foreground="#64748B" />
                             </StackPanel>
                             <ToggleSwitch Grid.Column="1"
                                           IsChecked="{Binding LowLatencyAudio}"
@@ -632,24 +633,24 @@
                     <Grid ColumnDefinitions="*, Auto">
                         <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <TextBlock Text=">_" FontSize="11" FontWeight="Bold" Foreground="#38BDF8" VerticalAlignment="Center" />
-                            <TextBlock Text="SCRCPY / ADB EXECUTION CONSOLE" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding [Console_Header], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" VerticalAlignment="Center" />
                             <Border Background="#132E27"
                                     BorderBrush="#10B981"
                                     BorderThickness="1"
                                     CornerRadius="3"
                                     Padding="5,1"
                                     VerticalAlignment="Center">
-                                <TextBlock Text="ACTIVE PIPE" FontSize="9" FontWeight="Bold" Foreground="#10B981" />
+                                <TextBlock Text="{Binding [Console_ActivePipe], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9" FontWeight="Bold" Foreground="#10B981" />
                             </Border>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                            <Button Content="Copy CLI"
+                            <Button Content="{Binding [Console_CopyCli], Source={x:Static loc:LocalizationManager.Instance}}"
                                     Command="{Binding CopyCliCommandCommand}"
                                     Classes="chip"
                                     Padding="8,2"
                                     FontSize="10.5" />
-                            <Button Content="Clear"
+                            <Button Content="{Binding [Action_Clear], Source={x:Static loc:LocalizationManager.Instance}}"
                                     Command="{Binding ClearLogsCommand}"
                                     Classes="chip"
                                     Padding="8,2"
@@ -726,7 +727,7 @@
 
                 <!-- Hardware info -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" Margin="0,0,12,0" VerticalAlignment="Center">
-                    <TextBlock Text="Target:" FontSize="10.5" Foreground="#64748B" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding [DeviceSelector_TargetLabel], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10.5" Foreground="#64748B" VerticalAlignment="Center" />
                     <TextBlock Text="{Binding DeviceDisplayName}"
                                FontSize="10.5"
                                FontWeight="SemiBold"
@@ -741,7 +742,7 @@
 
                 <!-- Latency readout (Right) -->
                 <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                    <TextBlock Text="Roundtrip:" FontSize="10.5" Foreground="#64748B" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding [Footer_RoundtripLabel], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10.5" Foreground="#64748B" VerticalAlignment="Center" />
                     <TextBlock Text="{Binding EstimatedLatencyMs}"
                                FontSize="10.5"
                                FontWeight="SemiBold"

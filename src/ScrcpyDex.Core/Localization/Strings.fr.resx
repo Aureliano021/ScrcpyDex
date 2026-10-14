@@ -397,4 +397,126 @@
   <data name="General_Language_Desc" xml:space="preserve">
     <value>Sélectionner la langue de l'interface utilisateur</value>
   </data>
+
+  <!-- MainWindow Avalonia UI -->
+  <data name="MainWindow_Title" xml:space="preserve">
+    <value>ScrcpyDeX — Client PC Samsung DeX</value>
+  </data>
+  <data name="MainWindow_EngineTag" xml:space="preserve">
+    <value>Moteur : scrcpy-core x64</value>
+  </data>
+  <data name="Device_DexModeReady" xml:space="preserve">
+    <value>Mode DeX prêt</value>
+  </data>
+  <data name="DeviceSelector_TargetLabel" xml:space="preserve">
+    <value>Cible :</value>
+  </data>
+  <data name="DeviceSelector_NoDevicesPlaceholder" xml:space="preserve">
+    <value>Aucun appareil détecté</value>
+  </data>
+  <data name="Telemetry_Battery" xml:space="preserve">
+    <value>BATTERIE</value>
+  </data>
+  <data name="Telemetry_Temperature" xml:space="preserve">
+    <value>TEMP</value>
+  </data>
+  <data name="Telemetry_Link" xml:space="preserve">
+    <value>LIAISON</value>
+  </data>
+  <data name="Telemetry_Latency" xml:space="preserve">
+    <value>LATENCE</value>
+  </data>
+  <data name="DeviceSelector_RescanTooltip" xml:space="preserve">
+    <value>Réanalyser les appareils ADB et le bus USB</value>
+  </data>
+  <data name="Action_Rescan" xml:space="preserve">
+    <value>Réanalyser</value>
+  </data>
+  <data name="Action_StopSessionText" xml:space="preserve">
+    <value>Arrêter la session</value>
+  </data>
+  <data name="Action_ConfigureScrcpyTooltip" xml:space="preserve">
+    <value>Configurer le chemin du binaire exécutable de scrcpy</value>
+  </data>
+  <data name="Action_ConfigureScrcpy" xml:space="preserve">
+    <value>Configurer scrcpy...</value>
+  </data>
+  <data name="Display_CardHeader" xml:space="preserve">
+    <value>PARAMÈTRES D'AFFICHAGE ET ENCODEUR</value>
+  </data>
+  <data name="Display_ResolutionLabel" xml:space="preserve">
+    <value>Résolution d'affichage :</value>
+  </data>
+  <data name="Display_TargetFrameRate" xml:space="preserve">
+    <value>Fréquence d'images cible :</value>
+  </data>
+  <data name="Display_VideoCodec" xml:space="preserve">
+    <value>Codec vidéo :</value>
+  </data>
+  <data name="Display_AudioStreamDriver" xml:space="preserve">
+    <value>Flux audio et pilote :</value>
+  </data>
+  <data name="Display_RenderingDriver" xml:space="preserve">
+    <value>Backend du pilote de rendu :</value>
+  </data>
+  <data name="Display_RenderingDriverDesc" xml:space="preserve">
+    <value>Rendu matériel D3D11 / OpenGL avec swapchain Zero Copy</value>
+  </data>
+  <data name="Display_TransmissionBitrate" xml:space="preserve">
+    <value>Débit de transmission :</value>
+  </data>
+  <data name="Display_BitratePresetRecommended" xml:space="preserve">
+    <value>24 Mbps (Rec.)</value>
+  </data>
+  <data name="QuickOptions_Header" xml:space="preserve">
+    <value>OPTIONS RAPIDES DE SESSION</value>
+  </data>
+  <data name="QuickOptions_TurnScreenOff" xml:space="preserve">
+    <value>Éteindre l'écran du téléphone</value>
+  </data>
+  <data name="QuickOptions_TurnScreenOff_Desc" xml:space="preserve">
+    <value>Protège l'écran OLED et réduit l'échauffement</value>
+  </data>
+  <data name="QuickOptions_NativeUhidMouse" xml:space="preserve">
+    <value>Souris UHID native</value>
+  </data>
+  <data name="QuickOptions_NativeUhidMouse_Desc" xml:space="preserve">
+    <value>Sans latence, émulation native du pointeur</value>
+  </data>
+  <data name="QuickOptions_ForwardShortcuts" xml:space="preserve">
+    <value>Transférer les touches de raccourci</value>
+  </data>
+  <data name="QuickOptions_ForwardShortcuts_Desc" xml:space="preserve">
+    <value>Transmettre Alt+Tab, touche Windows et Ctrl+W à DeX</value>
+  </data>
+  <data name="QuickOptions_StayAwake" xml:space="preserve">
+    <value>Garder l'appareil actif</value>
+  </data>
+  <data name="QuickOptions_StayAwake_Desc" xml:space="preserve">
+    <value>Empêche la mise en veille d'Android pendant la session</value>
+  </data>
+  <data name="QuickOptions_LowLatencyAudio" xml:space="preserve">
+    <value>Audio à faible latence</value>
+  </data>
+  <data name="QuickOptions_LowLatencyAudio_Desc" xml:space="preserve">
+    <value>Diffusion directe via un tampon Opus continu</value>
+  </data>
+  <data name="Console_Header" xml:space="preserve">
+    <value>CONSOLE D'EXÉCUTION SCRCPY / ADB</value>
+  </data>
+  <data name="Console_ActivePipe" xml:space="preserve">
+    <value>CANAL ACTIF</value>
+  </data>
+  <data name="Console_CopyCli" xml:space="preserve">
+    <value>Copier la CLI</value>
+  </data>
+  <data name="Footer_AdbDaemon" xml:space="preserve">
+    <value>Démon ADB : {0}</value>
+  </data>
+  <data name="Footer_EncoderFormat" xml:space="preserve">
+    <value>Encodeur : {0}</value>
+  </data>
+  <data name="Footer_RoundtripLabel" xml:space="preserve">
+    <value>Aller-retour :</value>
+  </data>
 </root>

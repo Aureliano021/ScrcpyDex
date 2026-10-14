@@ -187,5 +187,47 @@ namespace ScrcpyDex.Core.Localization
         // General
         public static string General_Language => LocalizationManager.Instance.GetString(nameof(General_Language));
         public static string General_Language_Desc => LocalizationManager.Instance.GetString(nameof(General_Language_Desc));
+
+        // MainWindow Avalonia UI
+        public static string MainWindow_Title => LocalizationManager.Instance.GetString(nameof(MainWindow_Title));
+        public static string MainWindow_EngineTag => LocalizationManager.Instance.GetString(nameof(MainWindow_EngineTag));
+        public static string Device_DexModeReady => LocalizationManager.Instance.GetString(nameof(Device_DexModeReady));
+        public static string DeviceSelector_TargetLabel => LocalizationManager.Instance.GetString(nameof(DeviceSelector_TargetLabel));
+        public static string DeviceSelector_NoDevicesPlaceholder => LocalizationManager.Instance.GetString(nameof(DeviceSelector_NoDevicesPlaceholder));
+        public static string Telemetry_Battery => LocalizationManager.Instance.GetString(nameof(Telemetry_Battery));
+        public static string Telemetry_Temperature => LocalizationManager.Instance.GetString(nameof(Telemetry_Temperature));
+        public static string Telemetry_Link => LocalizationManager.Instance.GetString(nameof(Telemetry_Link));
+        public static string Telemetry_Latency => LocalizationManager.Instance.GetString(nameof(Telemetry_Latency));
+        public static string DeviceSelector_RescanTooltip => LocalizationManager.Instance.GetString(nameof(DeviceSelector_RescanTooltip));
+        public static string Action_Rescan => LocalizationManager.Instance.GetString(nameof(Action_Rescan));
+        public static string Action_StopSessionText => LocalizationManager.Instance.GetString(nameof(Action_StopSessionText));
+        public static string Action_ConfigureScrcpyTooltip => LocalizationManager.Instance.GetString(nameof(Action_ConfigureScrcpyTooltip));
+        public static string Action_ConfigureScrcpy => LocalizationManager.Instance.GetString(nameof(Action_ConfigureScrcpy));
+        public static string Display_CardHeader => LocalizationManager.Instance.GetString(nameof(Display_CardHeader));
+        public static string Display_ResolutionLabel => LocalizationManager.Instance.GetString(nameof(Display_ResolutionLabel));
+        public static string Display_TargetFrameRate => LocalizationManager.Instance.GetString(nameof(Display_TargetFrameRate));
+        public static string Display_VideoCodec => LocalizationManager.Instance.GetString(nameof(Display_VideoCodec));
+        public static string Display_AudioStreamDriver => LocalizationManager.Instance.GetString(nameof(Display_AudioStreamDriver));
+        public static string Display_RenderingDriver => LocalizationManager.Instance.GetString(nameof(Display_RenderingDriver));
+        public static string Display_RenderingDriverDesc => LocalizationManager.Instance.GetString(nameof(Display_RenderingDriverDesc));
+        public static string Display_TransmissionBitrate => LocalizationManager.Instance.GetString(nameof(Display_TransmissionBitrate));
+        public static string Display_BitratePresetRecommended => LocalizationManager.Instance.GetString(nameof(Display_BitratePresetRecommended));
+        public static string QuickOptions_Header => LocalizationManager.Instance.GetString(nameof(QuickOptions_Header));
+        public static string QuickOptions_TurnScreenOff => LocalizationManager.Instance.GetString(nameof(QuickOptions_TurnScreenOff));
+        public static string QuickOptions_TurnScreenOff_Desc => LocalizationManager.Instance.GetString(nameof(QuickOptions_TurnScreenOff_Desc));
+        public static string QuickOptions_NativeUhidMouse => LocalizationManager.Instance.GetString(nameof(QuickOptions_NativeUhidMouse));
+        public static string QuickOptions_NativeUhidMouse_Desc => LocalizationManager.Instance.GetString(nameof(QuickOptions_NativeUhidMouse_Desc));
+        public static string QuickOptions_ForwardShortcuts => LocalizationManager.Instance.GetString(nameof(QuickOptions_ForwardShortcuts));
+        public static string QuickOptions_ForwardShortcuts_Desc => LocalizationManager.Instance.GetString(nameof(QuickOptions_ForwardShortcuts_Desc));
+        public static string QuickOptions_StayAwake => LocalizationManager.Instance.GetString(nameof(QuickOptions_StayAwake));
+        public static string QuickOptions_StayAwake_Desc => LocalizationManager.Instance.GetString(nameof(QuickOptions_StayAwake_Desc));
+        public static string QuickOptions_LowLatencyAudio => LocalizationManager.Instance.GetString(nameof(QuickOptions_LowLatencyAudio));
+        public static string QuickOptions_LowLatencyAudio_Desc => LocalizationManager.Instance.GetString(nameof(QuickOptions_LowLatencyAudio_Desc));
+        public static string Console_Header => LocalizationManager.Instance.GetString(nameof(Console_Header));
+        public static string Console_ActivePipe => LocalizationManager.Instance.GetString(nameof(Console_ActivePipe));
+        public static string Console_CopyCli => LocalizationManager.Instance.GetString(nameof(Console_CopyCli));
+        public static string Footer_AdbDaemon => LocalizationManager.Instance.GetString(nameof(Footer_AdbDaemon));
+        public static string Footer_EncoderFormat => LocalizationManager.Instance.GetString(nameof(Footer_EncoderFormat));
+        public static string Footer_RoundtripLabel => LocalizationManager.Instance.GetString(nameof(Footer_RoundtripLabel));
     }
 }
