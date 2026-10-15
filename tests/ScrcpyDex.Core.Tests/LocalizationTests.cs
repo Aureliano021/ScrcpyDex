@@ -136,5 +136,24 @@ namespace ScrcpyDex.Core.Tests
             string descText = manager["General_Language_Desc"];
             Assert.False(string.IsNullOrWhiteSpace(descText));
         }
+
+        [Theory]
+        [InlineData("en")]
+        [InlineData("pt-BR")]
+        [InlineData("es")]
+        [InlineData("de")]
+        [InlineData("fr")]
+        [InlineData("zh-Hans")]
+        public void LocalizationManager_FaqKeys_ResolveAcrossAllCultures(string cultureName)
+        {
+            var manager = LocalizationManager.Instance;
+            manager.SetCulture(cultureName);
+
+            Assert.False(string.IsNullOrWhiteSpace(manager["Faq_NavButton"]));
+            Assert.False(string.IsNullOrWhiteSpace(manager["Faq_DrawerTitle"]));
+            Assert.False(string.IsNullOrWhiteSpace(manager["Faq_Category_All"]));
+            Assert.False(string.IsNullOrWhiteSpace(manager["Faq_Q1_Title"]));
+            Assert.False(string.IsNullOrWhiteSpace(manager["Faq_Q12_Solution"]));
+        }
     }
 }

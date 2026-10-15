@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -28,6 +29,7 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ScrcpyDex.App.Models;
 using ScrcpyDex.App.Services;
 using ScrcpyDex.Core.Adb;
 using ScrcpyDex.Core.Collections;
@@ -113,6 +115,29 @@ namespace ScrcpyDex.App.ViewModels
 
         [ObservableProperty]
         private string _currentLanguageCode = "EN";
+
+        #endregion
+
+        #region Observable Properties - Troubleshooting FAQ
+
+        [ObservableProperty]
+        private bool _isFaqOpen;
+
+        [ObservableProperty]
+        private string _faqSearchQuery = string.Empty;
+
+        [ObservableProperty]
+        private string _selectedFaqCategoryId = "All";
+
+        public ObservableCollection<FaqCategoryItem> FaqCategories { get; } = new ObservableCollection<FaqCategoryItem>();
+
+        public ObservableCollection<FaqItem> AllFaqItems { get; } = new ObservableCollection<FaqItem>();
+
+        public ObservableCollection<FaqItem> FilteredFaqItems { get; } = new ObservableCollection<FaqItem>();
+
+        partial void OnFaqSearchQueryChanged(string value) => ApplyFaqFilter();
+
+        partial void OnSelectedFaqCategoryIdChanged(string value) => ApplyFaqFilter();
 
         #endregion
 
@@ -316,6 +341,17 @@ namespace ScrcpyDex.App.ViewModels
 
         private void InitializeConfigurationAndDiscovery()
         {
+            // Initial FAQ catalog initialization
+            foreach (var cat in FaqDataService.CreateCategories())
+            {
+                FaqCategories.Add(cat);
+            }
+            foreach (var item in FaqDataService.CreateFaqItems())
+            {
+                AllFaqItems.Add(item);
+            }
+            ApplyFaqFilter();
+
             // Initial language synchronization
             SetLanguageInternal(LocalizationManager.Instance.CurrentCulture.Name);
 
@@ -1159,7 +1195,114 @@ namespace ScrcpyDex.App.ViewModels
             LocalizationManager.Instance.SetCulture(cultureCode);
             CurrentLanguage = LocalizationManager.Instance.CurrentCulture.Name;
             CurrentLanguageCode = ResolveLanguageCode(CurrentLanguage);
+
+            foreach (var cat in FaqCategories)
+            {
+                cat.RefreshLocalizedStrings();
+            }
+            foreach (var item in AllFaqItems)
+            {
+                item.RefreshLocalizedStrings();
+            }
+            ApplyFaqFilter();
         }
+
+        [RelayCommand]
+        public void ToggleFaq()
+        {
+            IsFaqOpen = !IsFaqOpen;
+        }
+
+        [RelayCommand]
+        public void CloseFaq()
+        {
+            IsFaqOpen = false;
+        }
+
+        [RelayCommand]
+        public void SelectFaqCategory(string? categoryId)
+        {
+            if (string.IsNullOrWhiteSpace(categoryId)) return;
+
+            SelectedFaqCategoryId = categoryId;
+            foreach (var cat in FaqCategories)
+            {
+                cat.IsSelected = string.Equals(cat.Id, categoryId, StringComparison.OrdinalIgnoreCase);
+            }
+            ApplyFaqFilter();
+        }
+
+        [RelayCommand]
+        public void ToggleFaqItemExpanded(FaqItem? item)
+        {
+            if (item != null)
+            {
+                item.IsExpanded = !item.IsExpanded;
+            }
+        }
+
+        [RelayCommand]
+        public async Task CopyFaqCommandTextAsync(string? commandText)
+        {
+            if (string.IsNullOrWhiteSpace(commandText)) return;
+
+            try
+            {
+                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
+                {
+                    var clipboard = desktop.MainWindow.Clipboard;
+                    if (clipboard != null)
+                    {
+                        await clipboard.SetTextAsync(commandText).ConfigureAwait(false);
+                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Command copied to clipboard: {commandText}", false));
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Failed to copy command: {ex.Message}", true));
+            }
+        }
+
+        private void ApplyFaqFilter()
+        {
+            FilteredFaqItems.Clear();
+            string query = (FaqSearchQuery ?? string.Empty).Trim();
+            string category = SelectedFaqCategoryId ?? "All";
+
+            var culture = LocalizationManager.Instance.CurrentCulture;
+
+            foreach (var item in AllFaqItems)
+            {
+                if (category != "All" && !string.Equals(item.CategoryId, category, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (!string.IsNullOrEmpty(query))
+                {
+                    bool matchTitle = culture.CompareInfo.IndexOf(item.Title, query, CompareOptions.IgnoreCase) >= 0;
+                    bool matchSymptom = culture.CompareInfo.IndexOf(item.Symptom, query, CompareOptions.IgnoreCase) >= 0;
+                    bool matchCause = culture.CompareInfo.IndexOf(item.Cause, query, CompareOptions.IgnoreCase) >= 0;
+                    bool matchSolution = culture.CompareInfo.IndexOf(item.Solution, query, CompareOptions.IgnoreCase) >= 0;
+                    bool matchCommand = item.CommandCode != null && item.CommandCode.Contains(query, StringComparison.OrdinalIgnoreCase);
+
+                    if (!matchTitle && !matchSymptom && !matchCause && !matchSolution && !matchCommand)
+                    {
+                        continue;
+                    }
+                }
+
+                FilteredFaqItems.Add(item);
+            }
+
+            OnPropertyChanged(nameof(HasNoFaqResults));
+        }
+
+        public bool HasNoFaqResults => FilteredFaqItems.Count == 0;
 
         private static string ResolveLanguageCode(string cultureCode)
         {

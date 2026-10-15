@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:ScrcpyDex.App.ViewModels"
         xmlns:models="using:ScrcpyDex.Models"
+        xmlns:appModels="using:ScrcpyDex.App.Models"
         xmlns:io="using:ScrcpyDex.Core.IO"
         xmlns:converters="using:ScrcpyDex.App.Converters"
         xmlns:loc="using:ScrcpyDex.Core.Localization"
@@ -19,6 +20,8 @@
     <Window.KeyBindings>
         <KeyBinding Gesture="Ctrl+Enter" Command="{Binding StartSessionCommand}" />
         <KeyBinding Gesture="Ctrl+Shift+W" Command="{Binding StopSessionCommand}" />
+        <KeyBinding Gesture="F1" Command="{Binding ToggleFaqCommand}" />
+        <KeyBinding Gesture="Escape" Command="{Binding CloseFaqCommand}" />
     </Window.KeyBindings>
 
     <Grid RowDefinitions="38, *, Auto, 170, 26">
@@ -82,6 +85,22 @@
                                     Margin="4,0,0,0" />
                         </StackPanel>
                     </Border>
+
+                    <!-- FAQ Help Button -->
+                    <Button Classes="chip"
+                            Command="{Binding ToggleFaqCommand}"
+                            Padding="8,4"
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="{Binding [Faq_Title], Source={x:Static loc:LocalizationManager.Instance}}">
+                        <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                            <TextBlock Text="❓" FontSize="11" VerticalAlignment="Center" />
+                            <TextBlock Text="FAQ"
+                                       FontWeight="SemiBold"
+                                       FontSize="11"
+                                       VerticalAlignment="Center"
+                                       Foreground="#F1F5F9" />
+                        </StackPanel>
+                    </Button>
 
                     <!-- Language Switcher Button -->
                     <Button Classes="chip"
@@ -788,6 +807,266 @@
                                Foreground="#10B981"
                                VerticalAlignment="Center" />
                 </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 6. FAQ Drawer Backdrop (Clicking outside closes FAQ) -->
+        <Button Grid.Row="1"
+                Grid.RowSpan="4"
+                Command="{Binding CloseFaqCommand}"
+                IsVisible="{Binding IsFaqOpen}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Background="#80000000"
+                BorderThickness="0"
+                Padding="0"
+                Margin="0"
+                ZIndex="90">
+            <Button.Template>
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}" />
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
+
+        <!-- 7. Retractable FAQ Side Panel (460px width) -->
+        <Border Grid.Row="1"
+                Grid.RowSpan="4"
+                HorizontalAlignment="Right"
+                Width="460"
+                Background="#0E131D"
+                BorderBrush="#1E293B"
+                BorderThickness="1,0,0,0"
+                IsVisible="{Binding IsFaqOpen}"
+                ZIndex="100">
+            <Grid RowDefinitions="Auto, Auto, Auto, *">
+                <!-- 1. FAQ Drawer Header -->
+                <Border Grid.Row="0"
+                        Background="#111723"
+                        BorderBrush="#1E293B"
+                        BorderThickness="0,0,0,1"
+                        Padding="16,12">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <StackPanel Grid.Column="0" Spacing="2">
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <TextBlock Text="❓" FontSize="13" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding [Faq_Title], Source={x:Static loc:LocalizationManager.Instance}}"
+                                           FontSize="13"
+                                           FontWeight="Bold"
+                                           Foreground="#F1F5F9" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding [Faq_Subtitle], Source={x:Static loc:LocalizationManager.Instance}}"
+                                       FontSize="10.5"
+                                       Foreground="#64748B" />
+                        </StackPanel>
+
+                        <!-- Close Button -->
+                        <Button Grid.Column="1"
+                                Classes="chip"
+                                Command="{Binding CloseFaqCommand}"
+                                Padding="8,4"
+                                VerticalAlignment="Center"
+                                ToolTip.Tip="{Binding [Faq_Close], Source={x:Static loc:LocalizationManager.Instance}}">
+                            <TextBlock Text="✕" FontSize="12" FontWeight="Bold" Foreground="#94A3B8" />
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- 2. Search Box -->
+                <Border Grid.Row="1" Padding="14,10,14,6">
+                    <TextBox Text="{Binding FaqSearchQuery, Mode=TwoWay}"
+                             Watermark="{Binding [Faq_SearchPlaceholder], Source={x:Static loc:LocalizationManager.Instance}}"
+                             FontSize="11.5"
+                             Padding="10,6"
+                             CornerRadius="6" />
+                </Border>
+
+                <!-- 3. Category Filter Chips -->
+                <ScrollViewer Grid.Row="2"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Disabled"
+                              Margin="14,4,14,8">
+                    <ItemsControl ItemsSource="{Binding FaqCategories}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="appModels:FaqCategoryItem">
+                                <Button Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).SelectFaqCategoryCommand}"
+                                        CommandParameter="{Binding Id}"
+                                        Padding="8,3"
+                                        FontSize="11"
+                                        CornerRadius="4"
+                                        BorderThickness="1"
+                                        Background="{Binding BackgroundBrush}"
+                                        BorderBrush="{Binding BorderBrushColor}"
+                                        Foreground="{Binding ForegroundBrush}"
+                                        Content="{Binding HeaderText}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- 4. Scrollable FAQ Accordion List -->
+                <ScrollViewer Grid.Row="3"
+                              HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto"
+                              Padding="14,4,14,14">
+                    <StackPanel Spacing="8">
+                        <!-- No Results Notice (if empty) -->
+                        <Border IsVisible="{Binding HasNoFaqResults}"
+                                Background="#111723"
+                                BorderBrush="#1E293B"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="20"
+                                Margin="0,16,0,0">
+                            <StackPanel Spacing="6" HorizontalAlignment="Center">
+                                <TextBlock Text="🔍" FontSize="24" HorizontalAlignment="Center" />
+                                <TextBlock Text="{Binding [Faq_NoResults], Source={x:Static loc:LocalizationManager.Instance}}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           Foreground="#F1F5F9"
+                                           HorizontalAlignment="Center" />
+                                <TextBlock Text="{Binding [Faq_NoResults_Desc], Source={x:Static loc:LocalizationManager.Instance}}"
+                                           FontSize="11"
+                                           Foreground="#64748B"
+                                           TextWrapping="Wrap"
+                                           HorizontalAlignment="Center"
+                                           TextAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- FAQ Items -->
+                        <ItemsControl ItemsSource="{Binding FilteredFaqItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="appModels:FaqItem">
+                                    <Border Background="#111723"
+                                            BorderBrush="#1E293B"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Margin="0,0,0,8">
+                                        <StackPanel>
+                                            <!-- Card Header (Expander trigger) -->
+                                            <Button Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ToggleFaqItemExpandedCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    HorizontalAlignment="Stretch"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Padding="12,10"
+                                                    CornerRadius="6">
+                                                <Grid ColumnDefinitions="Auto, *, Auto">
+                                                    <Border Grid.Column="0"
+                                                            Background="#1E293B"
+                                                            CornerRadius="3"
+                                                            Padding="5,1"
+                                                            Margin="0,0,8,0"
+                                                            VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding CategoryName}"
+                                                                   FontSize="9.5"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="#94A3B8" />
+                                                    </Border>
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding Title}"
+                                                               FontSize="11.5"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="#F1F5F9"
+                                                               TextWrapping="Wrap"
+                                                               VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Column="2"
+                                                               Text="{Binding ExpandIcon}"
+                                                               FontSize="10"
+                                                               Foreground="#64748B"
+                                                               VerticalAlignment="Center"
+                                                               Margin="8,0,0,0" />
+                                                </Grid>
+                                            </Button>
+
+                                            <!-- Expanded Details -->
+                                            <Border IsVisible="{Binding IsExpanded}"
+                                                    BorderBrush="#1E293B"
+                                                    BorderThickness="0,1,0,0"
+                                                    Padding="12,10"
+                                                    Background="#0A0E17">
+                                                <StackPanel Spacing="10">
+                                                    <!-- Symptom -->
+                                                    <StackPanel Spacing="3">
+                                                        <TextBlock Text="{Binding [Faq_Label_Symptom], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="#E11D48" />
+                                                        <TextBlock Text="{Binding Symptom}"
+                                                                   FontSize="11"
+                                                                   Foreground="#CBD5E1"
+                                                                   TextWrapping="Wrap" />
+                                                    </StackPanel>
+
+                                                    <!-- Root Cause -->
+                                                    <StackPanel Spacing="3">
+                                                        <TextBlock Text="{Binding [Faq_Label_Cause], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="#F59E0B" />
+                                                        <TextBlock Text="{Binding Cause}"
+                                                                   FontSize="11"
+                                                                   Foreground="#CBD5E1"
+                                                                   TextWrapping="Wrap" />
+                                                    </StackPanel>
+
+                                                    <!-- Solution -->
+                                                    <StackPanel Spacing="3">
+                                                        <TextBlock Text="{Binding [Faq_Label_Solution], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="#10B981" />
+                                                        <TextBlock Text="{Binding Solution}"
+                                                                   FontSize="11"
+                                                                   Foreground="#F1F5F9"
+                                                                   TextWrapping="Wrap" />
+                                                    </StackPanel>
+
+                                                    <!-- Command Snippet with Copy Button -->
+                                                    <Border IsVisible="{Binding HasCommand}"
+                                                            Background="#06090F"
+                                                            BorderBrush="#1E293B"
+                                                            BorderThickness="1"
+                                                            CornerRadius="4"
+                                                            Padding="8,6"
+                                                            Margin="0,4,0,0">
+                                                        <Grid ColumnDefinitions="*, Auto">
+                                                            <TextBlock Grid.Column="0"
+                                                                       Text="{Binding CommandCode}"
+                                                                       FontFamily="Cascadia Code, Consolas, monospace"
+                                                                       FontSize="10"
+                                                                       Foreground="#93C5FD"
+                                                                       TextWrapping="Wrap"
+                                                                       VerticalAlignment="Center" />
+                                                            <Button Grid.Column="1"
+                                                                    Classes="chip"
+                                                                    Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).CopyFaqCommandTextCommand}"
+                                                                    CommandParameter="{Binding CommandCode}"
+                                                                    Padding="6,2"
+                                                                    Margin="8,0,0,0"
+                                                                    VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding [Faq_Label_CopyCommand], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                                           FontSize="9.5"
+                                                                           Foreground="#60A5FA" />
+                                                            </Button>
+                                                        </Grid>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
             </Grid>
         </Border>
     </Grid>

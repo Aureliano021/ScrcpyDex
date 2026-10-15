@@ -58,7 +58,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-
   <!-- App Branding & Titles -->
   <data name="App_Title" xml:space="preserve">
     <value>ScrcpyDeX — 设置</value>
@@ -84,7 +83,6 @@
   <data name="App_NonAffiliationNotice" xml:space="preserve">
     <value>非隶属关系声明与商标免责声明</value>
   </data>
-
   <!-- Navigation Tabs -->
   <data name="Tab_Display" xml:space="preserve">
     <value>显示与视频</value>
@@ -101,7 +99,6 @@
   <data name="Tab_About" xml:space="preserve">
     <value>关于与法律信息</value>
   </data>
-
   <!-- Device Selection & State -->
   <data name="DeviceSelector_Title" xml:space="preserve">
     <value>目标设备</value>
@@ -136,7 +133,6 @@
   <data name="DeviceSelector_AllocatedVia" xml:space="preserve">
     <value>通过 Android DisplayManager 分配</value>
   </data>
-
   <!-- Display Settings -->
   <data name="Display_Header" xml:space="preserve">
     <value>视频流与分辨率配置</value>
@@ -171,7 +167,6 @@
   <data name="Display_WindowMode_Desc" xml:space="preserve">
     <value>主机 Windows 桌面上的视口呈现方式</value>
   </data>
-
   <!-- Audio Settings -->
   <data name="Audio_Header" xml:space="preserve">
     <value>音频转发与延迟余量</value>
@@ -191,7 +186,6 @@
   <data name="Audio_Buffer_Format" xml:space="preserve">
     <value>{0} 毫秒</value>
   </data>
-
   <!-- Input Settings -->
   <data name="Input_Header" xml:space="preserve">
     <value>输入捕获与外设转发</value>
@@ -232,7 +226,6 @@
   <data name="Input_Fullscreen_Desc" xml:space="preserve">
     <value>以独占或无边框全屏模式启动 scrcpy 会话</value>
   </data>
-
   <!-- Device & Paths Settings -->
   <data name="Device_Header" xml:space="preserve">
     <value>设备电源与系统信息</value>
@@ -267,7 +260,6 @@
   <data name="Paths_ResetDefault_Desc" xml:space="preserve">
     <value>将所有显示、音频、输入、设备和路径设置恢复为出厂默认值</value>
   </data>
-
   <!-- Actions -->
   <data name="Action_StartSession" xml:space="preserve">
     <value>启动 DeX 会话</value>
@@ -302,7 +294,6 @@
   <data name="Action_ConfigurePath" xml:space="preserve">
     <value>配置路径...</value>
   </data>
-
   <!-- Status Messages -->
   <data name="Status_Idle" xml:space="preserve">
     <value>三星 DeX 准备就绪</value>
@@ -334,7 +325,6 @@
   <data name="Status_AdbUnauthorized" xml:space="preserve">
     <value>设备未授权。请检查手机屏幕。</value>
   </data>
-
   <!-- Diagnostic & Doctor Messages -->
   <data name="Doctor_Title" xml:space="preserve">
     <value>系统健康检查</value>
@@ -375,7 +365,6 @@
   <data name="Doctor_DisplayServerWayland" xml:space="preserve">
     <value>运行在 Wayland 显示服务器上。</value>
   </data>
-
   <!-- Logs & Filters -->
   <data name="Logs_Title" xml:space="preserve">
     <value>日志</value>
@@ -389,7 +378,6 @@
   <data name="Logs_ClearTooltip" xml:space="preserve">
     <value>清除日志历史记录</value>
   </data>
-
   <!-- General -->
   <data name="General_Language" xml:space="preserve">
     <value>语言</value>
@@ -397,7 +385,6 @@
   <data name="General_Language_Desc" xml:space="preserve">
     <value>选择用户界面显示语言</value>
   </data>
-
   <!-- MainWindow Avalonia UI -->
   <data name="MainWindow_Title" xml:space="preserve">
     <value>ScrcpyDeX — 三星 DeX 电脑客户端</value>
@@ -518,5 +505,216 @@
   </data>
   <data name="Footer_RoundtripLabel" xml:space="preserve">
     <value>往返延迟：</value>
+  </data>
+  <data name="Faq_Title" xml:space="preserve">
+    <value>故障排除与常见问题</value>
+  </data>
+  <data name="Faq_Subtitle" xml:space="preserve">
+    <value>针对 ADB、DeX、显示和 scrcpy 问题的快速解决方案</value>
+  </data>
+  <data name="Faq_SearchPlaceholder" xml:space="preserve">
+    <value>搜索问题、错误或关键字...</value>
+  </data>
+  <data name="Faq_Close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="Faq_Category_All" xml:space="preserve">
+    <value>全部</value>
+  </data>
+  <data name="Faq_Category_Connection" xml:space="preserve">
+    <value>连接与 ADB</value>
+  </data>
+  <data name="Faq_Category_DeX" xml:space="preserve">
+    <value>Samsung DeX</value>
+  </data>
+  <data name="Faq_Category_Display" xml:space="preserve">
+    <value>显示与驱动程序</value>
+  </data>
+  <data name="Faq_Category_Input" xml:space="preserve">
+    <value>音频与输入控制</value>
+  </data>
+  <data name="Faq_Category_Battery" xml:space="preserve">
+    <value>电池与散热</value>
+  </data>
+  <data name="Faq_Label_Symptom" xml:space="preserve">
+    <value>现象表现</value>
+  </data>
+  <data name="Faq_Label_Cause" xml:space="preserve">
+    <value>根本原因</value>
+  </data>
+  <data name="Faq_Label_Solution" xml:space="preserve">
+    <value>解决方案</value>
+  </data>
+  <data name="Faq_Label_CopyCommand" xml:space="preserve">
+    <value>复制命令</value>
+  </data>
+  <data name="Faq_NoResults" xml:space="preserve">
+    <value>未找到相关的故障排除主题</value>
+  </data>
+  <data name="Faq_NoResults_Desc" xml:space="preserve">
+    <value>请尝试其他搜索词或选择其他分类筛选。</value>
+  </data>
+  <data name="Faq_Q1_Title" xml:space="preserve">
+    <value>未检测到设备（列表为空 / No devices detected）</value>
+  </data>
+  <data name="Faq_Q1_Symptom" xml:space="preserve">
+    <value>设备下拉列表为空或显示“No devices detected”。</value>
+  </data>
+  <data name="Faq_Q1_Cause" xml:space="preserve">
+    <value>USB 线损坏或仅具充电功能、手机未开启 USB 调试、缺少三星 USB 驱动程序（Windows）或缺少 udev 规则（Linux）。</value>
+  </data>
+  <data name="Faq_Q1_Solution" xml:space="preserve">
+    <value>1. 手机端：设置 &gt; 开发者选项 &gt; 开启“USB 调试”。
+2. Windows：安装官方三星移动 USB 驱动程序。
+3. Linux：运行“sudo usermod -aG plugdev $USER”并重新加载 udev。
+4. 使用经过验证的数据线直接插入电脑主板 USB 接口。</value>
+  </data>
+  <data name="Faq_Q2_Title" xml:space="preserve">
+    <value>设备未授权（状态为 unauthorized）</value>
+  </data>
+  <data name="Faq_Q2_Symptom" xml:space="preserve">
+    <value>手机在设备列表中显示为“unauthorized”，且启动按钮处于禁用状态。</value>
+  </data>
+  <data name="Faq_Q2_Cause" xml:space="preserve">
+    <value>手机屏幕上尚未确认并允许电脑的 RSA 密钥握手请求。</value>
+  </data>
+  <data name="Faq_Q2_Solution" xml:space="preserve">
+    <value>1. 解锁手机屏幕。
+2. 在弹出的 USB 调试授权提示中勾选“始终允许使用这台计算机进行调试”，然后点击“允许”。
+3. 若未弹出提示：开发者选项 &gt; 点击“撤销 USB 调试授权”，然后重新拔插数据线。</value>
+  </data>
+  <data name="Faq_Q3_Title" xml:space="preserve">
+    <value>ADB 版本冲突（adb 服务端版本与客户端不匹配）</value>
+  </data>
+  <data name="Faq_Q3_Symptom" xml:space="preserve">
+    <value>执行终端持续输出“killing adb server...”循环信息或发生异常退出。</value>
+  </data>
+  <data name="Faq_Q3_Cause" xml:space="preserve">
+    <value>其他程序（如 Android Studio、三星智能轻传 Smart Switch、安卓模拟器）在 5037 端口启动了不同版本的 adb.exe。</value>
+  </data>
+  <data name="Faq_Q3_Solution" xml:space="preserve">
+    <value>1. 关闭后台运行的安卓模拟器、Android Studio 及 Smart Switch。
+2. 打开任务管理器，结束冲突的 adb.exe 进程。`n3. 在 ScrcpyDeX 设置中指定统一的 ADB 绝对路径。</value>
+  </data>
+  <data name="Faq_Q4_Title" xml:space="preserve">
+    <value>分配 DeX 虚拟显示屏失败</value>
+  </data>
+  <data name="Faq_Q4_Symptom" xml:space="preserve">
+    <value>终端日志提示“Failed to allocate Samsung DeX virtual display ID”，会话异常中止。</value>
+  </data>
+  <data name="Faq_Q4_Cause" xml:space="preserve">
+    <value>设备不受支持（三星 Galaxy A、M 及 Z Flip 系列缺少 DeX 硬件虚拟化层）、屏幕处于 Knox/生物识别锁屏状态，或前一次会话未正常释放。</value>
+  </data>
+  <data name="Faq_Q4_Solution" xml:space="preserve">
+    <value>1. 确认手机型号是否支持 DeX（仅限三星 Galaxy S、Note、Z Fold 及 Tab S 系列）。
+2. 点击“START DEX SESSION”前请务必先解锁手机屏幕。
+3. 点击“Stop Session”或“Rescan”强制释放残留的虚拟显示屏实例。</value>
+  </data>
+  <data name="Faq_Q5_Title" xml:space="preserve">
+    <value>服务端 JAR 部署错误（未找到 scrcpydex-server.jar）</value>
+  </data>
+  <data name="Faq_Q5_Symptom" xml:space="preserve">
+    <value>启动会话时出现 FileNotFoundException 或 adb push 失败。</value>
+  </data>
+  <data name="Faq_Q5_Cause" xml:space="preserve">
+    <value>缺少 scrcpydex-server.jar 文件，或安卓手机的 /data/local/tmp 目录空间不足或权限损坏。</value>
+  </data>
+  <data name="Faq_Q5_Solution" xml:space="preserve">
+    <value>1. 执行以下命令清理残留或损坏的文件：adb shell rm -f /data/local/tmp/scrcpydex-server.jar
+2. 检查手机内部存储空间是否充足。</value>
+  </data>
+  <data name="Faq_Q6_Title" xml:space="preserve">
+    <value>Direct3D 11 渲染器初始化失败（D3D11CreateDevice）</value>
+  </data>
+  <data name="Faq_Q6_Symptom" xml:space="preserve">
+    <value>控制台提示“ERROR: Could not create renderer: D3D11CreateDevice (DXGI_ERROR_UNSUPPORTED)”。</value>
+  </data>
+  <data name="Faq_Q6_Cause" xml:space="preserve">
+    <value>当前显卡不支持 DirectX 11 Feature Level 10_0，或在未开启 3D 硬件加速的虚拟机/远程桌面（RDP）环境中运行。</value>
+  </data>
+  <data name="Faq_Q6_Solution" xml:space="preserve">
+    <value>1. 在显示参数与编码器面板中，将“渲染驱动程序”切换为“OpenGL”。
+2. 从 AMD、Intel 或 NVIDIA 官方网站更新显卡驱动程序。</value>
+  </data>
+  <data name="Faq_Q7_Title" xml:space="preserve">
+    <value>Linux 下缺少硬件加速（VA-API / Mesa）</value>
+  </data>
+  <data name="Faq_Q7_Symptom" xml:space="preserve">
+    <value>在 Linux 系统下运行时 CPU 占用率极高、视频掉帧或画面卡顿。</value>
+  </data>
+  <data name="Faq_Q7_Cause" xml:space="preserve">
+    <value>Linux 系统中未安装 VA-API 硬件视频解码驱动程序包。</value>
+  </data>
+  <data name="Faq_Q7_Solution" xml:space="preserve">
+    <value>在终端中安装 VA-API 硬件加速软件包：
+sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-va-drivers</value>
+  </data>
+  <data name="Faq_Q8_Title" xml:space="preserve">
+    <value>黑屏或画面出现马赛克伪影</value>
+  </data>
+  <data name="Faq_Q8_Symptom" xml:space="preserve">
+    <value>scrcpy 窗口正常弹出但显示黑屏或严重的马赛克色块。</value>
+  </data>
+  <data name="Faq_Q8_Cause" xml:space="preserve">
+    <value>显卡仅支持 H.264 解码却选择了 H.265/AV1 编解码器，或设定的码率超过了 USB 接口的实际带宽。</value>
+  </data>
+  <data name="Faq_Q8_Solution" xml:space="preserve">
+    <value>1. 将“视频编解码器”切换为“h264”。
+2. 将分辨率设为“1920x1080 (FHD)”，帧率设为 30 或 60 fps。
+3. 将传输码率预设降低至 12 或 18 Mbps。</value>
+  </data>
+  <data name="Faq_Q9_Title" xml:space="preserve">
+    <value>鼠标指针延迟或出现双指针（aoa 与 uhid）</value>
+  </data>
+  <data name="Faq_Q9_Symptom" xml:space="preserve">
+    <value>鼠标移动有明显迟滞感，或画面上同时出现两个鼠标指针。</value>
+  </data>
+  <data name="Faq_Q9_Cause" xml:space="preserve">
+    <value>未开启原生 UHID 鼠标模式，回退到了安卓屏幕触摸注入方式（AOA/SDK）。</value>
+  </data>
+  <data name="Faq_Q9_Solution" xml:space="preserve">
+    <value>1. 在快速会话选项中勾选开启“Native UHID Mouse”。
+2. Linux 环境下：确保当前用户已加入 plugdev 用户组以获取 /dev/uhid 读写权限。</value>
+  </data>
+  <data name="Faq_Q10_Title" xml:space="preserve">
+    <value>系统快捷键无法传递至 DeX（Alt+Tab、Windows 键）</value>
+  </data>
+  <data name="Faq_Q10_Symptom" xml:space="preserve">
+    <value>按下 Alt+Tab 或 Windows 键时切换的是电脑本机的窗口，而非 DeX 内部的应用。</value>
+  </data>
+  <data name="Faq_Q10_Cause" xml:space="preserve">
+    <value>未开启“Forward Shortcut Keys”选项，或处于未支持修饰键全局拦截的 Wayland 会话下。</value>
+  </data>
+  <data name="Faq_Q10_Solution" xml:space="preserve">
+    <value>1. 在快速会话选项中勾选开启“Forward Shortcut Keys”。
+2. Linux 环境下：登录时请选择 X11 / Xorg 桌面环境以实现全键盘按键穿透。</value>
+  </data>
+  <data name="Faq_Q11_Title" xml:space="preserve">
+    <value>音频杂音、爆音或声音延迟（采样率不匹配）</value>
+  </data>
+  <data name="Faq_Q11_Symptom" xml:space="preserve">
+    <value>声音出现爆音、杂音或音画不同步现象。</value>
+  </data>
+  <data name="Faq_Q11_Cause" xml:space="preserve">
+    <value>安卓音频输出采样率（48,000 Hz）与电脑声卡默认格式（例如 44,100 Hz）不一致。</value>
+  </data>
+  <data name="Faq_Q11_Solution" xml:space="preserve">
+    <value>1. 进入 Windows 声音设置 &gt; 输出设备属性：将默认格式设为 24 位 48000 Hz 或 16 位 48000 Hz。
+2. 在快速会话选项中开启“Low Latency Audio”。
+3. 音频流选择“Opus 48kHz Stereo”。</value>
+  </data>
+  <data name="Faq_Q12_Title" xml:space="preserve">
+    <value>长时间使用导致手机过热且电池快速掉电</value>
+  </data>
+  <data name="Faq_Q12_Symptom" xml:space="preserve">
+    <value>温度监测指示变为黄色或红色（&gt; 40°C），且连接使用期间手机电量下降明显。</value>
+  </data>
+  <data name="Faq_Q12_Cause" xml:space="preserve">
+    <value>GPU 在渲染桌面界面的同时，手机机身物理 AMOLED 屏幕依然保持高亮度点亮。</value>
+  </data>
+  <data name="Faq_Q12_Solution" xml:space="preserve">
+    <value>1. 在快速会话选项中勾选“Turn off mobile screen”。
+2. 手机机身屏幕将彻底熄灭，可有效降低温度达 8°C 并杜绝 OLED 烧屏隐患。
+3. 将手机连接至供电充足的 USB 3.0 接口（1.5A 至 3A）。</value>
   </data>
 </root>
