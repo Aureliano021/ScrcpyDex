@@ -15,6 +15,7 @@ This project incorporates dependencies, build tools, or interfaces with external
 | **`CommunityToolkit.Mvvm`** | .NET Foundation and Contributors | [MIT](https://opensource.org/licenses/MIT) | **Compiled Dependency:** High-performance MVVM library. Bundled into `ScrcpyDeX.exe`. |
 | **`System.Text.Json`** | Microsoft Corporation | [MIT](https://opensource.org/licenses/MIT) | **Compiled Dependency:** High-performance JSON serialization. Bundled into `ScrcpyDeX.exe`. |
 | **Microsoft .NET 8 Runtime & WPF** | Microsoft Corporation | [MIT](https://github.com/dotnet/runtime/blob/main/LICENSE.TXT) | **Embedded Runtime:** Single-file host distribution bundle. |
+| **`Avalonia UI`** | Avalonia Community / .NET Foundation | [MIT](https://opensource.org/licenses/MIT) | **Compiled Dependency:** Cross-platform XAML GUI framework for Linux and Windows. Bundled into `ScrcpyDex.App`. |
 | **Android Robot Asset** | Google LLC | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) | **Modified Asset:** Icon artwork based on Android Robot, created and shared by Google. |
 
 ---
@@ -81,6 +82,15 @@ This project incorporates dependencies, build tools, or interfaces with external
 * **Website:** [https://developer.android.com/distribute/marketing-tools/brand-guidelines](https://developer.android.com/distribute/marketing-tools/brand-guidelines)
 * **License:** Creative Commons Attribution 3.0 Unported (CC BY 3.0)
 * **Usage in ScrcpyDeX:** The application icon incorporates stylized adaptations of the Android Robot. The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License.
+
+---
+
+### 2.8 Avalonia UI
+
+* **Copyright:** © 2013–2024 Avalonia Community
+* **Website / Repository:** [https://github.com/AvaloniaUI/Avalonia](https://github.com/AvaloniaUI/Avalonia)
+* **License:** MIT License
+* **Usage in ScrcpyDeX:** Provides cross-platform desktop UI controls, windowing abstractions, and rendering backends for Linux and Windows desktop clients (`ScrcpyDex.App`). Compiled into the application binary.
 
 ---
 
@@ -255,7 +265,7 @@ END OF TERMS AND CONDITIONS
 
 ### The MIT License (MIT)
 
-*Applicable to: `WPF-UI`, `CommunityToolkit.Mvvm`, `System.Text.Json`, Microsoft .NET 8 Runtime assemblies*
+*Applicable to: `WPF-UI`, `Avalonia UI`, `CommunityToolkit.Mvvm`, `System.Text.Json`, Microsoft .NET 8 Runtime assemblies*
 
 ```
 The MIT License (MIT)

@@ -1,5 +1,7 @@
 # Technical Report 02: Control Channel Protocol, Input Event Injection & Coordinate Translation
 
+> **Note (historical record):** This report documents the project at the time of this stage. Names such as WinUI refer to the Fluent visual style. The shipped desktop client is a WPF application (.NET 8, WPF-UI). scrcpy is an external dependency (official scrcpy v2.4 or newer), not bundled. Direct3D11 rendering is specific to the Windows client.
+
 **Project:** ScrcpyDeX Standalone Architecture  
 **Component:** Control Subsystem & Input Engine (`ControlChannel.java`, `InputHandler.java`, `InputManager.java`)  
 **Target Hardware:** Samsung Galaxy S23 (`SM-S911B`), One UI 8.5 / Android 16 (`SDK 36`)  
@@ -51,7 +53,7 @@ Both sockets operate with `TCP_NODELAY = true` to immediately flush buffers upon
 
 ## 2. Binary Control Protocol Specification
 
-The ScrcpyDeX binary protocol is defined in [`ScrcpyDex/docs/PROTOCOL.md`](file:///c:/Users/aurel/OneDrive/Documents/scrcpy-dex/ScrcpyDex/docs/PROTOCOL.md). Every packet begins with a single-byte identifier followed by a strongly-typed binary payload:
+The ScrcpyDeX binary protocol is defined in [`docs/PROTOCOL.md`](../PROTOCOL.md). Every packet begins with a single-byte identifier followed by a strongly-typed binary payload:
 
 ```
 ┌───────────────────────┬────────────────────────────────────────┐

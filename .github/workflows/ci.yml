@@ -1,0 +1,241 @@
+name: CI & Release Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - 'refactor/**'
+      - 'feat/**'
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-test:
+    name: Build & Test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Configure Linux pwsh wrapper
+        if: runner.os == 'Linux'
+        run: |
+          sudo ln -sf "$(which pwsh)" /usr/local/bin/pwsh.exe
+
+      - name: Restore dependencies
+        run: |
+          dotnet restore src/ScrcpyDex.Core/ScrcpyDex.Core.csproj
+          dotnet restore tests/ScrcpyDex.Core.Tests/ScrcpyDex.Core.Tests.csproj
+          if [ -f "src/ScrcpyDex.Platform.Linux/ScrcpyDex.Platform.Linux.csproj" ] && [ "${{ runner.os }}" = "Linux" ]; then
+            dotnet restore src/ScrcpyDex.Platform.Linux/ScrcpyDex.Platform.Linux.csproj
+          fi
+          if [ -f "src/ScrcpyDex.Cli/ScrcpyDex.Cli.csproj" ]; then
+            dotnet restore src/ScrcpyDex.Cli/ScrcpyDex.Cli.csproj
+          fi
+          if [ -f "src/ScrcpyDex.App/ScrcpyDex.App.csproj" ]; then
+            dotnet restore src/ScrcpyDex.App/ScrcpyDex.App.csproj
+          fi
+        shell: bash
+
+      - name: Restore Windows WPF dependencies
+        if: runner.os == 'Windows'
+        run: |
+          if (Test-Path "src/ScrcpyDex.App.Wpf/ScrcpyDex.App.Wpf.csproj") {
+            dotnet restore src/ScrcpyDex.App.Wpf/ScrcpyDex.App.Wpf.csproj
+          }
+        shell: pwsh
+
+      - name: Build Core Library
+        run: dotnet build src/ScrcpyDex.Core/ScrcpyDex.Core.csproj --configuration Release --no-restore
+
+      - name: Build Linux Platform
+        if: runner.os == 'Linux'
+        run: |
+          if [ -f "src/ScrcpyDex.Platform.Linux/ScrcpyDex.Platform.Linux.csproj" ]; then
+            dotnet build src/ScrcpyDex.Platform.Linux/ScrcpyDex.Platform.Linux.csproj --configuration Release --no-restore
+          else
+            echo "ScrcpyDex.Platform.Linux.csproj not found. Skipping build."
+          fi
+        shell: bash
+
+      - name: Build CLI
+        run: |
+          if [ -f "src/ScrcpyDex.Cli/ScrcpyDex.Cli.csproj" ]; then
+            dotnet build src/ScrcpyDex.Cli/ScrcpyDex.Cli.csproj --configuration Release --no-restore
+          else
+            echo "ScrcpyDex.Cli.csproj not found. Skipping build."
+          fi
+        shell: bash
+
+      - name: Build Avalonia App
+        run: |
+          if [ -f "src/ScrcpyDex.App/ScrcpyDex.App.csproj" ]; then
+            dotnet build src/ScrcpyDex.App/ScrcpyDex.App.csproj --configuration Release --no-restore
+          else
+            echo "ScrcpyDex.App.csproj not found. Skipping build."
+          fi
+        shell: bash
+
+      - name: Build Windows WPF App
+        if: runner.os == 'Windows'
+        run: |
+          if (Test-Path "src/ScrcpyDex.App.Wpf/ScrcpyDex.App.Wpf.csproj") {
+            dotnet build src/ScrcpyDex.App.Wpf/ScrcpyDex.App.Wpf.csproj --configuration Release --no-restore
+          }
+        shell: pwsh
+
+      - name: Run Core Automated Test Suite
+        run: dotnet test tests/ScrcpyDex.Core.Tests/ --configuration Release --verbosity normal
+
+      - name: Run Prototype Verification Script
+        shell: pwsh
+        run: pwsh -ExecutionPolicy Bypass -NoProfile -File tests/test-ui-prototype.ps1
+
+  package-linux:
+    name: Package Linux (Debian & AppImage)
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install packaging prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev file desktop-file-utils udev libfuse2
+
+      - name: Resolve Version
+        id: vars
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION="1.1.0"
+          fi
+          echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Debian Package
+        run: |
+          chmod +x packaging/linux/build-deb.sh
+          bash packaging/linux/build-deb.sh "${{ steps.vars.outputs.VERSION }}"
+
+      - name: Build AppImage
+        run: |
+          chmod +x packaging/linux/appimage/build-appimage.sh
+          chmod +x packaging/linux/appimage/AppRun
+          bash packaging/linux/appimage/build-appimage.sh "${{ steps.vars.outputs.VERSION }}"
+
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            publish/*.deb
+            publish/*.AppImage
+
+  package-windows:
+    name: Package Windows (win-x64 Zip)
+    needs: build-and-test
+    runs-on: windows-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Resolve Version
+        id: vars
+        shell: pwsh
+        run: |
+          $ref = $env:GITHUB_REF
+          if ($ref -like "refs/tags/v*") {
+            $ver = $ref.Substring(11)
+          } else {
+            $ver = "1.1.0"
+          }
+          "VERSION=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Build Windows Release Package
+        shell: pwsh
+        run: |
+          pwsh -ExecutionPolicy Bypass -NoProfile -File packaging/windows/build-release.ps1 -Version "${{ steps.vars.outputs.VERSION }}"
+
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-packages
+          path: |
+            publish/*.zip
+            publish/ScrcpyDeX.exe
+
+  release:
+    name: Publish GitHub Release
+    needs: [package-linux, package-windows]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-packages
+          path: release-assets
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-packages
+          path: release-assets
+
+      - name: Generate Checksums
+        working-directory: release-assets
+        run: |
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-assets/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true

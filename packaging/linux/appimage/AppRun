@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -e
+
+# ==============================================================================
+# ScrcpyDeX - AppImage Runtime Entrypoint (AppRun)
+# Sets up environment variables, library search paths, and launches scrcpydex
+# ==============================================================================
+
+HERE="$(dirname "$(readlink -f "${0}")")"
+
+export APPDIR="$HERE"
+export PATH="${HERE}/usr/bin:${PATH}"
+export LD_LIBRARY_PATH="${HERE}/usr/lib:${HERE}/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}"
+export XDG_DATA_DIRS="${HERE}/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+
+# Export server JAR location for process discovery
+export SCRCPYDEX_SERVER_PATH="${HERE}/usr/share/scrcpydex/server/scrcpydex-server.jar"
+
+# Locate executable
+if [ -x "${HERE}/usr/bin/scrcpydex" ]; then
+    EXEC="${HERE}/usr/bin/scrcpydex"
+elif [ -x "${HERE}/usr/bin/scrcpydex-cli" ]; then
+    EXEC="${HERE}/usr/bin/scrcpydex-cli"
+else
+    echo "[ERROR] ScrcpyDeX binary not found in ${HERE}/usr/bin" >&2
+    exit 1
+fi
+
+exec "$EXEC" "$@"

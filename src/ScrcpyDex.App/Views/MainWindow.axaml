@@ -1,0 +1,1087 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ScrcpyDex.App.ViewModels"
+        xmlns:models="using:ScrcpyDex.Models"
+        xmlns:appModels="using:ScrcpyDex.App.Models"
+        xmlns:io="using:ScrcpyDex.Core.IO"
+        xmlns:converters="using:ScrcpyDex.App.Converters"
+        xmlns:loc="using:ScrcpyDex.Core.Localization"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1060" d:DesignHeight="680"
+        x:Class="ScrcpyDex.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="{Binding [MainWindow_Title], Source={x:Static loc:LocalizationManager.Instance}}"
+        Width="1060" Height="680"
+        MinWidth="880" MinHeight="520"
+        WindowStartupLocation="CenterScreen"
+        Background="#0B0F17">
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Ctrl+Enter" Command="{Binding StartSessionCommand}" />
+        <KeyBinding Gesture="Ctrl+Shift+W" Command="{Binding StopSessionCommand}" />
+        <KeyBinding Gesture="F1" Command="{Binding ToggleFaqCommand}" />
+        <KeyBinding Gesture="Escape" Command="{Binding CloseFaqCommand}" />
+    </Window.KeyBindings>
+
+    <Grid RowDefinitions="38, *, Auto, 170, 26">
+        <!-- 1. Header / Integrated Titlebar (38px) -->
+        <Border Grid.Row="0"
+                Background="#0E131D"
+                BorderBrush="#1E293B"
+                BorderThickness="0,0,0,1"
+                Padding="16,0">
+            <Grid ColumnDefinitions="Auto, *">
+                <!-- Brand & Engine Tag -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Spacing="8">
+                    <Border Width="24" Height="24" Background="#2563EB" CornerRadius="4">
+                        <TextBlock Text="D"
+                                   FontSize="13"
+                                   FontWeight="Bold"
+                                   Foreground="#FFFFFF"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="ScrcpyDeX"
+                               FontSize="13"
+                               FontWeight="Bold"
+                               Foreground="#F1F5F9"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="v2.0.0"
+                               FontSize="11"
+                               FontFamily="Cascadia Code, Consolas, monospace"
+                               Foreground="#64748B"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="|"
+                               FontSize="11"
+                               Foreground="#334155"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding [MainWindow_EngineTag], Source={x:Static loc:LocalizationManager.Instance}}"
+                               FontSize="11"
+                               Foreground="#94A3B8"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- Right Header Actions (Warning Alert & Language Switcher) -->
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Spacing="10">
+                    <!-- Warning Alert (if any) -->
+                    <Border Background="#3A2500"
+                            BorderBrush="#FFB900"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="8,2"
+                            IsVisible="{Binding StatusWarning, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="⚠" Foreground="#FFD54F" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding StatusWarning}" Foreground="#FFE082" FontSize="11" VerticalAlignment="Center" />
+                            <Button Content="{Binding [Action_Browse], Source={x:Static loc:LocalizationManager.Instance}}"
+                                    Command="{Binding BrowseScrcpyPathCommand}"
+                                    Padding="6,1"
+                                    FontSize="10.5"
+                                    Margin="4,0,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- FAQ Help Button -->
+                    <Button Classes="chip"
+                            Command="{Binding ToggleFaqCommand}"
+                            Padding="8,4"
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="{Binding [Faq_Title], Source={x:Static loc:LocalizationManager.Instance}}">
+                        <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                            <TextBlock Text="❓" FontSize="11" VerticalAlignment="Center" />
+                            <TextBlock Text="FAQ"
+                                       FontWeight="SemiBold"
+                                       FontSize="11"
+                                       VerticalAlignment="Center"
+                                       Foreground="#F1F5F9" />
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Language Switcher Button -->
+                    <Button Classes="chip"
+                            Padding="8,4"
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="{Binding [General_Language_Desc], Source={x:Static loc:LocalizationManager.Instance}}">
+                        <Button.Flyout>
+                            <MenuFlyout x:DataType="vm:MainWindowViewModel" Placement="BottomEdgeAlignedRight">
+                                <MenuItem Header="English (EN)"
+                                          Command="{Binding ChangeLanguageCommand}"
+                                          CommandParameter="en" />
+                                <MenuItem Header="Português (Brasil)"
+                                          Command="{Binding ChangeLanguageCommand}"
+                                          CommandParameter="pt-BR" />
+                                <MenuItem Header="Español (ES)"
+                                          Command="{Binding ChangeLanguageCommand}"
+                                          CommandParameter="es" />
+                                <MenuItem Header="Deutsch (DE)"
+                                          Command="{Binding ChangeLanguageCommand}"
+                                          CommandParameter="de" />
+                                <MenuItem Header="Français (FR)"
+                                          Command="{Binding ChangeLanguageCommand}"
+                                          CommandParameter="fr" />
+                                <MenuItem Header="简体中文 (ZH)"
+                                          Command="{Binding ChangeLanguageCommand}"
+                                          CommandParameter="zh-Hans" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="🌐" FontSize="11" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding CurrentLanguageCode}"
+                                       FontWeight="SemiBold"
+                                       FontSize="11"
+                                       VerticalAlignment="Center"
+                                       Foreground="#F1F5F9" />
+                            <TextBlock Text="▾" FontSize="9" VerticalAlignment="Center" Foreground="#64748B" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 2. Main Workspace (Scrollable when window height is constrained) -->
+        <ScrollViewer Grid.Row="1"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="6" Margin="14,6,14,4">
+                <!-- Device Strip & Real-Time Telemetry Card -->
+                <Border Background="#111723"
+                        BorderBrush="#1E293B"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="12,8">
+                    <Grid ColumnDefinitions="Auto, *, Auto">
+                        <!-- Smartphone Display Slot: Real Hardware Render or Fallback Graphical Frame -->
+                        <Grid Grid.Column="0"
+                              Width="76"
+                              Height="94"
+                              Margin="0,0,14,0">
+                            <!-- 1. Real Device Render (When hardware photo is available) -->
+                            <Image Source="{Binding DeviceImage}"
+                                   Stretch="Uniform"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   ToolTip.Tip="{Binding DeviceDisplayName}"
+                                   IsVisible="{Binding HasDeviceImage}" />
+
+                            <!-- 2. Fallback Smartphone Graphical Frame (When no render image is available) -->
+                            <Border Background="#141C2A"
+                                    BorderBrush="{Binding HasSelectedDevice, Converter={StaticResource StatusToBrushConverter}, ConverterParameter='frameBorder'}"
+                                    BorderThickness="1"
+                                    CornerRadius="12"
+                                    IsVisible="{Binding HasDeviceImage, Converter={StaticResource InverseBooleanConverter}}">
+                                <Grid>
+                                    <!-- Speaker slit -->
+                                    <Border Width="20" Height="2.5"
+                                            Background="#334155"
+                                            CornerRadius="1"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Top"
+                                            Margin="0,6,0,0" />
+
+                                    <!-- Center phone badge -->
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="2">
+                                        <TextBlock Text="📱" FontSize="16" HorizontalAlignment="Center" />
+                                        <TextBlock Text="GALAXY"
+                                                   FontSize="7.5"
+                                                   FontWeight="Bold"
+                                                   Foreground="#64748B"
+                                                   HorizontalAlignment="Center" />
+                                        <TextBlock Text="{Binding DeviceFrameLabel}"
+                                                   FontSize="10.5"
+                                                   FontWeight="Bold"
+                                                   Foreground="{Binding HasSelectedDevice, Converter={StaticResource StatusToBrushConverter}, ConverterParameter='accent'}"
+                                                   HorizontalAlignment="Center" />
+                                    </StackPanel>
+
+                                    <!-- Bottom Home indicator -->
+                                    <Border Width="24" Height="2"
+                                            Background="#334155"
+                                            CornerRadius="1"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Bottom"
+                                            Margin="0,0,0,6" />
+                                </Grid>
+                            </Border>
+                        </Grid>
+
+                <!-- Device Info & Specs -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="5">
+                    <!-- Title & Model Badge -->
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding DeviceDisplayName}"
+                                   FontSize="15"
+                                   FontWeight="Bold"
+                                   Foreground="#F1F5F9"
+                                   VerticalAlignment="Center" />
+                        <Border Background="#162235"
+                                BorderBrush="#2563EB"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="6,1"
+                                VerticalAlignment="Center"
+                                IsVisible="{Binding HasSelectedDevice}">
+                            <TextBlock Text="{Binding DeviceModelCode}"
+                                       FontSize="11"
+                                       FontFamily="Cascadia Code, Consolas, monospace"
+                                       Foreground="#93C5FD" />
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Connection details -->
+                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <TextBlock Text="🔌" FontSize="11" Foreground="#94A3B8" />
+                        <TextBlock Text="{Binding ConnectionDetailsText}"
+                                   FontSize="11.5"
+                                   Foreground="#94A3B8" />
+                        <TextBlock Text="•" Foreground="#475569" IsVisible="{Binding HasSelectedDevice}" />
+                        <TextBlock Text="{Binding [Device_DexModeReady], Source={x:Static loc:LocalizationManager.Instance}}"
+                                   FontSize="11.5"
+                                   Foreground="#38BDF8"
+                                   IsVisible="{Binding HasSelectedDevice}" />
+                    </StackPanel>
+
+                    <!-- Hardware & GPU -->
+                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <TextBlock Text="⚡" FontSize="11" Foreground="#94A3B8" />
+                        <TextBlock Text="{Binding HardwareModelDisplay}"
+                                   FontSize="11.5"
+                                   Foreground="#64748B" />
+                    </StackPanel>
+
+                    <!-- Device Switcher (for multiple devices) -->
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding [DeviceSelector_TargetLabel], Source={x:Static loc:LocalizationManager.Instance}}" Classes="label" VerticalAlignment="Center" Margin="0" />
+                        <ComboBox ItemsSource="{Binding DeviceList}"
+                                  SelectedItem="{Binding SelectedDevice}"
+                                  MinWidth="240"
+                                  Height="28"
+                                  VerticalAlignment="Center"
+                                  PlaceholderText="{Binding [DeviceSelector_NoDevicesPlaceholder], Source={x:Static loc:LocalizationManager.Instance}}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="models:DeviceInfo">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="{Binding Model}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Serial, StringFormat='({0})'}" Foreground="#64748B" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Telemetry Meters Grid & Rescan Action -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <!-- Meter 1: Battery -->
+                    <Border Background="#161F2E"
+                            BorderBrush="#1E293B"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="8,4"
+                            Height="38"
+                            MinWidth="70">
+                        <StackPanel Spacing="1">
+                            <TextBlock Text="{Binding [Telemetry_Battery], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9" FontWeight="Bold" Foreground="#64748B" />
+                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                <TextBlock Text="⚡" FontSize="10.5" Foreground="#10B981" />
+                                <TextBlock Text="{Binding BatteryLevel}" FontSize="12.5" FontWeight="Bold" Foreground="#10B981" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Meter 2: Temperature -->
+                    <Border Background="#161F2E"
+                            BorderBrush="#1E293B"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="8,4"
+                            Height="38"
+                            MinWidth="70">
+                        <StackPanel Spacing="1">
+                            <TextBlock Text="{Binding [Telemetry_Temperature], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9" FontWeight="Bold" Foreground="#64748B" />
+                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                <TextBlock Text="🌡️" FontSize="10.5" Foreground="#F59E0B" />
+                                <TextBlock Text="{Binding BatteryTemperature}" FontSize="12.5" FontWeight="Bold" Foreground="#F59E0B" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Meter 3: USB Link -->
+                    <Border Background="#161F2E"
+                            BorderBrush="#1E293B"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="8,4"
+                            Height="38"
+                            MinWidth="70">
+                        <StackPanel Spacing="1">
+                            <TextBlock Text="{Binding [Telemetry_Link], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9" FontWeight="Bold" Foreground="#64748B" />
+                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                <TextBlock Text="🚀" FontSize="10.5" Foreground="#38BDF8" />
+                                <TextBlock Text="{Binding UsbLinkSpeed}" FontSize="12.5" FontWeight="Bold" Foreground="#38BDF8" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Meter 4: Latency -->
+                    <Border Background="#161F2E"
+                            BorderBrush="#1E293B"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="8,4"
+                            Height="38"
+                            MinWidth="70">
+                        <StackPanel Spacing="1">
+                            <TextBlock Text="{Binding [Telemetry_Latency], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9" FontWeight="Bold" Foreground="#64748B" />
+                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                <TextBlock Text="⏱" FontSize="10.5" Foreground="#10B981" />
+                                <TextBlock Text="{Binding EstimatedLatencyMs}" FontSize="12.5" FontWeight="Bold" Foreground="#10B981" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Rescan Button -->
+                    <Button Command="{Binding RefreshDevicesCommand}"
+                            Classes="meterAction"
+                            ToolTip.Tip="{Binding [DeviceSelector_RescanTooltip], Source={x:Static loc:LocalizationManager.Instance}}">
+                        <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                            <TextBlock Text="⟳" FontSize="13" Foreground="#94A3B8" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding [Action_Rescan], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Session Control Toolbar -->
+        <Border Background="#111723"
+                BorderBrush="#1E293B"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="8,6">
+            <Grid ColumnDefinitions="Auto, Auto, *, Auto">
+                <!-- Primary Action: START DEX SESSION -->
+                <Button Grid.Column="0"
+                        Command="{Binding StartSessionCommand}"
+                        IsEnabled="{Binding CanStart}"
+                        Classes="actionStart"
+                        Height="34"
+                        Padding="14,0"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+                        <TextBlock Text="▶" FontSize="11" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding [Action_StartSession], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" />
+                        <Border Classes="shortcutBadge"
+                                CornerRadius="3"
+                                Padding="4,1"
+                                VerticalAlignment="Center">
+                            <TextBlock Classes="shortcutBadgeText" Text="Ctrl+Enter" FontSize="9" />
+                        </Border>
+                    </StackPanel>
+                </Button>
+
+                <!-- Secondary Action: Stop Session -->
+                <Button Grid.Column="1"
+                        Command="{Binding StopSessionCommand}"
+                        IsEnabled="{Binding CanStop}"
+                        Classes="danger"
+                        Height="34"
+                        Padding="12,0"
+                        Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <TextBlock Classes="stopIcon" Text="■" FontSize="11" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding [Action_StopSessionText], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11.5" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- State Badge (Middle) -->
+                <Border Grid.Column="2"
+                        Background="#0E1420"
+                        BorderBrush="#1E293B"
+                        BorderThickness="1"
+                        CornerRadius="16"
+                        Padding="10,4"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+                        <Ellipse Width="7"
+                                 Height="7"
+                                 Fill="{Binding ConnectionState, Converter={StaticResource StatusToBrushConverter}}"
+                                 VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding SessionStatusText}"
+                                   FontSize="11"
+                                   Foreground="#94A3B8"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Scrcpy Binary Configuration (Right) -->
+                <Button Grid.Column="3"
+                        Command="{Binding BrowseScrcpyPathCommand}"
+                        Height="32"
+                        Padding="12,0"
+                        CornerRadius="6"
+                        Background="#161F2E"
+                        BorderBrush="#1E293B"
+                        BorderThickness="1"
+                        VerticalAlignment="Center"
+                        ToolTip.Tip="{Binding [Action_ConfigureScrcpyTooltip], Source={x:Static loc:LocalizationManager.Instance}}">
+                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <TextBlock Text="⚙" FontSize="12" Foreground="#94A3B8" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding [Action_ConfigureScrcpy], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Configuration Grid (Display & Video Stream / Quick Session Options) -->
+        <Grid ColumnDefinitions="1.35*, 1*">
+            <!-- Left Card: DISPLAY PARAMETERS & ENCODER (8 cols) -->
+            <Border Grid.Column="0"
+                    Classes="card"
+                    Margin="0,0,5,0"
+                    Padding="10">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{Binding [Display_CardHeader], Source={x:Static loc:LocalizationManager.Instance}}"
+                               Classes="cardHeader"
+                               Margin="0,0,0,2" />
+
+                    <!-- Resolution & Target FPS Grid -->
+                    <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto, Auto">
+                        <!-- Resolution -->
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,6,6">
+                            <TextBlock Text="{Binding [Display_ResolutionLabel], Source={x:Static loc:LocalizationManager.Instance}}" Classes="label" />
+                            <ComboBox ItemsSource="{Binding AvailableResolutions}"
+                                      SelectedItem="{Binding SelectedResolution}"
+                                      HorizontalAlignment="Stretch" />
+                        </StackPanel>
+
+                        <!-- FPS -->
+                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="6,0,0,6">
+                            <TextBlock Text="{Binding [Display_TargetFrameRate], Source={x:Static loc:LocalizationManager.Instance}}" Classes="label" />
+                            <ComboBox ItemsSource="{Binding AvailableFps}"
+                                      SelectedItem="{Binding SelectedFps}"
+                                      HorizontalAlignment="Stretch" />
+                        </StackPanel>
+
+                        <!-- Video Codec -->
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,6,6">
+                            <TextBlock Text="{Binding [Display_VideoCodec], Source={x:Static loc:LocalizationManager.Instance}}" Classes="label" />
+                            <ComboBox ItemsSource="{Binding AvailableCodecs}"
+                                      SelectedItem="{Binding SelectedCodec}"
+                                      HorizontalAlignment="Stretch" />
+                        </StackPanel>
+
+                        <!-- Audio Stream -->
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="6,0,0,6">
+                            <TextBlock Text="{Binding [Display_AudioStreamDriver], Source={x:Static loc:LocalizationManager.Instance}}" Classes="label" />
+                            <ComboBox ItemsSource="{Binding AvailableAudioCodecs}"
+                                      SelectedItem="{Binding SelectedAudioCodec}"
+                                      HorizontalAlignment="Stretch" />
+                        </StackPanel>
+
+                        <!-- Rendering Driver Backend -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,6,6">
+                            <TextBlock Text="{Binding [Display_RenderingDriver], Source={x:Static loc:LocalizationManager.Instance}}" Classes="label" />
+                            <ComboBox ItemsSource="{Binding AvailableRenderDrivers}"
+                                      SelectedItem="{Binding SelectedRenderDriver}"
+                                      HorizontalAlignment="Stretch" />
+                        </StackPanel>
+
+                        <!-- Driver Info Badge -->
+                        <Border Grid.Row="2" Grid.Column="1"
+                                Margin="6,0,0,6"
+                                Padding="8,4"
+                                Background="#0E131D"
+                                BorderBrush="#1E293B"
+                                BorderThickness="1"
+                                CornerRadius="5"
+                                VerticalAlignment="Bottom">
+                            <TextBlock Text="{Binding [Display_RenderingDriverDesc], Source={x:Static loc:LocalizationManager.Instance}}"
+                                       FontSize="10"
+                                       Foreground="#64748B"
+                                       VerticalAlignment="Center"
+                                       TextWrapping="Wrap" />
+                        </Border>
+                    </Grid>
+
+                    <!-- Separator -->
+                    <Border Height="1" Background="#1E293B" Margin="0,2" />
+
+                    <!-- Transmission Bitrate Section -->
+                    <StackPanel Spacing="3">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <TextBlock Text="{Binding [Display_TransmissionBitrate], Source={x:Static loc:LocalizationManager.Instance}}" Classes="label" Grid.Column="0" VerticalAlignment="Center" Margin="0" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="3">
+                                <TextBlock Text="{Binding BitrateMbps}"
+                                           FontSize="13.5"
+                                           FontWeight="Bold"
+                                           Foreground="#38BDF8" />
+                                <TextBlock Text="Mbps"
+                                           FontSize="10.5"
+                                           Foreground="#64748B"
+                                           VerticalAlignment="Bottom"
+                                           Margin="0,0,0,1" />
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Slider -->
+                        <Slider Minimum="4"
+                                Maximum="60"
+                                Value="{Binding BitrateMbps}"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                Margin="0,1,0,0" />
+
+                        <!-- Quick Bitrate Preset Chips -->
+                        <Grid ColumnDefinitions="*, *, *, *" Margin="0,2,0,0">
+                            <Button Grid.Column="0"
+                                     Content="8 Mbps"
+                                     Command="{Binding SetBitratePresetCommand}"
+                                     CommandParameter="8"
+                                     Classes="chip"
+                                     Margin="0,0,3,0"
+                                     HorizontalAlignment="Stretch"
+                                     HorizontalContentAlignment="Center" />
+                            <Button Grid.Column="1"
+                                     Content="16 Mbps"
+                                     Command="{Binding SetBitratePresetCommand}"
+                                     CommandParameter="16"
+                                     Classes="chip"
+                                     Margin="3,0,3,0"
+                                     HorizontalAlignment="Stretch"
+                                     HorizontalContentAlignment="Center" />
+                            <Button Grid.Column="2"
+                                     Content="{Binding [Display_BitratePresetRecommended], Source={x:Static loc:LocalizationManager.Instance}}"
+                                     Command="{Binding SetBitratePresetCommand}"
+                                     CommandParameter="24"
+                                     Classes="chip"
+                                     Margin="3,0,3,0"
+                                     HorizontalAlignment="Stretch"
+                                     HorizontalContentAlignment="Center" />
+                            <Button Grid.Column="3"
+                                     Content="50 Mbps"
+                                     Command="{Binding SetBitratePresetCommand}"
+                                     CommandParameter="50"
+                                     Classes="chip"
+                                     Margin="3,0,0,0"
+                                     HorizontalAlignment="Stretch"
+                                     HorizontalContentAlignment="Center" />
+                        </Grid>
+
+                        <!-- Dynamic Status Hint -->
+                        <TextBlock Text="{Binding BitrateStatusHint}"
+                                   FontSize="11"
+                                   Foreground="#64748B"
+                                   Margin="0,3,0,0" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Right Card: QUICK SESSION OPTIONS -->
+            <Border Grid.Column="1"
+                    Classes="card"
+                    Margin="5,0,0,0"
+                    Padding="10">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="{Binding [QuickOptions_Header], Source={x:Static loc:LocalizationManager.Instance}}"
+                               Classes="cardHeader"
+                               Margin="0,0,0,2" />
+
+                    <!-- Option 1: Turn off mobile screen -->
+                    <Border Classes="subcard" Padding="8,4">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding [QuickOptions_TurnScreenOff], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" />
+                                <TextBlock Text="{Binding [QuickOptions_TurnScreenOff_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" Foreground="#64748B" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1"
+                                          IsChecked="{Binding TurnScreenOff}"
+                                          OnContent="" OffContent="" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Option 2: Native UHID Mouse -->
+                    <Border Classes="subcard" Padding="8,4">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding [QuickOptions_NativeUhidMouse], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" />
+                                <TextBlock Text="{Binding [QuickOptions_NativeUhidMouse_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" Foreground="#64748B" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1"
+                                          IsChecked="{Binding MouseUhidEnabled}"
+                                          OnContent="" OffContent="" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Option 3: Forward Shortcut Keys -->
+                    <Border Classes="subcard" Padding="8,4">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding [QuickOptions_ForwardShortcuts], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" />
+                                <TextBlock Text="{Binding [QuickOptions_ForwardShortcuts_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" Foreground="#64748B" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1"
+                                          IsChecked="{Binding ForwardShortcuts}"
+                                          OnContent="" OffContent="" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Option 4: Stay Awake Device -->
+                    <Border Classes="subcard" Padding="8,4">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding [QuickOptions_StayAwake], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" />
+                                <TextBlock Text="{Binding [QuickOptions_StayAwake_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" Foreground="#64748B" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1"
+                                          IsChecked="{Binding StayAwake}"
+                                          OnContent="" OffContent="" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Option 5: Low Latency Audio -->
+                    <Border Classes="subcard" Padding="8,4">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding [QuickOptions_LowLatencyAudio], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" />
+                                <TextBlock Text="{Binding [QuickOptions_LowLatencyAudio_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" Foreground="#64748B" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1"
+                                          IsChecked="{Binding LowLatencyAudio}"
+                                          OnContent="" OffContent="" />
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </Grid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- 3. Dynamic Resize Splitter -->
+        <GridSplitter Grid.Row="2"
+                      Height="5"
+                      HorizontalAlignment="Stretch"
+                      Background="#111723"
+                      BorderBrush="#1E293B"
+                      BorderThickness="0,1,0,1"
+                      Cursor="SizeNorthSouth"
+                      Margin="14,0" />
+
+        <!-- 4. Terminal Console -->
+        <Border Grid.Row="3"
+                Background="#090D14"
+                BorderBrush="#1E293B"
+                BorderThickness="1"
+                CornerRadius="8"
+                Margin="14,2,14,6"
+                MinHeight="100">
+            <Grid RowDefinitions="Auto, *">
+                <!-- Terminal Header Bar -->
+                <Border Grid.Row="0"
+                        Background="#0E1420"
+                        BorderBrush="#1E293B"
+                        BorderThickness="0,0,0,1"
+                        CornerRadius="8,8,0,0"
+                        Padding="10,5">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <TextBlock Text=">_" FontSize="11" FontWeight="Bold" Foreground="#38BDF8" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding [Console_Header], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#F1F5F9" VerticalAlignment="Center" />
+                            <Border Background="#132E27"
+                                    BorderBrush="#10B981"
+                                    BorderThickness="1"
+                                    CornerRadius="3"
+                                    Padding="5,1"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="{Binding [Console_ActivePipe], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9" FontWeight="Bold" Foreground="#10B981" />
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <Button Content="{Binding [Console_CopyCli], Source={x:Static loc:LocalizationManager.Instance}}"
+                                    Command="{Binding CopyCliCommandCommand}"
+                                    Classes="chip"
+                                    Padding="8,2"
+                                    FontSize="10.5" />
+                            <Button Content="{Binding [Action_Clear], Source={x:Static loc:LocalizationManager.Instance}}"
+                                    Command="{Binding ClearLogsCommand}"
+                                    Classes="chip"
+                                    Padding="8,2"
+                                    FontSize="10.5" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Terminal Log Stream -->
+                <ScrollViewer x:Name="TerminalScrollViewer"
+                              Grid.Row="1"
+                              Padding="10,8,12,0"
+                              HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <ItemsControl ItemsSource="{Binding LogEntries}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="io:ProcessLogEntry">
+                                    <Grid ColumnDefinitions="Auto, Auto, *" Margin="0,1">
+                                        <!-- Timestamp -->
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding Timestamp, StringFormat='[{0:HH:mm:ss.fff}]'}"
+                                                   FontFamily="Cascadia Code, Consolas, Courier New, monospace"
+                                                   FontSize="11"
+                                                   Foreground="#475569"
+                                                   Margin="0,0,6,0" />
+
+                                        <!-- ERR badge -->
+                                        <Border Grid.Column="1"
+                                                CornerRadius="3"
+                                                Padding="4,0"
+                                                Margin="0,0,6,0"
+                                                Background="#E11D48"
+                                                IsVisible="{Binding IsError}">
+                                            <TextBlock Text="ERR"
+                                                       FontSize="9"
+                                                       FontWeight="Bold"
+                                                       Foreground="#FFFFFF" />
+                                        </Border>
+
+                                        <!-- Log Text -->
+                                        <TextBlock Grid.Column="2"
+                                                   Text="{Binding Text}"
+                                                   FontFamily="Cascadia Code, Consolas, Courier New, monospace"
+                                                   FontSize="11"
+                                                   Foreground="{Binding Converter={StaticResource LogEntryBrushConverter}}"
+                                                   TextWrapping="Wrap" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <!-- End Spacer: Guarantees 24px of clear buffer space below the last log entry -->
+                        <Border Height="24" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <!-- 5. Footer Status Strip (26px) -->
+        <Border Grid.Row="4"
+                Background="#0E131D"
+                BorderBrush="#1E293B"
+                BorderThickness="0,1,0,0"
+                Padding="16,0">
+            <Grid ColumnDefinitions="Auto, Auto, Auto, *, Auto" VerticalAlignment="Center">
+                <!-- Daemon -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" Margin="0,0,12,0" VerticalAlignment="Center">
+                    <Ellipse Width="6" Height="6" Fill="#10B981" VerticalAlignment="Center" />
+                    <TextBlock Text="ADB Daemon: 127.0.0.1:5037" FontSize="10.5" Foreground="#64748B" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- Separator -->
+                <TextBlock Grid.Column="1" Text="|" Foreground="#334155" Margin="0,0,12,0" VerticalAlignment="Center" />
+
+                <!-- Hardware info -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" Margin="0,0,12,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding [DeviceSelector_TargetLabel], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10.5" Foreground="#64748B" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding DeviceDisplayName}"
+                               FontSize="10.5"
+                               FontWeight="SemiBold"
+                               Foreground="#94A3B8"
+                               VerticalAlignment="Center" />
+                    <TextBlock Text="•" Foreground="#475569" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding SelectedCodec, StringFormat='Encoder: {0}'}"
+                               FontSize="10.5"
+                               Foreground="#94A3B8"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- Latency readout (Right) -->
+                <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding [Footer_RoundtripLabel], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10.5" Foreground="#64748B" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding EstimatedLatencyMs}"
+                               FontSize="10.5"
+                               FontWeight="SemiBold"
+                               Foreground="#10B981"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 6. FAQ Drawer Backdrop (Clicking outside closes FAQ) -->
+        <Button Grid.Row="1"
+                Grid.RowSpan="4"
+                Command="{Binding CloseFaqCommand}"
+                IsVisible="{Binding IsFaqOpen}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Background="#80000000"
+                BorderThickness="0"
+                Padding="0"
+                Margin="0"
+                ZIndex="90">
+            <Button.Template>
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}" />
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
+
+        <!-- 7. Retractable FAQ Side Panel (500px width) -->
+        <Border Grid.Row="1"
+                Grid.RowSpan="4"
+                HorizontalAlignment="Right"
+                Width="500"
+                Background="#0E131D"
+                BorderBrush="#1E293B"
+                BorderThickness="1,0,0,0"
+                IsVisible="{Binding IsFaqOpen}"
+                ZIndex="100">
+            <Grid RowDefinitions="Auto, Auto, Auto, *">
+                <!-- 1. FAQ Drawer Header -->
+                <Border Grid.Row="0"
+                        Background="#111723"
+                        BorderBrush="#1E293B"
+                        BorderThickness="0,0,0,1"
+                        Padding="16,12">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <StackPanel Grid.Column="0" Spacing="2">
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <TextBlock Text="❓" FontSize="13" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding [Faq_Title], Source={x:Static loc:LocalizationManager.Instance}}"
+                                           FontSize="13"
+                                           FontWeight="Bold"
+                                           Foreground="#F1F5F9" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding [Faq_Subtitle], Source={x:Static loc:LocalizationManager.Instance}}"
+                                       FontSize="10.5"
+                                       Foreground="#64748B" />
+                        </StackPanel>
+
+                        <!-- Close Button -->
+                        <Button Grid.Column="1"
+                                Classes="chip"
+                                Command="{Binding CloseFaqCommand}"
+                                Padding="8,4"
+                                VerticalAlignment="Center"
+                                ToolTip.Tip="{Binding [Faq_Close], Source={x:Static loc:LocalizationManager.Instance}}">
+                            <TextBlock Text="✕" FontSize="12" FontWeight="Bold" Foreground="#94A3B8" />
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- 2. Search Box -->
+                <Border Grid.Row="1" Padding="16,10,16,6">
+                    <TextBox Text="{Binding FaqSearchQuery, Mode=TwoWay}"
+                             Watermark="{Binding [Faq_SearchPlaceholder], Source={x:Static loc:LocalizationManager.Instance}}"
+                             FontSize="11.5"
+                             Padding="12,7"
+                             CornerRadius="6" />
+                </Border>
+
+                <!-- 3. Category Filter Chips (WrapPanel - wraps cleanly, NO horizontal scrollbar) -->
+                <ItemsControl Grid.Row="2"
+                              ItemsSource="{Binding FaqCategories}"
+                              Margin="16,2,16,8">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="appModels:FaqCategoryItem">
+                            <Button Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).SelectFaqCategoryCommand}"
+                                    CommandParameter="{Binding Id}"
+                                    Padding="10,4"
+                                    Margin="0,0,6,6"
+                                    FontSize="11"
+                                    FontWeight="SemiBold"
+                                    CornerRadius="6"
+                                    BorderThickness="1"
+                                    Background="{Binding BackgroundBrush}"
+                                    BorderBrush="{Binding BorderBrushColor}"
+                                    Foreground="{Binding ForegroundBrush}"
+                                    Content="{Binding HeaderText}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- 4. Scrollable FAQ Accordion List -->
+                <ScrollViewer Grid.Row="3"
+                              HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto"
+                              Padding="16,0,16,0">
+                    <StackPanel Spacing="8" Margin="0,0,8,0">
+                        <!-- No Results Notice (if empty) -->
+                        <Border IsVisible="{Binding HasNoFaqResults}"
+                                Background="#111723"
+                                BorderBrush="#1E293B"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="20"
+                                Margin="0,16,0,0">
+                            <StackPanel Spacing="6" HorizontalAlignment="Center">
+                                <TextBlock Text="🔍" FontSize="24" HorizontalAlignment="Center" />
+                                <TextBlock Text="{Binding [Faq_NoResults], Source={x:Static loc:LocalizationManager.Instance}}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           Foreground="#F1F5F9"
+                                           HorizontalAlignment="Center" />
+                                <TextBlock Text="{Binding [Faq_NoResults_Desc], Source={x:Static loc:LocalizationManager.Instance}}"
+                                           FontSize="11"
+                                           Foreground="#64748B"
+                                           TextWrapping="Wrap"
+                                           HorizontalAlignment="Center"
+                                           TextAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- FAQ Items -->
+                        <ItemsControl ItemsSource="{Binding FilteredFaqItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="appModels:FaqItem">
+                                    <Border Background="#111723"
+                                            BorderBrush="#1E293B"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Margin="0,0,0,8">
+                                        <StackPanel>
+                                            <!-- Card Header (Expander trigger) -->
+                                            <Button Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ToggleFaqItemExpandedCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    HorizontalAlignment="Stretch"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Padding="12,10"
+                                                    CornerRadius="6">
+                                                <Grid ColumnDefinitions="Auto, *, Auto">
+                                                    <!-- Category Tag -->
+                                                    <Border Grid.Column="0"
+                                                            Background="#1E293B"
+                                                            CornerRadius="4"
+                                                            Padding="6,2"
+                                                            Margin="0,0,10,0"
+                                                            VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding CategoryName}"
+                                                                   FontSize="9.5"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="#94A3B8" />
+                                                    </Border>
+
+                                                    <!-- Title -->
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding Title}"
+                                                               FontSize="11.5"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="#F1F5F9"
+                                                               TextWrapping="Wrap"
+                                                               VerticalAlignment="Center"
+                                                               Margin="0,0,10,0" />
+
+                                                    <!-- Expand / Collapse Indicator Badge -->
+                                                    <Border Grid.Column="2"
+                                                            Width="22" Height="22"
+                                                            CornerRadius="11"
+                                                            Background="#161F2E"
+                                                            VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding ExpandIcon}"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="#94A3B8"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center" />
+                                                    </Border>
+                                                </Grid>
+                                            </Button>
+
+                                            <!-- Expanded Details -->
+                                            <Border IsVisible="{Binding IsExpanded}"
+                                                    BorderBrush="#1E293B"
+                                                    BorderThickness="0,1,0,0"
+                                                    Padding="14,12,14,12"
+                                                    Background="#0A0E17">
+                                                <StackPanel Spacing="10">
+                                                    <!-- Symptom -->
+                                                    <StackPanel Spacing="3">
+                                                        <TextBlock Text="{Binding [Faq_Label_Symptom], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="#E11D48" />
+                                                        <TextBlock Text="{Binding Symptom}"
+                                                                   FontSize="11"
+                                                                   Foreground="#CBD5E1"
+                                                                   TextWrapping="Wrap" />
+                                                    </StackPanel>
+
+                                                    <!-- Root Cause -->
+                                                    <StackPanel Spacing="3">
+                                                        <TextBlock Text="{Binding [Faq_Label_Cause], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="#F59E0B" />
+                                                        <TextBlock Text="{Binding Cause}"
+                                                                   FontSize="11"
+                                                                   Foreground="#CBD5E1"
+                                                                   TextWrapping="Wrap" />
+                                                    </StackPanel>
+
+                                                    <!-- Solution -->
+                                                    <StackPanel Spacing="3">
+                                                        <TextBlock Text="{Binding [Faq_Label_Solution], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="#10B981" />
+                                                        <TextBlock Text="{Binding Solution}"
+                                                                   FontSize="11"
+                                                                   Foreground="#F1F5F9"
+                                                                   TextWrapping="Wrap" />
+                                                    </StackPanel>
+
+                                                    <!-- Command Snippet with Copy Button -->
+                                                    <Border IsVisible="{Binding HasCommand}"
+                                                            Background="#06090F"
+                                                            BorderBrush="#1E293B"
+                                                            BorderThickness="1"
+                                                            CornerRadius="4"
+                                                            Padding="10,8"
+                                                            Margin="0,4,0,0">
+                                                        <Grid ColumnDefinitions="*, Auto">
+                                                            <TextBlock Grid.Column="0"
+                                                                       Text="{Binding CommandCode}"
+                                                                       FontFamily="Cascadia Code, Consolas, monospace"
+                                                                       FontSize="10"
+                                                                       Foreground="#93C5FD"
+                                                                       TextWrapping="Wrap"
+                                                                       VerticalAlignment="Center"
+                                                                       Margin="0,0,8,0" />
+                                                            <Button Grid.Column="1"
+                                                                    Classes="chip"
+                                                                    Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).CopyFaqCommandTextCommand}"
+                                                                    CommandParameter="{Binding CommandCode}"
+                                                                    Padding="8,3"
+                                                                    VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding [Faq_Label_CopyCommand], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                                           FontSize="9.5"
+                                                                           Foreground="#60A5FA" />
+                                                            </Button>
+                                                        </Grid>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- End Spacer: Guarantees 64px of clear buffer space below the last item -->
+                        <Border Height="64" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

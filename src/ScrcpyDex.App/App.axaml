@@ -1,0 +1,210 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="using:ScrcpyDex.App.Converters"
+             x:Class="ScrcpyDex.App.App"
+             RequestedThemeVariant="Dark">
+    <Application.Resources>
+        <!-- Converters -->
+        <converters:StatusToBrushConverter x:Key="StatusToBrushConverter" />
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <converters:LogEntryBrushConverter x:Key="LogEntryBrushConverter" />
+
+        <!-- Deep Space Navy Design Tokens -->
+        <SolidColorBrush x:Key="AppBackgroundBrush" Color="#0B0F17" />
+        <SolidColorBrush x:Key="AppHeaderFooterBrush" Color="#0E131D" />
+        <SolidColorBrush x:Key="AppPanelBrush" Color="#111723" />
+        <SolidColorBrush x:Key="AppCardBrush" Color="#161F2E" />
+        <SolidColorBrush x:Key="AppInputBrush" Color="#0E1420" />
+        <SolidColorBrush x:Key="AppBorderBrush" Color="#1E293B" />
+        <SolidColorBrush x:Key="AppBorderHoverBrush" Color="#334155" />
+        <SolidColorBrush x:Key="AccentPrimaryBrush" Color="#2563EB" />
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="#1D4ED8" />
+        <SolidColorBrush x:Key="StatusSuccessBrush" Color="#10B981" />
+        <SolidColorBrush x:Key="StatusWarningBrush" Color="#F59E0B" />
+        <SolidColorBrush x:Key="StatusDangerBrush" Color="#E11D48" />
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F1F5F9" />
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#94A3B8" />
+        <SolidColorBrush x:Key="TextMutedBrush" Color="#64748B" />
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+        
+        <!-- Surface & Card Styles -->
+        <Style Selector="Border.panel">
+            <Setter Property="Background" Value="{StaticResource AppPanelBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="14" />
+        </Style>
+
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{StaticResource AppCardBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="12" />
+        </Style>
+
+        <Style Selector="Border.subcard">
+            <Setter Property="Background" Value="{StaticResource AppInputBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="10,7" />
+        </Style>
+        
+        <!-- Typography -->
+        <Style Selector="TextBlock.cardHeader">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        
+        <Style Selector="TextBlock.label">
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+
+        <Style Selector="TextBlock.muted">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+        </Style>
+
+        <!-- Buttons -->
+        <Style Selector="Button.chip">
+            <Setter Property="Background" Value="{StaticResource AppCardBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        </Style>
+
+        <Style Selector="Button.chip:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#1E293B" />
+            <Setter Property="BorderBrush" Value="{StaticResource AppBorderHoverBrush}" />
+            <Setter Property="TextBlock.Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        </Style>
+
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="{StaticResource AccentPrimaryBrush}" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+
+        <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource AccentHoverBrush}" />
+            <Setter Property="TextBlock.Foreground" Value="#FFFFFF" />
+        </Style>
+
+        <Style Selector="Button.actionStart">
+            <Setter Property="Background" Value="#2563EB" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+
+        <Style Selector="Button.actionStart:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#1D4ED8" />
+            <Setter Property="TextBlock.Foreground" Value="#FFFFFF" />
+        </Style>
+
+        <Style Selector="Button.actionStart:disabled /template/ ContentPresenter">
+            <Setter Property="Background" Value="#161F2E" />
+            <Setter Property="BorderBrush" Value="#1E293B" />
+            <Setter Property="TextBlock.Foreground" Value="#475569" />
+        </Style>
+
+        <Style Selector="Button.danger">
+            <Setter Property="Background" Value="#3B1219" />
+            <Setter Property="BorderBrush" Value="#9F1239" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="#FDA4AF" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+
+        <Style Selector="Button.danger:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#4C1D26" />
+            <Setter Property="TextBlock.Foreground" Value="#FFE4E6" />
+        </Style>
+
+        <Style Selector="Button.danger:disabled /template/ ContentPresenter">
+            <Setter Property="Background" Value="#161F2E" />
+            <Setter Property="BorderBrush" Value="#1E293B" />
+            <Setter Property="TextBlock.Foreground" Value="#475569" />
+        </Style>
+
+        <!-- General Disabled Button Dimming -->
+        <Style Selector="Button:disabled">
+            <Setter Property="Opacity" Value="0.4" />
+        </Style>
+
+        <!-- Shortcut Badge Styles -->
+        <Style Selector="Border.shortcutBadge">
+            <Setter Property="Background" Value="#1D4ED8" />
+        </Style>
+        <Style Selector="Button:disabled Border.shortcutBadge">
+            <Setter Property="Background" Value="#1E293B" />
+        </Style>
+        <Style Selector="TextBlock.shortcutBadgeText">
+            <Setter Property="Foreground" Value="#BFDBFE" />
+        </Style>
+        <Style Selector="Button:disabled TextBlock.shortcutBadgeText">
+            <Setter Property="Foreground" Value="#475569" />
+        </Style>
+
+        <!-- Stop Button Icon Styles -->
+        <Style Selector="TextBlock.stopIcon">
+            <Setter Property="Foreground" Value="#FDA4AF" />
+        </Style>
+        <Style Selector="Button:disabled TextBlock.stopIcon">
+            <Setter Property="Foreground" Value="#475569" />
+        </Style>
+
+        <!-- Rescan Meter Action Button -->
+        <Style Selector="Button.meterAction">
+            <Setter Property="Background" Value="#161F2E" />
+            <Setter Property="BorderBrush" Value="#1E293B" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Height" Value="38" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style Selector="Button.meterAction:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#1E293B" />
+            <Setter Property="BorderBrush" Value="#334155" />
+            <Setter Property="TextBlock.Foreground" Value="#F1F5F9" />
+        </Style>
+
+        <!-- Form Controls -->
+        <Style Selector="ComboBox">
+            <Setter Property="Background" Value="{StaticResource AppInputBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="{StaticResource AppInputBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
+        <Style Selector="ToggleSwitch">
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Application.Styles>
+</Application>

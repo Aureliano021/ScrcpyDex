@@ -1,0 +1,721 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" msdata:Ordinal="0" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <!-- App Branding & Titles -->
+  <data name="App_Title" xml:space="preserve">
+    <value>ScrcpyDeX — Settings</value>
+  </data>
+  <data name="App_Subtitle" xml:space="preserve">
+    <value>Direct PC Streaming</value>
+  </data>
+  <data name="App_Description" xml:space="preserve">
+    <value>Direct USB desktop session with Linux /dev/uhid mouse capture</value>
+  </data>
+  <data name="App_VersionBadge" xml:space="preserve">
+    <value>v1.1 Fluent</value>
+  </data>
+  <data name="App_AutoSaved" xml:space="preserve">
+    <value>Auto-saved</value>
+  </data>
+  <data name="App_About" xml:space="preserve">
+    <value>About &amp; Legal</value>
+  </data>
+  <data name="App_LegalNotices" xml:space="preserve">
+    <value>Legal Notices &amp; Licensing</value>
+  </data>
+  <data name="App_NonAffiliationNotice" xml:space="preserve">
+    <value>Notice of Non-Affiliation &amp; Trademark Disclaimers</value>
+  </data>
+  <!-- Navigation Tabs -->
+  <data name="Tab_Display" xml:space="preserve">
+    <value>Display &amp; Video</value>
+  </data>
+  <data name="Tab_AudioInput" xml:space="preserve">
+    <value>Audio &amp; Input</value>
+  </data>
+  <data name="Tab_DeviceSystem" xml:space="preserve">
+    <value>Device &amp; System</value>
+  </data>
+  <data name="Tab_Logs" xml:space="preserve">
+    <value>Logs</value>
+  </data>
+  <data name="Tab_About" xml:space="preserve">
+    <value>About &amp; Legal</value>
+  </data>
+  <!-- Device Selection & State -->
+  <data name="DeviceSelector_Title" xml:space="preserve">
+    <value>Target Device</value>
+  </data>
+  <data name="DeviceSelector_Refresh" xml:space="preserve">
+    <value>Refresh Devices</value>
+  </data>
+  <data name="DeviceSelector_NoDevices" xml:space="preserve">
+    <value>No device detected. Connect a Samsung Galaxy device via USB.</value>
+  </data>
+  <data name="DeviceSelector_Unauthorized" xml:space="preserve">
+    <value>Device detected (Unauthorized). Unlock phone screen and authorize USB debugging.</value>
+  </data>
+  <data name="DeviceSelector_Connected" xml:space="preserve">
+    <value>{0} Connected</value>
+  </data>
+  <data name="DeviceSelector_Connecting" xml:space="preserve">
+    <value>Connecting...</value>
+  </data>
+  <data name="DeviceSelector_Disconnected" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
+  <data name="DeviceSelector_Details" xml:space="preserve">
+    <value>{0} {1} ({2}) • {3} • {4}</value>
+  </data>
+  <data name="DeviceSelector_SurfaceId" xml:space="preserve">
+    <value>Surface ID #{0}</value>
+  </data>
+  <data name="DeviceSelector_SurfacePending" xml:space="preserve">
+    <value>Surface Pending</value>
+  </data>
+  <data name="DeviceSelector_AllocatedVia" xml:space="preserve">
+    <value>Allocated via Android DisplayManager</value>
+  </data>
+  <!-- Display Settings -->
+  <data name="Display_Header" xml:space="preserve">
+    <value>Video Stream &amp; Resolution Configuration</value>
+  </data>
+  <data name="Display_Resolution" xml:space="preserve">
+    <value>Display Resolution</value>
+  </data>
+  <data name="Display_Resolution_Desc" xml:space="preserve">
+    <value>Virtual display resolution exposed to One UI desktop compositor</value>
+  </data>
+  <data name="Display_Fps" xml:space="preserve">
+    <value>Target Refresh Rate (FPS)</value>
+  </data>
+  <data name="Display_Fps_Desc" xml:space="preserve">
+    <value>Frame rate cap for video stream (60 FPS default, 120 FPS high refresh)</value>
+  </data>
+  <data name="Display_Bitrate" xml:space="preserve">
+    <value>Video Bitrate</value>
+  </data>
+  <data name="Display_Bitrate_Desc" xml:space="preserve">
+    <value>Target bandwidth allocation for compressed video stream (8 Mbps recommended)</value>
+  </data>
+  <data name="Display_Codec" xml:space="preserve">
+    <value>Hardware Video Codec</value>
+  </data>
+  <data name="Display_Codec_Desc" xml:space="preserve">
+    <value>Compression format (H.264 offers low latency; H.265 provides higher compression)</value>
+  </data>
+  <data name="Display_WindowMode" xml:space="preserve">
+    <value>Window Presentation Mode</value>
+  </data>
+  <data name="Display_WindowMode_Desc" xml:space="preserve">
+    <value>Viewport presentation style on host Windows desktop</value>
+  </data>
+  <!-- Audio Settings -->
+  <data name="Audio_Header" xml:space="preserve">
+    <value>Audio Forwarding &amp; Latency Margin</value>
+  </data>
+  <data name="Audio_Enabled" xml:space="preserve">
+    <value>Forward Audio to PC</value>
+  </data>
+  <data name="Audio_Enabled_Desc" xml:space="preserve">
+    <value>Stream device audio in real-time to default Windows output speakers</value>
+  </data>
+  <data name="Audio_Buffer" xml:space="preserve">
+    <value>Audio Latency Buffer</value>
+  </data>
+  <data name="Audio_Buffer_Desc" xml:space="preserve">
+    <value>Audio buffer margin in milliseconds (50ms recommended to prevent buffer underruns)</value>
+  </data>
+  <data name="Audio_Buffer_Format" xml:space="preserve">
+    <value>{0} ms</value>
+  </data>
+  <!-- Input Settings -->
+  <data name="Input_Header" xml:space="preserve">
+    <value>Input Capture &amp; Peripheral Forwarding</value>
+  </data>
+  <data name="Input_MouseUhid" xml:space="preserve">
+    <value>Mouse Driver Subsystem</value>
+  </data>
+  <data name="Input_MouseUhid_Desc" xml:space="preserve">
+    <value>uhid: Linux /dev/uhid mode (recommended). sdk: Android injection mode.</value>
+  </data>
+  <data name="Input_ReleaseKey" xml:space="preserve">
+    <value>Mouse Capture Release Key</value>
+  </data>
+  <data name="Input_ReleaseKey_Desc" xml:space="preserve">
+    <value>Keyboard key to unbind cursor focus and return mouse control to Windows desktop</value>
+  </data>
+  <data name="Input_ForwardGamepad" xml:space="preserve">
+    <value>Forward Gamepad Controllers</value>
+  </data>
+  <data name="Input_ForwardGamepad_Desc" xml:space="preserve">
+    <value>Route Xbox, DualSense, and DirectInput gaming controllers directly into Samsung DeX games</value>
+  </data>
+  <data name="Input_StayAwake" xml:space="preserve">
+    <value>Stay Awake on USB</value>
+  </data>
+  <data name="Input_StayAwake_Desc" xml:space="preserve">
+    <value>Acquires Android power wakelock while connected to PC to prevent lock screen dropouts</value>
+  </data>
+  <data name="Input_TurnScreenOff" xml:space="preserve">
+    <value>Turn Physical Phone Screen Off</value>
+  </data>
+  <data name="Input_TurnScreenOff_Desc" xml:space="preserve">
+    <value>Blanks physical OLED phone display while streaming DeX to conserve battery and avoid burn-in</value>
+  </data>
+  <data name="Input_Fullscreen" xml:space="preserve">
+    <value>Fullscreen Mode</value>
+  </data>
+  <data name="Input_Fullscreen_Desc" xml:space="preserve">
+    <value>Launches scrcpy session in exclusive or borderless fullscreen mode</value>
+  </data>
+  <!-- Device & Paths Settings -->
+  <data name="Device_Header" xml:space="preserve">
+    <value>Device Power &amp; System Information</value>
+  </data>
+  <data name="Device_AutoConnect" xml:space="preserve">
+    <value>Auto-Connect on USB Insertion</value>
+  </data>
+  <data name="Device_AutoConnect_Desc" xml:space="preserve">
+    <value>Automatically launches Samsung DeX session when authorized phone is plugged in</value>
+  </data>
+  <data name="Paths_Header" xml:space="preserve">
+    <value>Executable &amp; System Paths</value>
+  </data>
+  <data name="Paths_Scrcpy" xml:space="preserve">
+    <value>scrcpy Executable Path</value>
+  </data>
+  <data name="Paths_Scrcpy_Desc" xml:space="preserve">
+    <value>Custom filesystem path to scrcpy.exe (leave empty for automatic detection)</value>
+  </data>
+  <data name="Paths_Scrcpy_Placeholder" xml:space="preserve">
+    <value>Auto-detected on system (leave empty)</value>
+  </data>
+  <data name="Paths_Scrcpy_Resolved" xml:space="preserve">
+    <value>Resolved: {0}</value>
+  </data>
+  <data name="Paths_Scrcpy_NotFound" xml:space="preserve">
+    <value>Status: scrcpy executable not detected</value>
+  </data>
+  <data name="Paths_ResetDefault" xml:space="preserve">
+    <value>Restore Default Configuration</value>
+  </data>
+  <data name="Paths_ResetDefault_Desc" xml:space="preserve">
+    <value>Revert all display, audio, input, device, and path settings to initial factory defaults</value>
+  </data>
+  <!-- Actions -->
+  <data name="Action_StartSession" xml:space="preserve">
+    <value>Start DeX Session</value>
+  </data>
+  <data name="Action_StopSession" xml:space="preserve">
+    <value>Disconnect</value>
+  </data>
+  <data name="Action_EmergencyKill" xml:space="preserve">
+    <value>Force Close</value>
+  </data>
+  <data name="Action_Browse" xml:space="preserve">
+    <value>Browse...</value>
+  </data>
+  <data name="Action_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Action_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Action_ResetDefaults" xml:space="preserve">
+    <value>Reset Defaults</value>
+  </data>
+  <data name="Action_Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Action_Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="Action_ViewLogs" xml:space="preserve">
+    <value>View Logs</value>
+  </data>
+  <data name="Action_ConfigurePath" xml:space="preserve">
+    <value>Configure Path...</value>
+  </data>
+  <!-- Status Messages -->
+  <data name="Status_Idle" xml:space="preserve">
+    <value>Ready for Samsung DeX</value>
+  </data>
+  <data name="Status_Handshaking" xml:space="preserve">
+    <value>Negotiating DeX session...</value>
+  </data>
+  <data name="Status_Connecting" xml:space="preserve">
+    <value>Connecting to device...</value>
+  </data>
+  <data name="Status_Connected" xml:space="preserve">
+    <value>Device connected</value>
+  </data>
+  <data name="Status_DeployingServer" xml:space="preserve">
+    <value>Deploying scrcpydex-server.jar...</value>
+  </data>
+  <data name="Status_Streaming" xml:space="preserve">
+    <value>Streaming active</value>
+  </data>
+  <data name="Status_Stopping" xml:space="preserve">
+    <value>Terminating DeX session...</value>
+  </data>
+  <data name="Status_Error" xml:space="preserve">
+    <value>Error encountered</value>
+  </data>
+  <data name="Status_ScrcpyMissing" xml:space="preserve">
+    <value>scrcpy executable not found on host</value>
+  </data>
+  <data name="Status_AdbUnauthorized" xml:space="preserve">
+    <value>Device unauthorized. Check phone screen.</value>
+  </data>
+  <!-- Diagnostic & Doctor Messages -->
+  <data name="Doctor_Title" xml:space="preserve">
+    <value>System Health Check</value>
+  </data>
+  <data name="Doctor_AdbFound" xml:space="preserve">
+    <value>ADB detected at: {0}</value>
+  </data>
+  <data name="Doctor_AdbMissing" xml:space="preserve">
+    <value>Android Debug Bridge (adb) was not found in PATH or standard directories.</value>
+  </data>
+  <data name="Doctor_ScrcpyFound" xml:space="preserve">
+    <value>scrcpy detected at: {0} (version {1})</value>
+  </data>
+  <data name="Doctor_ScrcpyMissing" xml:space="preserve">
+    <value>scrcpy was not found. Please install scrcpy v2.4 or later.</value>
+  </data>
+  <data name="Doctor_UdevOk" xml:space="preserve">
+    <value>udev rules for Android USB device access are properly configured.</value>
+  </data>
+  <data name="Doctor_UdevMissing" xml:space="preserve">
+    <value>udev rules for Android USB device access are missing. USB permissions may fail.</value>
+  </data>
+  <data name="Doctor_VaapiOk" xml:space="preserve">
+    <value>VA-API hardware video acceleration is available and operational.</value>
+  </data>
+  <data name="Doctor_VaapiMissing" xml:space="preserve">
+    <value>VA-API hardware acceleration is not available; falling back to software decoding.</value>
+  </data>
+  <data name="Doctor_UhidOk" xml:space="preserve">
+    <value>/dev/uhid kernel interface is accessible for hardware mouse capture.</value>
+  </data>
+  <data name="Doctor_UhidMissing" xml:space="preserve">
+    <value>/dev/uhid interface is not accessible. Run with appropriate permissions or udev rules.</value>
+  </data>
+  <data name="Doctor_DisplayServerX11" xml:space="preserve">
+    <value>Running on X11 display server.</value>
+  </data>
+  <data name="Doctor_DisplayServerWayland" xml:space="preserve">
+    <value>Running on Wayland display server.</value>
+  </data>
+  <!-- Logs & Filters -->
+  <data name="Logs_Title" xml:space="preserve">
+    <value>Logs</value>
+  </data>
+  <data name="Logs_FilterPlaceholder" xml:space="preserve">
+    <value>Filter logs...</value>
+  </data>
+  <data name="Logs_CopyTooltip" xml:space="preserve">
+    <value>Copy all logs to clipboard</value>
+  </data>
+  <data name="Logs_ClearTooltip" xml:space="preserve">
+    <value>Clear log history</value>
+  </data>
+  <!-- General -->
+  <data name="General_Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="General_Language_Desc" xml:space="preserve">
+    <value>Select user interface display language</value>
+  </data>
+  <!-- MainWindow Avalonia UI -->
+  <data name="MainWindow_Title" xml:space="preserve">
+    <value>ScrcpyDeX — Samsung DeX PC Client</value>
+  </data>
+  <data name="MainWindow_EngineTag" xml:space="preserve">
+    <value>Engine: scrcpy-core x64</value>
+  </data>
+  <data name="Device_DexModeReady" xml:space="preserve">
+    <value>DeX Mode Ready</value>
+  </data>
+  <data name="DeviceSelector_TargetLabel" xml:space="preserve">
+    <value>Target:</value>
+  </data>
+  <data name="DeviceSelector_NoDevicesPlaceholder" xml:space="preserve">
+    <value>No devices detected</value>
+  </data>
+  <data name="Telemetry_Battery" xml:space="preserve">
+    <value>BATTERY</value>
+  </data>
+  <data name="Telemetry_Temperature" xml:space="preserve">
+    <value>TEMP</value>
+  </data>
+  <data name="Telemetry_Link" xml:space="preserve">
+    <value>LINK</value>
+  </data>
+  <data name="Telemetry_Latency" xml:space="preserve">
+    <value>LATENCY</value>
+  </data>
+  <data name="DeviceSelector_RescanTooltip" xml:space="preserve">
+    <value>Rescan ADB devices &amp; USB bus</value>
+  </data>
+  <data name="Action_Rescan" xml:space="preserve">
+    <value>Rescan</value>
+  </data>
+  <data name="Action_StopSessionText" xml:space="preserve">
+    <value>Stop Session</value>
+  </data>
+  <data name="Action_ConfigureScrcpyTooltip" xml:space="preserve">
+    <value>Configure scrcpy executable binary path</value>
+  </data>
+  <data name="Action_ConfigureScrcpy" xml:space="preserve">
+    <value>Configure scrcpy...</value>
+  </data>
+  <data name="Display_CardHeader" xml:space="preserve">
+    <value>DISPLAY PARAMETERS &amp; ENCODER</value>
+  </data>
+  <data name="Display_ResolutionLabel" xml:space="preserve">
+    <value>Display Resolution:</value>
+  </data>
+  <data name="Display_TargetFrameRate" xml:space="preserve">
+    <value>Target Frame Rate:</value>
+  </data>
+  <data name="Display_VideoCodec" xml:space="preserve">
+    <value>Video Codec:</value>
+  </data>
+  <data name="Display_AudioStreamDriver" xml:space="preserve">
+    <value>Audio Stream &amp; Driver:</value>
+  </data>
+  <data name="Display_RenderingDriver" xml:space="preserve">
+    <value>Rendering Driver Backend:</value>
+  </data>
+  <data name="Display_RenderingDriverDesc" xml:space="preserve">
+    <value>D3D11 / OpenGL hardware rendering with Zero Copy swapchain</value>
+  </data>
+  <data name="Display_TransmissionBitrate" xml:space="preserve">
+    <value>Transmission Bitrate:</value>
+  </data>
+  <data name="Display_BitratePresetRecommended" xml:space="preserve">
+    <value>24 Mbps (Rec.)</value>
+  </data>
+  <data name="QuickOptions_Header" xml:space="preserve">
+    <value>QUICK SESSION OPTIONS</value>
+  </data>
+  <data name="QuickOptions_TurnScreenOff" xml:space="preserve">
+    <value>Turn off mobile screen</value>
+  </data>
+  <data name="QuickOptions_TurnScreenOff_Desc" xml:space="preserve">
+    <value>Protects OLED panel &amp; reduces heat</value>
+  </data>
+  <data name="QuickOptions_NativeUhidMouse" xml:space="preserve">
+    <value>Native UHID Mouse</value>
+  </data>
+  <data name="QuickOptions_NativeUhidMouse_Desc" xml:space="preserve">
+    <value>Zero lag, native pointer emulation</value>
+  </data>
+  <data name="QuickOptions_ForwardShortcuts" xml:space="preserve">
+    <value>Forward Shortcut Keys</value>
+  </data>
+  <data name="QuickOptions_ForwardShortcuts_Desc" xml:space="preserve">
+    <value>Pass Alt+Tab, Win Key, Ctrl+W to DeX</value>
+  </data>
+  <data name="QuickOptions_StayAwake" xml:space="preserve">
+    <value>Stay Awake Device</value>
+  </data>
+  <data name="QuickOptions_StayAwake_Desc" xml:space="preserve">
+    <value>Prevents Android sleep during session</value>
+  </data>
+  <data name="QuickOptions_LowLatencyAudio" xml:space="preserve">
+    <value>Low Latency Audio</value>
+  </data>
+  <data name="QuickOptions_LowLatencyAudio_Desc" xml:space="preserve">
+    <value>Direct streaming via continuous Opus buffer</value>
+  </data>
+  <data name="Console_Header" xml:space="preserve">
+    <value>SCRCPY / ADB EXECUTION CONSOLE</value>
+  </data>
+  <data name="Console_ActivePipe" xml:space="preserve">
+    <value>ACTIVE PIPE</value>
+  </data>
+  <data name="Console_CopyCli" xml:space="preserve">
+    <value>Copy CLI</value>
+  </data>
+  <data name="Footer_AdbDaemon" xml:space="preserve">
+    <value>ADB Daemon: {0}</value>
+  </data>
+  <data name="Footer_EncoderFormat" xml:space="preserve">
+    <value>Encoder: {0}</value>
+  </data>
+  <data name="Footer_RoundtripLabel" xml:space="preserve">
+    <value>Roundtrip:</value>
+  </data>
+  <data name="Faq_Title" xml:space="preserve">
+    <value>Troubleshooting &amp; FAQ</value>
+  </data>
+  <data name="Faq_Subtitle" xml:space="preserve">
+    <value>Quick solutions for ADB, DeX, display, and scrcpy issues</value>
+  </data>
+  <data name="Faq_SearchPlaceholder" xml:space="preserve">
+    <value>Search issues, errors, or keywords...</value>
+  </data>
+  <data name="Faq_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Faq_Category_All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Faq_Category_Connection" xml:space="preserve">
+    <value>Connection &amp; ADB</value>
+  </data>
+  <data name="Faq_Category_DeX" xml:space="preserve">
+    <value>Samsung DeX</value>
+  </data>
+  <data name="Faq_Category_Display" xml:space="preserve">
+    <value>Display &amp; Drivers</value>
+  </data>
+  <data name="Faq_Category_Input" xml:space="preserve">
+    <value>Audio &amp; Input</value>
+  </data>
+  <data name="Faq_Category_Battery" xml:space="preserve">
+    <value>Battery &amp; Thermal</value>
+  </data>
+  <data name="Faq_Label_Symptom" xml:space="preserve">
+    <value>Visual Symptom</value>
+  </data>
+  <data name="Faq_Label_Cause" xml:space="preserve">
+    <value>Root Cause</value>
+  </data>
+  <data name="Faq_Label_Solution" xml:space="preserve">
+    <value>Quick Solution</value>
+  </data>
+  <data name="Faq_Label_CopyCommand" xml:space="preserve">
+    <value>Copy Command</value>
+  </data>
+  <data name="Faq_NoResults" xml:space="preserve">
+    <value>No matching troubleshooting topics found</value>
+  </data>
+  <data name="Faq_NoResults_Desc" xml:space="preserve">
+    <value>Try different search terms or select another category filter.</value>
+  </data>
+  <data name="Faq_Q1_Title" xml:space="preserve">
+    <value>Device Not Detected (No devices detected / Empty list)</value>
+  </data>
+  <data name="Faq_Q1_Symptom" xml:space="preserve">
+    <value>The device ComboBox remains empty or displays 'No devices detected'.</value>
+  </data>
+  <data name="Faq_Q1_Cause" xml:space="preserve">
+    <value>Damaged or charge-only USB cable, USB debugging disabled on phone, missing Samsung USB drivers (Windows), or missing udev rules (Linux).</value>
+  </data>
+  <data name="Faq_Q1_Solution" xml:space="preserve">
+    <value>1. On phone: Settings &gt; Developer Options &gt; enable 'USB Debugging'.
+2. Windows: Install official Samsung Mobile USB Composite driver.
+3. Linux: Run 'sudo usermod -aG plugdev $USER' and reload udev.
+4. Connect directly to PC motherboard USB port using a verified data cable.</value>
+  </data>
+  <data name="Faq_Q2_Title" xml:space="preserve">
+    <value>Device Unauthorized (Device detected as unauthorized)</value>
+  </data>
+  <data name="Faq_Q2_Symptom" xml:space="preserve">
+    <value>Phone appears in the device list with 'unauthorized' status and Start session button is disabled.</value>
+  </data>
+  <data name="Faq_Q2_Cause" xml:space="preserve">
+    <value>The PC RSA cryptographic handshake prompt was not accepted on the smartphone display.</value>
+  </data>
+  <data name="Faq_Q2_Solution" xml:space="preserve">
+    <value>1. Unlock your phone screen.
+2. On the USB debugging authorization popup, check 'Always allow from this computer' and tap 'Allow'.
+3. If prompt does not appear: Developer Options &gt; tap 'Revoke USB debugging authorizations' and reconnect cable.</value>
+  </data>
+  <data name="Faq_Q3_Title" xml:space="preserve">
+    <value>ADB Version Conflict (adb server version doesn't match this client)</value>
+  </data>
+  <data name="Faq_Q3_Symptom" xml:space="preserve">
+    <value>Execution console displays cyclic 'killing adb server...' logs or crashes.</value>
+  </data>
+  <data name="Faq_Q3_Cause" xml:space="preserve">
+    <value>Another program (Android Studio, Samsung Smart Switch, emulator) is spawning a conflicting adb.exe version on port 5037.</value>
+  </data>
+  <data name="Faq_Q3_Solution" xml:space="preserve">
+    <value>1. Close background emulators, Android Studio, and Smart Switch.
+2. Open Task Manager and terminate conflicting adb.exe processes.
+3. In ScrcpyDeX settings, configure an absolute unified ADB executable path.</value>
+  </data>
+  <data name="Faq_Q4_Title" xml:space="preserve">
+    <value>Failed to Allocate DeX Virtual Display</value>
+  </data>
+  <data name="Faq_Q4_Symptom" xml:space="preserve">
+    <value>Session aborts with 'Failed to allocate Samsung DeX virtual display ID' in terminal logs.</value>
+  </data>
+  <data name="Faq_Q4_Cause" xml:space="preserve">
+    <value>Incompatible device (Galaxy A/M/Z Flip series lack DeX desktop virtualization hardware), screen locked with pending Knox biometric unlock, or previous session stuck.</value>
+  </data>
+  <data name="Faq_Q4_Solution" xml:space="preserve">
+    <value>1. Verify device compatibility (Galaxy S, Note, Z Fold, and Tab S series only).
+2. Unlock phone screen before clicking 'START DEX SESSION'.
+3. Click 'Stop Session' or 'Rescan' to forcefully terminate orphan virtual display instances.</value>
+  </data>
+  <data name="Faq_Q5_Title" xml:space="preserve">
+    <value>Server JAR Deployment Error (scrcpydex-server.jar not found)</value>
+  </data>
+  <data name="Faq_Q5_Symptom" xml:space="preserve">
+    <value>FileNotFoundException or adb push failure when starting session.</value>
+  </data>
+  <data name="Faq_Q5_Cause" xml:space="preserve">
+    <value>scrcpydex-server.jar file is missing or Android /data/local/tmp has corrupted permissions or insufficient storage.</value>
+  </data>
+  <data name="Faq_Q5_Solution" xml:space="preserve">
+    <value>1. Clean corrupted target files by executing: adb shell rm -f /data/local/tmp/scrcpydex-server.jar
+2. Verify free storage space on internal phone memory.</value>
+  </data>
+  <data name="Faq_Q6_Title" xml:space="preserve">
+    <value>Direct3D 11 Renderer Initialization Error (D3D11CreateDevice)</value>
+  </data>
+  <data name="Faq_Q6_Symptom" xml:space="preserve">
+    <value>Log shows 'ERROR: Could not create renderer: D3D11CreateDevice (DXGI_ERROR_UNSUPPORTED)'.</value>
+  </data>
+  <data name="Faq_Q6_Cause" xml:space="preserve">
+    <value>Host GPU lacks DirectX 11 Feature Level 10_0 support, or running inside a VM / Remote Desktop (RDP) session without 3D acceleration.</value>
+  </data>
+  <data name="Faq_Q6_Solution" xml:space="preserve">
+    <value>1. Under Display Parameters &amp; Encoder, change 'Render Driver' to 'OpenGL'.
+2. Update GPU display drivers directly from AMD, Intel, or NVIDIA website.</value>
+  </data>
+  <data name="Faq_Q7_Title" xml:space="preserve">
+    <value>Missing Hardware Acceleration on Linux (VA-API / Mesa)</value>
+  </data>
+  <data name="Faq_Q7_Symptom" xml:space="preserve">
+    <value>High CPU usage, frame skipping, or video rendering stuttering on Linux.</value>
+  </data>
+  <data name="Faq_Q7_Cause" xml:space="preserve">
+    <value>VA-API hardware video decoding drivers are missing from the Linux operating system.</value>
+  </data>
+  <data name="Faq_Q7_Solution" xml:space="preserve">
+    <value>Install VA-API acceleration packages via terminal:
+sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-va-drivers</value>
+  </data>
+  <data name="Faq_Q8_Title" xml:space="preserve">
+    <value>Black Screen or Video Artifacts (Blocky pixels / Distortion)</value>
+  </data>
+  <data name="Faq_Q8_Symptom" xml:space="preserve">
+    <value>scrcpy window opens but shows a black screen or distorted pixel blocks.</value>
+  </data>
+  <data name="Faq_Q8_Cause" xml:space="preserve">
+    <value>H.265/AV1 selected on a GPU with only H.264 hardware decoding, or bitrate exceeds USB connection bandwidth.</value>
+  </data>
+  <data name="Faq_Q8_Solution" xml:space="preserve">
+    <value>1. Switch 'Video Codec' to 'h264'.
+2. Set Resolution to '1920x1080 (FHD)' and Framerate to 30 or 60 fps.
+3. Lower Transmission Bitrate preset to 12 or 18 Mbps.</value>
+  </data>
+  <data name="Faq_Q9_Title" xml:space="preserve">
+    <value>Mouse Pointer Lag or Double Cursor (aoa vs uhid)</value>
+  </data>
+  <data name="Faq_Q9_Symptom" xml:space="preserve">
+    <value>Cursor has perceptible delay or two mouse pointers appear simultaneously.</value>
+  </data>
+  <data name="Faq_Q9_Cause" xml:space="preserve">
+    <value>Native UHID mouse emulation disabled, falling back to Android touch injection (AOA/SDK).</value>
+  </data>
+  <data name="Faq_Q9_Solution" xml:space="preserve">
+    <value>1. Enable 'Native UHID Mouse' in Quick Session Options.
+2. On Linux: Ensure user has read/write permissions to /dev/uhid by being part of the plugdev group.</value>
+  </data>
+  <data name="Faq_Q10_Title" xml:space="preserve">
+    <value>Desktop Shortcuts Not Reaching DeX (Alt+Tab, Windows Key)</value>
+  </data>
+  <data name="Faq_Q10_Symptom" xml:space="preserve">
+    <value>Pressing Alt+Tab or Windows key switches host computer windows instead of DeX apps.</value>
+  </data>
+  <data name="Faq_Q10_Cause" xml:space="preserve">
+    <value>Forward Shortcut Keys option is disabled, or running under Wayland without modifier key capture.</value>
+  </data>
+  <data name="Faq_Q10_Solution" xml:space="preserve">
+    <value>1. Enable 'Forward Shortcut Keys' in Quick Session Options.
+2. On Linux: Use an X11 / Xorg desktop session for full modifier key forwarding.</value>
+  </data>
+  <data name="Faq_Q11_Title" xml:space="preserve">
+    <value>Audio Noise, Crackling, or Delay (Sample rate mismatch)</value>
+  </data>
+  <data name="Faq_Q11_Symptom" xml:space="preserve">
+    <value>Audio is crackling, popping, or out of sync with video playback.</value>
+  </data>
+  <data name="Faq_Q11_Cause" xml:space="preserve">
+    <value>Sample rate divergence between Android output (48,000 Hz) and PC audio output (e.g. 44,100 Hz).</value>
+  </data>
+  <data name="Faq_Q11_Solution" xml:space="preserve">
+    <value>1. In Windows Sound settings &gt; Output device properties: set Default Format to 24-bit 48000 Hz or 16-bit 48000 Hz.
+2. Enable 'Low Latency Audio' in Quick Session Options.
+3. Select 'Opus 48kHz Stereo' as audio codec.</value>
+  </data>
+  <data name="Faq_Q12_Title" xml:space="preserve">
+    <value>Phone Overheating &amp; Fast Battery Drain During Sessions</value>
+  </data>
+  <data name="Faq_Q12_Symptom" xml:space="preserve">
+    <value>Temperature meter turns amber/red (&gt; 40°C) and battery discharges quickly while connected.</value>
+  </data>
+  <data name="Faq_Q12_Cause" xml:space="preserve">
+    <value>Physical AMOLED phone screen stays on at high brightness while the GPU renders the desktop interface.</value>
+  </data>
+  <data name="Faq_Q12_Solution" xml:space="preserve">
+    <value>1. Enable 'Turn off mobile screen' in Quick Session Options.
+2. Phone screen shuts off completely, reducing temperature by up to 8°C and preventing OLED burn-in.
+3. Connect phone to a USB 3.0 port capable of delivering adequate power (1.5A to 3A).</value>
+  </data>
+</root>

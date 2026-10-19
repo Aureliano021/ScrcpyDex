@@ -1,5 +1,5 @@
 {
-  "version": "1.1",
+  "version": "1.0",
   "display": {
     "resolution": "1920x1080",
     "fps": 60,
@@ -17,12 +17,8 @@
   },
   "device": {
     "turnScreenOff": false,
-    "stayAwake": false,
+    "stayAwake": true,
     "autoConnect": false
-  },
-  "paths": {
-    "scrcpyPath": null,
-    "adbPath": null
   },
   "ui": {
     "theme": "dark",
