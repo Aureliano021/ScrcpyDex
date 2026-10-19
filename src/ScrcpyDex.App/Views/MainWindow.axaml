@@ -829,11 +829,11 @@
             </Button.Template>
         </Button>
 
-        <!-- 7. Retractable FAQ Side Panel (460px width) -->
+        <!-- 7. Retractable FAQ Side Panel (500px width) -->
         <Border Grid.Row="1"
                 Grid.RowSpan="4"
                 HorizontalAlignment="Right"
-                Width="460"
+                Width="500"
                 Background="#0E131D"
                 BorderBrush="#1E293B"
                 BorderThickness="1,0,0,0"
@@ -873,48 +873,47 @@
                 </Border>
 
                 <!-- 2. Search Box -->
-                <Border Grid.Row="1" Padding="14,10,14,6">
+                <Border Grid.Row="1" Padding="16,10,16,6">
                     <TextBox Text="{Binding FaqSearchQuery, Mode=TwoWay}"
                              Watermark="{Binding [Faq_SearchPlaceholder], Source={x:Static loc:LocalizationManager.Instance}}"
                              FontSize="11.5"
-                             Padding="10,6"
+                             Padding="12,7"
                              CornerRadius="6" />
                 </Border>
 
-                <!-- 3. Category Filter Chips -->
-                <ScrollViewer Grid.Row="2"
-                              HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Disabled"
-                              Margin="14,4,14,8">
-                    <ItemsControl ItemsSource="{Binding FaqCategories}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="6" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="appModels:FaqCategoryItem">
-                                <Button Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).SelectFaqCategoryCommand}"
-                                        CommandParameter="{Binding Id}"
-                                        Padding="8,3"
-                                        FontSize="11"
-                                        CornerRadius="4"
-                                        BorderThickness="1"
-                                        Background="{Binding BackgroundBrush}"
-                                        BorderBrush="{Binding BorderBrushColor}"
-                                        Foreground="{Binding ForegroundBrush}"
-                                        Content="{Binding HeaderText}" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
+                <!-- 3. Category Filter Chips (WrapPanel - wraps cleanly, NO horizontal scrollbar) -->
+                <ItemsControl Grid.Row="2"
+                              ItemsSource="{Binding FaqCategories}"
+                              Margin="16,2,16,8">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="appModels:FaqCategoryItem">
+                            <Button Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).SelectFaqCategoryCommand}"
+                                    CommandParameter="{Binding Id}"
+                                    Padding="10,4"
+                                    Margin="0,0,6,6"
+                                    FontSize="11"
+                                    FontWeight="SemiBold"
+                                    CornerRadius="6"
+                                    BorderThickness="1"
+                                    Background="{Binding BackgroundBrush}"
+                                    BorderBrush="{Binding BorderBrushColor}"
+                                    Foreground="{Binding ForegroundBrush}"
+                                    Content="{Binding HeaderText}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
                 <!-- 4. Scrollable FAQ Accordion List -->
                 <ScrollViewer Grid.Row="3"
                               HorizontalScrollBarVisibility="Disabled"
                               VerticalScrollBarVisibility="Auto"
-                              Padding="14,4,14,14">
-                    <StackPanel Spacing="8">
+                              Padding="16,0,16,0">
+                    <StackPanel Spacing="8" Margin="0,0,8,0">
                         <!-- No Results Notice (if empty) -->
                         <Border IsVisible="{Binding HasNoFaqResults}"
                                 Background="#111723"
@@ -959,30 +958,42 @@
                                                     Padding="12,10"
                                                     CornerRadius="6">
                                                 <Grid ColumnDefinitions="Auto, *, Auto">
+                                                    <!-- Category Tag -->
                                                     <Border Grid.Column="0"
                                                             Background="#1E293B"
-                                                            CornerRadius="3"
-                                                            Padding="5,1"
-                                                            Margin="0,0,8,0"
+                                                            CornerRadius="4"
+                                                            Padding="6,2"
+                                                            Margin="0,0,10,0"
                                                             VerticalAlignment="Center">
                                                         <TextBlock Text="{Binding CategoryName}"
                                                                    FontSize="9.5"
                                                                    FontWeight="SemiBold"
                                                                    Foreground="#94A3B8" />
                                                     </Border>
+
+                                                    <!-- Title -->
                                                     <TextBlock Grid.Column="1"
                                                                Text="{Binding Title}"
                                                                FontSize="11.5"
                                                                FontWeight="SemiBold"
                                                                Foreground="#F1F5F9"
                                                                TextWrapping="Wrap"
-                                                               VerticalAlignment="Center" />
-                                                    <TextBlock Grid.Column="2"
-                                                               Text="{Binding ExpandIcon}"
-                                                               FontSize="10"
-                                                               Foreground="#64748B"
                                                                VerticalAlignment="Center"
-                                                               Margin="8,0,0,0" />
+                                                               Margin="0,0,10,0" />
+
+                                                    <!-- Expand / Collapse Indicator Badge -->
+                                                    <Border Grid.Column="2"
+                                                            Width="22" Height="22"
+                                                            CornerRadius="11"
+                                                            Background="#161F2E"
+                                                            VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding ExpandIcon}"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="#94A3B8"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center" />
+                                                    </Border>
                                                 </Grid>
                                             </Button>
 
@@ -990,7 +1001,7 @@
                                             <Border IsVisible="{Binding IsExpanded}"
                                                     BorderBrush="#1E293B"
                                                     BorderThickness="0,1,0,0"
-                                                    Padding="12,10"
+                                                    Padding="14,12,14,12"
                                                     Background="#0A0E17">
                                                 <StackPanel Spacing="10">
                                                     <!-- Symptom -->
@@ -1035,7 +1046,7 @@
                                                             BorderBrush="#1E293B"
                                                             BorderThickness="1"
                                                             CornerRadius="4"
-                                                            Padding="8,6"
+                                                            Padding="10,8"
                                                             Margin="0,4,0,0">
                                                         <Grid ColumnDefinitions="*, Auto">
                                                             <TextBlock Grid.Column="0"
@@ -1044,13 +1055,13 @@
                                                                        FontSize="10"
                                                                        Foreground="#93C5FD"
                                                                        TextWrapping="Wrap"
-                                                                       VerticalAlignment="Center" />
+                                                                       VerticalAlignment="Center"
+                                                                       Margin="0,0,8,0" />
                                                             <Button Grid.Column="1"
                                                                     Classes="chip"
                                                                     Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).CopyFaqCommandTextCommand}"
                                                                     CommandParameter="{Binding CommandCode}"
-                                                                    Padding="6,2"
-                                                                    Margin="8,0,0,0"
+                                                                    Padding="8,3"
                                                                     VerticalAlignment="Center">
                                                                 <TextBlock Text="{Binding [Faq_Label_CopyCommand], Source={x:Static loc:LocalizationManager.Instance}}"
                                                                            FontSize="9.5"
@@ -1065,6 +1076,9 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+
+                        <!-- End Spacer: Guarantees 64px of clear buffer space below the last item -->
+                        <Border Height="64" />
                     </StackPanel>
                 </ScrollViewer>
             </Grid>
