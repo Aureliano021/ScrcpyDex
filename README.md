@@ -40,6 +40,7 @@
 * **Instant Device Recognition & Disconnect Handling:** Discovers Samsung Galaxy models via ADB `track-devices-l` and friendly model resolution (`SM-S911B` -> "Samsung Galaxy S23") immediately upon startup, resetting the interface instantly if unplugged.
 * **Audio Forwarding:** Captures DeX audio on the device and forwards it to PC speakers or headphones over USB (WASAPI on Windows, SDL/PipeWire/PulseAudio on Linux).
 * **Multilingual Localization:** Runtime language selection across 6 languages (English, Portuguese, Spanish, German, French, Simplified Chinese).
+* **Interactive Troubleshooting & FAQ Drawer (`F1`):** Retractable in-app drawer providing real-time search, category filters, and 1-click clipboard terminal command copying for rapid resolution of ADB, DeX, audio, and display issues.
 * **Standard ADB Privileges (UID 2000):** Operates under standard development user context (`UID 2000 shell`) without root access — Knox warranty bit (`0x0`) remained untouched on tested devices.
 * **Unified Graceful Session Teardown:** Closes the session, unregisters Samsung `system_server` virtual display buffers, restores the mobile display, and clears ADB tunnels automatically when closing the window (`Alt+F4` or `[X]`) or clicking **Stop Session**. No emergency kill switch needed.
 
@@ -135,6 +136,7 @@ For manual step-by-step installation, see the [**Linux Setup Guide**](docs/LINUX
 | **Release Mouse Capture** | `Left Alt` or `Windows Key` | `Left Alt` | Releases the captured mouse cursor from the DeX window back to the host window manager. |
 | **Toggle Fullscreen** | `Alt + F` | `Alt + F` | Toggles borderless fullscreen display mode. |
 | **Close & Restore Phone** | `Alt + F4` or Click `[X]` | `Alt + F4` or Click `[X]` | Closes the streaming window and automatically triggers the complete DeX teardown sequence. |
+| **Troubleshooting FAQ Drawer** | `F1` or `Escape` to close | `F1` or `Escape` to close | Opens or closes the in-app interactive troubleshooting side drawer. |
 | **Terminal Disconnect (Fallback)** | `stop-dex.bat` | `scrcpydex stop` / `stop-dex.sh` | Terminal utility to clean up lingering processes and reset ADB port forward tunnels. |
 
 ---
@@ -203,6 +205,7 @@ ScrcpyDex/
 ## 📂 Documentation & Deep Dives
 
 * [**Linux Setup & Installation Guide:**](docs/LINUX_SETUP_GUIDE.md) Step-by-step setup instructions, udev rules, and VA-API troubleshooting for Linux users.
+* [**Troubleshooting & FAQ Catalog:**](docs/TROUBLESHOOTING_FAQ.md) Comprehensive resolutions for ADB, DeX virtual displays, VA-API/D3D11 renderers, audio jitter, and OLED burn-in prevention.
 * [**Protocol Specification (SSOT):**](docs/PROTOCOL.md) Binary control protocol, handshake contracts, and packet structures.
 * [**Report 01:** Server Core Architecture, Loopback Miracast RTSP & H.264 Video Pipeline](docs/reports/01_server_core_and_video.md)
 * [**Report 02:** Control Channel Protocol, Input Event Injection & Coordinate Translation](docs/reports/02_control_channel_and_input.md)
