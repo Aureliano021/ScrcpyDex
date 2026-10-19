@@ -1,5 +1,7 @@
 # Architectural Blueprint & Technical Analysis: ScrcpyDeX Client
 
+> **Note (historical record):** This report documents the project at the time of this stage. Names such as WinUI refer to the Fluent visual style. The shipped desktop client is a WPF application (.NET 8, WPF-UI). scrcpy is an external dependency (official scrcpy v2.4 or newer), not bundled. Direct3D11 rendering is specific to the Windows client.
+
 **Document Version:** 1.0.0  
 **Phase:** Stage 5 — Client Deep Architectural Audit & Systems Modernization Blueprint  
 **Target Platform:** Windows 10/11 x64 (.NET 8/9, WinUI 3 / Modern WPF)  
@@ -376,7 +378,7 @@ The local ADB server runs a loopback TCP daemon on `127.0.0.1:5037`. Communicati
    - Wire payload: `0012host:track-devices`
 3. Server responds with `OKAY` (4 bytes) if accepted.
 4. Server leaves the socket open and pushes status updates whenever a device connects, disconnects, or changes state (`device`, `offline`, `unauthorized`):
-   - `001D192.168.1.50:5555	device\n`
+   - `001D<HOST_IP>:5555	device\n` (or USB: `0012<DEVICE_SERIAL>	device\n`)
 
 ```csharp
 using System;

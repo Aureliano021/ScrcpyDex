@@ -11,7 +11,7 @@ Write-Host "=================================================" -ForegroundColor 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 if (-not $scriptDir) { $scriptDir = (Get-Location).Path }
 $rootDir = Split-Path -Parent $scriptDir
-if (-not $rootDir -or -not (Test-Path (Join-Path $rootDir "client"))) { $rootDir = $scriptDir }
+if (-not $rootDir -or (-not (Test-Path (Join-Path $rootDir "src\ScrcpyDex.App.Wpf")) -and -not (Test-Path (Join-Path $rootDir "client")))) { $rootDir = $scriptDir }
 
 $savedConfigFile = Join-Path $rootDir "config\settings.json"
 $savedConfigContent = if (Test-Path $savedConfigFile) { Get-Content $savedConfigFile -Raw } else { $null }
@@ -47,7 +47,7 @@ Assert-Test "Configuration files exist" {
 Assert-Test "settings.json parses valid JSON with 60 FPS & 8 Mbps defaults" {
     $configFile = Join-Path $rootDir "config\settings.json"
     $content = Get-Content $configFile -Raw | ConvertFrom-Json
-    ($content.version -eq "1.0") -and 
+    ($content.version -eq "1.0" -or $content.version -eq "1.1") -and 
     ($content.display.resolution -eq "1920x1080") -and 
     ($content.display.fps -eq 60) -and 
     ($content.display.bitrate -eq 8000000) -and 
@@ -72,7 +72,8 @@ Assert-Test "Settings save and reload roundtrip" {
 
 # 4. Headless WinUI XAML Verification & Kill Switch Default Collapsed
 Assert-Test "WinUI 3 XAML parses, 30/60/120 FPS bound, and Kill Switch collapsed" {
-    $winUiScript = Join-Path $rootDir "client\ScrcpyDeX-WinUI.ps1"
+    $winUiScript = Join-Path $rootDir "src\ScrcpyDex.App.Wpf\ScrcpyDeX-WinUI.ps1"
+    if (-not (Test-Path $winUiScript)) { $winUiScript = Join-Path $rootDir "client\ScrcpyDeX-WinUI.ps1" }
     $output = & pwsh.exe -ExecutionPolicy Bypass -NoProfile -File $winUiScript -HeadlessTest
     ($output -match "HEADLESS TEST PASSED")
 }
@@ -89,12 +90,14 @@ Assert-Test "run-scrcpydex.ps1 accepts custom parameters" {
 
 # 6. C# Source Architecture Check
 Assert-Test "C# client source models and services compiled structure" {
-    $csharpDir = Join-Path $rootDir "client\src"
+    $coreDir = Join-Path $rootDir "src\ScrcpyDex.Core"
+    $wpfDir = Join-Path $rootDir "src\ScrcpyDex.App.Wpf\src"
+    $csharpDir = if (Test-Path $coreDir) { $coreDir } else { Join-Path $rootDir "client\src" }
     (Test-Path (Join-Path $csharpDir "Models\DisplayConfig.cs")) -and
     (Test-Path (Join-Path $csharpDir "Models\DeviceInfo.cs")) -and
     (Test-Path (Join-Path $csharpDir "Services\ConfigStore.cs")) -and
     (Test-Path (Join-Path $csharpDir "Services\AdbService.cs")) -and
-    (Test-Path (Join-Path $csharpDir "ViewModels\MainViewModel.cs"))
+    ((Test-Path (Join-Path $wpfDir "ViewModels\MainViewModel.cs")) -or (Test-Path (Join-Path $rootDir "client\src\ViewModels\MainViewModel.cs")))
 }
 
 # 7. Native Zero-Flash Windows Launchers Validation
