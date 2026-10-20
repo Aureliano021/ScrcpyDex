@@ -56,14 +56,6 @@ jobs:
           fi
         shell: bash
 
-      - name: Restore Windows WPF dependencies
-        if: runner.os == 'Windows'
-        run: |
-          if (Test-Path "src/ScrcpyDex.App.Wpf/ScrcpyDex.App.Wpf.csproj") {
-            dotnet restore src/ScrcpyDex.App.Wpf/ScrcpyDex.App.Wpf.csproj
-          }
-        shell: pwsh
-
       - name: Build Core Library
         run: dotnet build src/ScrcpyDex.Core/ScrcpyDex.Core.csproj --configuration Release --no-restore
 
@@ -95,20 +87,8 @@ jobs:
           fi
         shell: bash
 
-      - name: Build Windows WPF App
-        if: runner.os == 'Windows'
-        run: |
-          if (Test-Path "src/ScrcpyDex.App.Wpf/ScrcpyDex.App.Wpf.csproj") {
-            dotnet build src/ScrcpyDex.App.Wpf/ScrcpyDex.App.Wpf.csproj --configuration Release --no-restore
-          }
-        shell: pwsh
-
       - name: Run Core Automated Test Suite
         run: dotnet test tests/ScrcpyDex.Core.Tests/ --configuration Release --verbosity normal
-
-      - name: Run Prototype Verification Script
-        shell: pwsh
-        run: pwsh -ExecutionPolicy Bypass -NoProfile -File tests/test-ui-prototype.ps1
 
   package-linux:
     name: Package Linux (Debian & AppImage)
@@ -201,7 +181,7 @@ jobs:
           name: windows-packages
           path: |
             publish/*.zip
-            publish/ScrcpyDeX.exe
+            publish/ScrcpyDex.App.exe
 
   release:
     name: Publish GitHub Release

@@ -48,14 +48,12 @@
 
 ## 🖥️ Platform Support & Client Applications
 
-ScrcpyDeX supports both **Microsoft Windows** (10/11 x64) and **Linux** (Ubuntu 24.04 LTS noble, Linux Mint 22.3 Zena x86_64, and compatible Debian/Ubuntu derivatives). Three client interfaces are available:
+ScrcpyDeX supports both **Microsoft Windows** (10/11 x64) and **Linux** (Ubuntu 24.04 LTS noble, Linux Mint 22.3 Zena x86_64, and compatible Debian/Ubuntu derivatives). Two client interfaces are available:
 
 | Client | Binary / Project | Target Platforms | Description |
 |---|---|---|---|
 | **ScrcpyDeX CLI** | `scrcpydex` (`src/ScrcpyDex.Cli`) | Linux x64, Windows x64 | Lightweight, headless, terminal-based control and scriptable workflows. |
 | **ScrcpyDeX Avalonia GUI** | `ScrcpyDex.App` (`src/ScrcpyDex.App`) | Linux x64 (X11 / XWayland), Windows x64 | Cross-platform desktop GUI with visual device management and inline configuration. |
-| **ScrcpyDeX WPF GUI** | `ScrcpyDeX.exe` (`src/ScrcpyDex.App.Wpf`) | Windows 10/11 x64 | Native Windows desktop GUI featuring Windows 11 Fluent styling and Mica effects. |
-
 ---
 
 ## 📋 System Prerequisites
@@ -161,12 +159,10 @@ ScrcpyDex/
 │   ├── ScrcpyDex.Core/   # Portable .NET 8 core library (models, state machine, platform abstractions)
 │   ├── ScrcpyDex.Cli/    # Cross-platform CLI application (doctor, devices, start, stop, config)
 │   ├── ScrcpyDex.App/    # Cross-platform desktop GUI (Avalonia UI for Linux and Windows)
-│   └── ScrcpyDex.App.Wpf/# Windows desktop GUI (.NET 8 WPF with Fluent styling)
 ├── tests/                # Automated verification test suites (Core xUnit tests, gate scripts)
 ├── tools/                # Build utilities, icon compilers, and fallback launchers
 ├── LICENSE               # Apache License 2.0
 ├── README.md             # Project documentation and landing page
-├── ScrcpyDeX.bat         # Windows launcher script
 └── stop-dex.bat          # Windows emergency session disconnect script
 ```
 
@@ -179,7 +175,7 @@ ScrcpyDex/
   ┌──────────────────────────────────────────────┐     ┌────────────────────────────────────┐
   │  ScrcpyDeX Client                            │     │  scrcpydex-server.jar (app_process)│
   │  - CLI: scrcpydex (ScrcpyDex.Cli)            │     │                                    │
-  │  - GUI: ScrcpyDex.App / ScrcpyDex.App.Wpf    │     │  [DexActivator (Loopback RTSP)]    │
+  │  - GUI: ScrcpyDex.App (Avalonia UI)          │     │  [DexActivator (Loopback RTSP)]    │
   │                                              │◄───►│   - 127.0.0.1:7236 Loopback        │
   │  [Official scrcpy >= 2.4 Streaming Client]   │ USB │   - SemWifiDisplay IPC Hook        │
   │   - Video: Direct3D11 (Win) / VA-API (Linux) │(ADB)│                                    │
@@ -225,6 +221,6 @@ Contributions are welcome! Please review [**CONTRIBUTING.md**](.github/CONTRIBUT
 ## 📄 License & Legal Compliance
 
 * **License:** Distributed under the [Apache License, Version 2.0](LICENSE).
-* **Third-Party Notices:** See [docs/THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md) for licenses and copyright attributions of external dependencies (`scrcpy`, Avalonia UI, WPF-UI, AOSP, FFmpeg).
+* **Third-Party Notices:** See [docs/THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md) for licenses and copyright attributions of external dependencies (`scrcpy`, Avalonia UI, AOSP, FFmpeg).
 * **Legal & Interoperability Compliance:** See [docs/LEGAL_AND_LICENSING.md](docs/LEGAL_AND_LICENSING.md) for clean-room audit documentation and legal interoperability analysis (DMCA 17 U.S.C. § 1201(f), EU Directive 2009/24/EC, Brazilian Software Law No. 9.609/1998).
 * **Legal Disclaimer & Non-Affiliation:** See [docs/DISCLAIMER.md](docs/DISCLAIMER.md) for warranty disclaimers, Knox safety analysis, and trademark notices.

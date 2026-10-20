@@ -2,13 +2,13 @@
 .SYNOPSIS
     ScrcpyDeX — Windows Release Packaging Script
 .DESCRIPTION
-    Compiles ScrcpyDex.App.Wpf into a self-contained single-file win-x64 executable,
+    Compiles ScrcpyDex.App into a self-contained single-file win-x64 executable,
     assembles runtime distribution files, generates the release zip, and computes SHA-256 sums.
 #>
 
 [CmdletBinding()]
 param(
-    [string]$Version = "1.1.0",
+    [string]$Version = "2.0.0",
     [string]$Configuration = "Release",
     [string]$OutputDir = ""
 )
@@ -18,7 +18,7 @@ $ErrorActionPreference = "Stop"
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 if (-not $scriptDir) { $scriptDir = (Get-Location).Path }
 $repoRoot = Split-Path -Parent (Split-Path -Parent $scriptDir)
-if (-not (Test-Path (Join-Path $repoRoot "src\ScrcpyDex.App.Wpf\ScrcpyDex.App.Wpf.csproj"))) {
+if (-not (Test-Path (Join-Path $repoRoot "src\ScrcpyDex.App\ScrcpyDex.App.csproj"))) {
     $repoRoot = (Get-Location).Path
 }
 
@@ -43,42 +43,25 @@ $stageDir = Join-Path ([System.IO.Path]::GetTempPath()) ("scrcpydex-win-stage-" 
 New-Item -ItemType Directory -Path $stageDir -Force | Out-Null
 
 try {
-    $hasDotnetSdk = $false
-    try {
-        $sdkCheck = & dotnet --list-sdks 2>$null
-        if ($LASTEXITCODE -eq 0 -and $sdkCheck -and $sdkCheck.Count -gt 0) {
-            $hasDotnetSdk = $true
-        }
-    } catch { }
+    $appProject = Join-Path $repoRoot "src\ScrcpyDex.App\ScrcpyDex.App.csproj"
+    if (-not (Test-Path $appProject)) {
+        throw "ScrcpyDex.App project not found at $appProject"
+    }
 
-    $wpfProject = Join-Path $repoRoot "src\ScrcpyDex.App.Wpf\ScrcpyDex.App.Wpf.csproj"
-    if ($hasDotnetSdk -and (Test-Path $wpfProject)) {
-        Write-Host "[1/4] Publishing ScrcpyDex.App.Wpf (win-x64 single file)..." -ForegroundColor Yellow
-        & dotnet publish $wpfProject `
-            -c $Configuration `
-            -r win-x64 `
-            --self-contained true `
-            -p:PublishSingleFile=true `
-            -p:IncludeNativeLibrariesForSelfExtract=true `
-            -p:EnableCompressionInSingleFile=true `
-            -p:Version=$Version `
-            -p:AssemblyVersion="${Version}.0" `
-            -p:FileVersion="${Version}.0" `
-            -o $stageDir
-        if ($LASTEXITCODE -ne 0) {
-            throw "dotnet publish failed with exit code $LASTEXITCODE"
-        }
-    } else {
-        Write-Host "[1/4] .NET SDK not detected or project absent; staging available binary..." -ForegroundColor Yellow
-        $prebuiltExe = Join-Path $OutputDir "ScrcpyDeX.exe"
-        if (-not (Test-Path $prebuiltExe)) {
-            $prebuiltExe = Join-Path $repoRoot "ScrcpyDeX.exe"
-        }
-        if (Test-Path $prebuiltExe) {
-            Copy-Item $prebuiltExe -Destination (Join-Path $stageDir "ScrcpyDeX.exe") -Force
-        } else {
-            throw "Neither working .NET SDK nor prebuilt ScrcpyDeX.exe found."
-        }
+    Write-Host "[1/4] Publishing ScrcpyDex.App (win-x64 single file)..." -ForegroundColor Yellow
+    & dotnet publish $appProject `
+        -c $Configuration `
+        -r win-x64 `
+        --self-contained true `
+        -p:PublishSingleFile=true `
+        -p:IncludeNativeLibrariesForSelfExtract=true `
+        -p:EnableCompressionInSingleFile=true `
+        -p:Version=$Version `
+        -p:AssemblyVersion="${Version}.0" `
+        -p:FileVersion="${Version}.0" `
+        -o $stageDir
+    if ($LASTEXITCODE -ne 0) {
+        throw "dotnet publish failed with exit code $LASTEXITCODE"
     }
 
     function Copy-IfNotSame($src, $dst) {
@@ -103,10 +86,13 @@ try {
     Copy-IfNotSame $jarPath (Join-Path $stageDir "scrcpydex-server.jar")
     Copy-IfNotSame $jarPath (Join-Path $OutputDir "scrcpydex-server.jar")
 
-    # Emergency stop batch script
+    # Stop script
     $stopBat = Join-Path $repoRoot "stop-dex.bat"
-    Copy-IfNotSame $stopBat (Join-Path $stageDir "stop-dex.bat")
-    Copy-IfNotSame $stopBat (Join-Path $OutputDir "stop-dex.bat")
+    if (-not (Test-Path $stopBat)) { $stopBat = Join-Path $repoRoot "scripts\windows\stop-dex.bat" }
+    if (Test-Path $stopBat) {
+        Copy-IfNotSame $stopBat (Join-Path $stageDir "stop-dex.bat")
+        Copy-IfNotSame $stopBat (Join-Path $OutputDir "stop-dex.bat")
+    }
 
     # Documentation & Licenses
     $readme = Join-Path $repoRoot "README.md"
@@ -136,8 +122,8 @@ try {
     Copy-IfNotSame (Join-Path $configDir "settings.schema.json") (Join-Path $OutputDir "config\settings.schema.json")
 
     # Copy published exe and pdb to output directory
-    Copy-IfNotSame (Join-Path $stageDir "ScrcpyDeX.exe") (Join-Path $OutputDir "ScrcpyDeX.exe")
-    Copy-IfNotSame (Join-Path $stageDir "ScrcpyDeX.pdb") (Join-Path $OutputDir "ScrcpyDeX.pdb")
+    Copy-IfNotSame (Join-Path $stageDir "ScrcpyDex.App.exe") (Join-Path $OutputDir "ScrcpyDex.App.exe")
+    Copy-IfNotSame (Join-Path $stageDir "ScrcpyDex.App.pdb") (Join-Path $OutputDir "ScrcpyDex.App.pdb")
 
     Write-Host "[3/4] Creating ZIP distribution package..." -ForegroundColor Yellow
     $zipName = "ScrcpyDeX-v${Version}-win-x64.zip"
@@ -148,14 +134,14 @@ try {
     Write-Host "[4/4] Calculating SHA-256 checksums..." -ForegroundColor Yellow
     $hashFiles = @(
         $zipName,
-        "ScrcpyDeX.exe",
+        "ScrcpyDex.App.exe",
         "scrcpydex-server.jar",
         "stop-dex.bat",
         "README.md",
         "DISCLAIMER.md",
         "LICENSE",
         "THIRD_PARTY_NOTICES.md",
-        "ScrcpyDeX.pdb",
+        "ScrcpyDex.App.pdb",
         "config/settings.json",
         "config/settings.schema.json"
     )
