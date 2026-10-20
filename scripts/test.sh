@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # ScrcpyDeX - Linux Automated Test & Verification Script
-# Executes .NET Core automated tests and PowerShell prototype verification
+# Executes .NET Core automated tests
 # ==============================================================================
 
 set -euo pipefail
 
 CONFIGURATION="Release"
 RUN_UNIT=true
-RUN_PROTOTYPE=true
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -20,12 +19,8 @@ while [[ $# -gt 0 ]]; do
             RUN_UNIT=false
             shift
             ;;
-        --skip-prototype)
-            RUN_PROTOTYPE=false
-            shift
-            ;;
         -h|--help)
-            echo "Usage: $0 [-c|--configuration <Release|Debug>] [--skip-unit] [--skip-prototype]"
+            echo "Usage: $0 [-c|--configuration <Release|Debug>] [--skip-unit]"
             exit 0
             ;;
         *)
@@ -49,7 +44,7 @@ TEST_FAILURES=0
 
 # 1. Automated Core Unit Tests
 if [ "$RUN_UNIT" = true ]; then
-    echo "[1/2] Running ScrcpyDex.Core unit test suite..."
+    echo "Running ScrcpyDex.Core unit test suite..."
     TEST_PROJ="$REPO_ROOT/tests/ScrcpyDex.Core.Tests/ScrcpyDex.Core.Tests.csproj"
     if [ -f "$TEST_PROJ" ] && command -v dotnet >/dev/null 2>&1; then
         if dotnet test "$TEST_PROJ" -c "$CONFIGURATION" --verbosity normal; then
@@ -62,37 +57,7 @@ if [ "$RUN_UNIT" = true ]; then
         echo "[SKIP] .NET test project or dotnet command not available."
     fi
 else
-    echo "[1/2] Unit tests skipped (--skip-unit)."
-fi
-
-# 2. Automated Prototype Verification
-if [ "$RUN_PROTOTYPE" = true ]; then
-    echo "[2/2] Running Prototype Verification Suite (test-ui-prototype.ps1)..."
-    PROTO_SCRIPT="$REPO_ROOT/tests/test-ui-prototype.ps1"
-    if [ -f "$PROTO_SCRIPT" ] && command -v pwsh >/dev/null 2>&1; then
-        # Ensure pwsh.exe is resolvable if called inside test-ui-prototype.ps1
-        SHIM_DIR=""
-        if ! command -v pwsh.exe >/dev/null 2>&1; then
-            SHIM_DIR="$(mktemp -d -t pwsh-shim.XXXXXX)"
-            ln -sf "$(command -v pwsh)" "$SHIM_DIR/pwsh.exe"
-            export PATH="$SHIM_DIR:$PATH"
-        fi
-
-        if pwsh -ExecutionPolicy Bypass -NoProfile -File "$PROTO_SCRIPT"; then
-            echo "[OK] Prototype verification suite passed."
-        else
-            echo "[FAIL] Prototype verification suite failed." >&2
-            TEST_FAILURES=$((TEST_FAILURES + 1))
-        fi
-
-        if [ -n "$SHIM_DIR" ] && [ -d "$SHIM_DIR" ]; then
-            rm -rf "$SHIM_DIR"
-        fi
-    else
-        echo "[SKIP] PowerShell (pwsh) or test script not available."
-    fi
-else
-    echo "[2/2] Prototype verification skipped (--skip-prototype)."
+    echo "Unit tests skipped (--skip-unit)."
 fi
 
 echo "================================================="

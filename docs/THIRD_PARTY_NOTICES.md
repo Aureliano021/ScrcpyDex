@@ -14,9 +14,10 @@ This project incorporates dependencies, build tools, or interfaces with external
 | **`WPF-UI`** | Lepoco / Leszek Pomian | [MIT](https://opensource.org/licenses/MIT) | **Compiled Dependency:** Modern Fluent UI controls for WPF. Bundled into `ScrcpyDeX.exe`. |
 | **`CommunityToolkit.Mvvm`** | .NET Foundation and Contributors | [MIT](https://opensource.org/licenses/MIT) | **Compiled Dependency:** High-performance MVVM library. Bundled into `ScrcpyDeX.exe`. |
 | **`System.Text.Json`** | Microsoft Corporation | [MIT](https://opensource.org/licenses/MIT) | **Compiled Dependency:** High-performance JSON serialization. Bundled into `ScrcpyDeX.exe`. |
-| **Microsoft .NET 8 Runtime & WPF** | Microsoft Corporation | [MIT](https://github.com/dotnet/runtime/blob/main/LICENSE.TXT) | **Embedded Runtime:** Single-file host distribution bundle. |
+| **Microsoft .NET 8 Runtime** | Microsoft Corporation | [MIT](https://github.com/dotnet/runtime/blob/main/LICENSE.TXT) | **Embedded Runtime:** Single-file host distribution bundle. |
 | **`Avalonia UI`** | Avalonia Community / .NET Foundation | [MIT](https://opensource.org/licenses/MIT) | **Compiled Dependency:** Cross-platform XAML GUI framework for Linux and Windows. Bundled into `ScrcpyDex.App`. |
 | **Android Robot Asset** | Google LLC | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) | **Modified Asset:** Icon artwork based on Android Robot, created and shared by Google. |
+| **Device Preview Renders** | Samsung / Third-Party Product Renders | Informational / Identification | **Asset:** Device preview images in src/ScrcpyDex.App/Assets/Devices/ used for identification only. Trademarks belong to their respective owners. |
 
 ---
 
@@ -46,15 +47,6 @@ This project incorporates dependencies, build tools, or interfaces with external
 * **Website:** [https://ffmpeg.org/](https://ffmpeg.org/)
 * **License:** LGPL v2.1 or later (standard builds) / GPL v2 or later (if compiled with `--enable-gpl`)
 * **Usage in ScrcpyDeX:** An optional test client (`client/ScrcpyDeXClient.ps1`) allows playing raw H.264 streams directly via `ffplay` over a TCP socket. FFmpeg is not bundled, compiled into, or linked into this project. Users acquire FFmpeg independently.
-
----
-
-### 2.4 WPF-UI
-
-* **Copyright:** © 2021–2024 Lepoco, Leszek Pomian
-* **Website / Repository:** [https://github.com/lepoco/wpfui](https://github.com/lepoco/wpfui)
-* **License:** MIT License
-* **Usage in ScrcpyDeX:** Provides Windows 11 Fluent Design styles, Mica/Acrylic backdrops, and navigation controls in `MainWindow.xaml`. Compiled into the client binary.
 
 ---
 

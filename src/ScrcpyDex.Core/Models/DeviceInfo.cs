@@ -43,12 +43,3 @@ namespace ScrcpyDex.Models
         }
     }
 }
-
-namespace ScrcpyDex.WinUI.Models
-{
-    public class DeviceInfo : ScrcpyDex.Models.DeviceInfo
-    {
-        public DeviceInfo() { }
-        public DeviceInfo(string serial, string model, string state) : base(serial, model, state) { }
-    }
-}

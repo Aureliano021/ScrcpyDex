@@ -402,7 +402,6 @@ namespace ScrcpyDex.Core.IO
             {
                 var assembly = typeof(ScrcpyPathResolver).Assembly;
                 Stream? stream = assembly.GetManifestResourceStream("scrcpydex-server.jar")
-                              ?? assembly.GetManifestResourceStream("ScrcpyDex.WinUI.scrcpydex-server.jar")
                               ?? assembly.GetManifestResourceStream("ScrcpyDex.Core.scrcpydex-server.jar");
 
                 if (stream == null)
