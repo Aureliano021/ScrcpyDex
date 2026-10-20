@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using ScrcpyDex.Core.Platform.Windows;
 
 namespace ScrcpyDex.Core.Platform
 {
@@ -28,7 +29,11 @@ namespace ScrcpyDex.Core.Platform
             {
                 if (_default != null) return _default;
 
-                if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+                if (OperatingSystem.IsWindows())
+                {
+                    _default = WindowsJobObjectLifetimeManager.Default;
+                }
+                else if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
                 {
                     _default = PosixProcessLifetimeManager.Default;
                 }
