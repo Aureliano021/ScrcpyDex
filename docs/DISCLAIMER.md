@@ -115,14 +115,14 @@ ScrcpyDeX enforces strict clean-room engineering standards:
 * **Execution Against Pre-Installed Resident Code:** Reflected methods and classes resolve exclusively against system libraries already present on the user's legally purchased device firmware.
 * **Separation of Executables:** Upstream binaries (`scrcpy.exe`, `adb.exe`, `ffplay.exe`) are not bundled inside ScrcpyDeX code, but invoked independently via standard operating system subprocess calls.
 
-### 5.2 Cryptographic Audit Verification
-To ensure full transparency, non-tampering, and auditability, the server JAR distributed with ScrcpyDeX matches the following verifiable cryptographic specification:
+### 5.2 Server JAR Checksum
+To ensure full transparency, non-tampering, and auditability, the server JAR distributed with ScrcpyDeX matches the following verifiable integrity specification:
 
 * **File Name:** `scrcpydex-server.jar`
-* **File Size:** `18,993 bytes`
+* **File Size:** 13,291 bytes
 * **Cryptographic Hash (SHA-256):**  
-  `AEB4329BEC1AD16F051C2FA0CE415B33A1C99B078D323B27B0D7A0860A930C6F`
-* **Internal Entries:** Strictly 1 file (`classes.dex`, 38,244 bytes uncompressed)
+  C57D704AB4116FC43E0370D746455C6C80170391F17082561D80CC926AB0C15C
+* **Internal Entries:** Strictly 1 file (classes.dex, 26,680 bytes uncompressed)
 * **Bytecode Namespace:** Exclusively `com/scrcpydex/server/*`
 
 **Verification Command (Windows PowerShell):**
