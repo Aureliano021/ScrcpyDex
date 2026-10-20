@@ -1,6 +1,6 @@
 # Architectural Blueprint & Technical Analysis: ScrcpyDeX Client
 
-> **Note (historical record):** This report documents the project at the time of this stage. Names such as WinUI refer to the Fluent visual style. The shipped desktop client is a WPF application (.NET 8, WPF-UI). scrcpy is an external dependency (official scrcpy v2.4 or newer), not bundled. Direct3D11 rendering is specific to the Windows client.
+> **Note (historical record):** This report documents early development stages. References to the standalone TCP video stream (port 27183), binary control channel (port 27184 / ControlChannel), and legacy WPF client describe the prototype v1.x architecture. In v2.0.0, the server runs exclusively in activation mode with upstream official scrcpy (>= 2.4) and the cross-platform Avalonia GUI / CLI (.NET 8). See [ARCHITECTURE.md](../ARCHITECTURE.md) for current design.
 
 **Document Version:** 1.0.0  
 **Phase:** Stage 5 — Client Deep Architectural Audit & Systems Modernization Blueprint  

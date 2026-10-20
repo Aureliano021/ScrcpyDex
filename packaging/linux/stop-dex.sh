@@ -32,17 +32,14 @@ adb_cmd() {
 echo -e "[1/4] Terminating local scrcpy processes..."
 pkill -f "scrcpy" 2>/dev/null || true
 
-echo -e "[2/4] Sending disconnect signal to Samsung One UI..."
+echo -e "[2/3] Sending disconnect signal to Samsung One UI..."
 adb_cmd shell "CLASSPATH=${REMOTE_JAR} app_process /data/local/tmp com.scrcpydex.server.Server disconnect" 2>/dev/null || true
 
-echo -e "[3/4] Terminating server activator processes on device..."
+echo -e "[3/3] Terminating server activator processes on device..."
 adb_cmd shell "pkill -f com.scrcpydex.server.Server" 2>/dev/null || true
 adb_cmd shell "pkill -f scrcpy" 2>/dev/null || true
 adb_cmd shell "am broadcast -a com.sec.android.app.desktoplauncher.ACTION_STOP_DESKTOP_MODE" 2>/dev/null || true
 adb_cmd shell "am broadcast -a com.samsung.android.desktopmode.action.DESKTOP_MODE_UPDATE --ez enabled false" 2>/dev/null || true
 
-echo -e "[4/4] Removing ADB port forwards..."
-adb forward --remove tcp:27183 2>/dev/null || true
-adb forward --remove tcp:27184 2>/dev/null || true
 
 echo -e "${C_GREEN}[OK] Session terminated. Phone display restored successfully.${C_RESET}"

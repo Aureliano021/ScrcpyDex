@@ -215,9 +215,9 @@ ScrcpyDeX maintains a strict separation of concerns regarding external executabl
 └──────────────┘  └──────────────┘
 ```
 
-1. **Subprocess Invocation:** `adb.exe` and `scrcpy.exe` are called via standard OS process pipelines (`Start-Process` / CLI execution).
-2. **Network Bridging:** Communication across PC and device occurs over standard TCP port forwarding (`adb forward tcp:27183 tcp:27183` and `adb forward tcp:27184 tcp:27184`).
-3. **No Dynamic/Static Linking:** Because communication takes place exclusively across standard operating system process boundaries and local loopback sockets, ScrcpyDeX maintains complete architectural and legal independence.
+1. **Subprocess Invocation:** db and scrcpy are invoked via standard operating system process execution pipelines.
+2. **Device Activation & Streaming:** The host application executes scrcpydex-server.jar via db shell app_process to initialize the Samsung DeX virtual display, captures the assigned display identifier (DEX_ACTIVATED_DISPLAY_ID=<id>), and spawns upstream scrcpy pointing to that display (--display-id=<id>).
+3. **No Dynamic/Static Linking:** Because communication takes place exclusively across standard operating system process boundaries and ADB pipelines, ScrcpyDeX maintains complete architectural and legal independence.
 
 ---
 

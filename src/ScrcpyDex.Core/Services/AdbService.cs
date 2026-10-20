@@ -454,9 +454,6 @@ namespace ScrcpyDex.Services
             }
             catch { }
 
-            // Step 3: Remove port forwards asynchronously without blocking
-            _ = _resilience.ExecuteDirectAsync($"{target}forward --remove tcp:27183", TimeSpan.FromMilliseconds(500), ct);
-            _ = _resilience.ExecuteDirectAsync($"{target}forward --remove tcp:27184", TimeSpan.FromMilliseconds(500), ct);
         }
 
         #endregion

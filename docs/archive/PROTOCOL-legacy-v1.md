@@ -1,3 +1,11 @@
+> [!NOTE]
+> **Historical Archive Notice:**
+> This document describes the prototype "full mode" engine (custom TCP video streaming on port 27183 and custom binary input channel on port 27184) which was deprecated and removed in ScrcpyDeX v2.0.0.
+> Current clients do not use this protocol; they orchestrate Samsung DeX virtual display creation via `scrcpydex-server.jar activate` and delegate streaming/input to official `scrcpy` (>= 2.4). See [ARCHITECTURE.md](../ARCHITECTURE.md) for current design.
+> The historical code implementing this protocol is preserved at the Git tag `legacy-full-mode`.
+>
+> *(Errata note: Line 108 of the sequence diagram below depicted `[Size][NAL]` framing for the video stream; the actual prototype implementation in `VideoCapture.java` streamed raw Annex B NAL units directly without length headers).*
+
 # Communication Protocol — ScrcpyDeX (SSOT)
 
 **Status:** Normative Technical Specification  
@@ -122,3 +130,4 @@ sequenceDiagram
 Any modification to this protocol requires:
 1. Version increment in this document.
 2. Corresponding updates to the serialization classes (`MessageReader`/`MessageWriter`) across both language runtimes (Java and C#).
+

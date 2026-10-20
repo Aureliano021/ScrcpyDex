@@ -24,9 +24,6 @@ echo [2/3] Sending disconnect signal to Android device...
 "%ADB_EXE%" shell "pkill -f com.scrcpydex.server.Server" 2>nul
 "%ADB_EXE%" shell "pkill -f DexTriggerTest" 2>nul
 
-echo [3/3] Cleaning up USB network forward tunnels...
-"%ADB_EXE%" forward --remove tcp:27183 2>nul
-"%ADB_EXE%" forward --remove tcp:27184 2>nul
 
 echo.
 echo DeX session disconnected. Device display restored.
