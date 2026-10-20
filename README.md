@@ -148,7 +148,7 @@ ScrcpyDex/
 ├── config/               # Session configuration (settings.json, settings.schema.json)
 ├── docs/                 # Technical reports, guides, protocol specifications, and legal audits
 │   ├── LINUX_SETUP_GUIDE.md # Step-by-step setup guide for Linux users
-│   ├── PROTOCOL.md       # Binary protocol and handshake specification
+│   ├── ARCHITECTURE.md   # Architectural design and execution flow specification
 │   ├── THIRD_PARTY_NOTICES.md # Third-party open source licenses and attributions
 │   └── reports/          # Architectural reports and empirical validation logs
 ├── packaging/            # Platform distribution files
@@ -202,7 +202,7 @@ ScrcpyDex/
 
 * [**Linux Setup & Installation Guide:**](docs/LINUX_SETUP_GUIDE.md) Step-by-step setup instructions, udev rules, and VA-API troubleshooting for Linux users.
 * [**Troubleshooting & FAQ Catalog:**](docs/TROUBLESHOOTING_FAQ.md) Comprehensive resolutions for ADB, DeX virtual displays, VA-API/D3D11 renderers, audio jitter, and OLED burn-in prevention.
-* [**Protocol Specification (SSOT):**](docs/PROTOCOL.md) Binary control protocol, handshake contracts, and packet structures.
+* [**Architecture Specification:**](docs/ARCHITECTURE.md) Architectural design, session execution flow, and lifetime management.
 * [**Report 01:** Server Core Architecture, Loopback Miracast RTSP & H.264 Video Pipeline](docs/reports/01_server_core_and_video.md)
 * [**Report 02:** Control Channel Protocol, Input Event Injection & Coordinate Translation](docs/reports/02_control_channel_and_input.md)
 * [**Report 03:** Unified Client, Linux Kernel UHID Mouse & Lifecycle Orchestration](docs/reports/03_unified_client_and_uhid_mouse.md)
