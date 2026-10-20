@@ -339,7 +339,7 @@ The hardware validation was executed under an active **X11** desktop session (`D
 #### Status of Wayland:
 - Wayland enforces strict window and input isolation. Under native Wayland sessions (e.g. GNOME Mutter or KDE KWin Wayland), arbitrary window coordinate queries and global pointer locks are restricted unless supported by specific compositor protocols (such as `zwp_confined_pointer_v1` or `zxdg_decoration_v1`).
 - The desktop shortcut modifier key (`Super` / `Windows` key) is typically reserved by Wayland compositors for system shell functions (such as the Overview or Application Menu), interfering with DeX shortcut passthrough.
-- **Decision:** Native Wayland testing is deferred to later phases. Phase 2 (CLI) and Phase 3 (Avalonia GUI) will explicitly target **X11 and XWayland** as the certified deployment baseline.
+- **Decision:** Native Wayland testing is deferred to later phases. Phase 2 (CLI) and Phase 3 (Avalonia GUI) will explicitly target **X11 and XWayland** as the tested deployment baseline.
 
 ### 6.4 Architecture Matrix Confirmation
 

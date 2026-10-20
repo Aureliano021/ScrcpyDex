@@ -2,11 +2,11 @@
 
 Thank you for your interest in contributing to ScrcpyDeX! We welcome contributions, bug reports, and enhancements from the community.
 
-Because this project involves hardware-software interoperability and clean-room implementation, all contributors must adhere to strict legal, licensing, and clean-room engineering guidelines.
+Because this project involves hardware-software interoperability, all contributors must adhere to strict legal, licensing, and code hygiene guidelines.
 
 ---
 
-## 1. Clean-Room Development Standards
+## 1. Development & Interoperability Standards
 
 To preserve the intellectual property integrity of ScrcpyDeX, every contributor must follow these rules:
 
@@ -14,9 +14,9 @@ To preserve the intellectual property integrity of ScrcpyDeX, every contributor 
    Never commit, upload, or submit pull requests containing:
    * Proprietary Samsung or vendor bytecode (`.dex`, `.odex`, `.vdex`, `.jar`, `.apk`, `.so`).
    * Verbatim disassembled or decompiled method bodies extracted from vendor firmware (`framework.jar`, `services.jar`).
-   * Proprietary media, icons, UI assets, wallpapers, or sound effects.
+   * Proprietary vendor code or decompiled method bodies. (Note: device preview images in the client are third-party product renders used for device identification only; trademarks belong to their respective owners).
 
-2. **Clean-Room Interoperability:**  
+2. **Independent Interoperability:**  
    Code interacting with vendor-specific system features must use dynamic runtime reflection (`Class.forName()`, `Method.invoke()`) or public Android platform APIs. Interface signatures must declare only the minimum necessary parameters required for functional interoperability.
 
 3. **Permissive Licensing:**  

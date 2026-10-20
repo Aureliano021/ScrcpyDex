@@ -278,7 +278,7 @@ namespace ScrcpyDex.Platform.Linux
                     Name = "Display Server",
                     Status = DiagnosticStatus.Warning,
                     Summary = $"Wayland desktop session detected (WAYLAND_DISPLAY={waylandDisplay ?? "unknown"}).",
-                    Details = "X11 / XWayland is the certified baseline. Under native Wayland, desktop modifier shortcuts " +
+                    Details = "X11 / XWayland is the tested baseline. Under native Wayland, desktop modifier shortcuts " +
                               "(such as Super/Windows key) and UHID mouse capture may be constrained by compositor security policies.",
                     Remediation = "For full desktop shortcut passthrough and pointer grab, select an X11 (or X.Org) session at login."
                 };
@@ -291,7 +291,7 @@ namespace ScrcpyDex.Platform.Linux
                     Name = "Display Server",
                     Status = DiagnosticStatus.Pass,
                     Summary = $"X11 desktop session active (DISPLAY={display}).",
-                    Details = "X11 satisfies the certified ScrcpyDeX deployment baseline."
+                    Details = "X11 satisfies the tested ScrcpyDeX deployment baseline."
                 };
             }
 

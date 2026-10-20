@@ -2,7 +2,7 @@
 
 **Document Version:** 1.0.0  
 **Target Distributions:** Ubuntu 24.04 LTS (`noble`), Ubuntu 22.04 LTS (`jammy`), Linux Mint 22.x (`Zena`), Linux Mint 21.x  
-**Tested Baseline:** Linux Mint 22.3 x86_64 (Kernel 6.8, X11) with Samsung Galaxy S23 (Android 16 / One UI 8.5)  
+**Tested Baseline:** Linux Mint 22.3 (64-bit, Kernel 7.0.0-38-generic, base Ubuntu 24.04 LTS, X11) with Samsung Galaxy S23 (SM-S911B, One UI 8.5 / Android 16)  
 
 ---
 
@@ -439,7 +439,7 @@ scrcpydex-gui
 
 ## Section 6: Display Servers & Window Managers
 
-### 6.1 X11 (Tested & Certified Baseline)
+### 6.1 X11 (Tested Baseline)
 
 * **Status:** Tested and verified on Linux Mint Cinnamon (`X.Org 1.21.1`) and Ubuntu GNOME on Xorg (`DISPLAY=:0`).
 * **Video Rendering:** `scrcpy` uses the SDL OpenGL 3.3 backend (`--render-driver=opengl`), providing stable frame pacing and low latency.

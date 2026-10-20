@@ -106,10 +106,12 @@ ScrcpyDeX is legitimate, lawful interoperability software developed under clear 
 
 ---
 
-## 5. Clean-Room Implementation & Cryptographic Audit Verification
+## 5. Independent Interoperability Implementation & Integrity Specification
 
-### 5.1 Strict Clean-Room Development
-ScrcpyDeX enforces strict clean-room engineering standards:
+### 5.1 Independent Implementation for Interoperability
+ScrcpyDeX is developed independently for interoperability. The repository contains no vendor source code or decompiled method bodies. Samsung framework APIs are invoked at runtime through Java reflection.
+
+*Note: Legal citations provided in this document are for technical context only; this is not legal advice and does not assert compliance in any jurisdiction.*
 * **Zero Proprietary Binary Redistribution:** ScrcpyDeX does **NOT** redistribute, package, ship, or mirror any Samsung proprietary JAR files (e.g., `framework.jar`, `services.jar`), deodexed classes, `.odex` / `.vdex` bytecode caches, or native ARM/ARM64 `.so` libraries.
 * **Dynamic Java Runtime Reflection:** All calls to Samsung-specific subsystem classes (e.g., `android.hardware.display.SemWifiDisplayConfig$Builder`, `android.hardware.display.DisplayManagerGlobal`) are performed purely via dynamic reflection (`java.lang.reflect.Method.invoke()`, `Class.forName()`). The compiled `scrcpydex-server.jar` contains exclusively original Java class implementations under the namespace `com.scrcpydex.server.*`.
 * **Execution Against Pre-Installed Resident Code:** Reflected methods and classes resolve exclusively against system libraries already present on the user's legally purchased device firmware.
