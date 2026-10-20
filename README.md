@@ -12,8 +12,7 @@
 <p align="center">
   <a href="https://github.com/Aureliano021/ScrcpyDex/releases/latest"><img src="https://img.shields.io/github/v/release/Aureliano021/ScrcpyDex?label=Release&color=blue" alt="Latest Release" /></a>
   <a href="https://www.microsoft.com/windows"><img src="https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20%7C%20Linux%20x64-blue" alt="Platform" /></a>
-  <a href="https://www.samsung.com"><img src="https://img.shields.io/badge/Android-11%20to%2016%2B%20%28One%20UI%203%20to%208.5%29-green" alt="Android Support" /></a>
-  <a href="https://www.samsung.com/galaxy-s23/"><img src="https://img.shields.io/badge/Tested%20on-Samsung%20Galaxy%20S23-orange" alt="Hardware Tested" /></a>
+  <a href="https://www.samsung.com/galaxy-s23/"><img src="https://img.shields.io/badge/Tested%20on-Galaxy%20S23%20%C2%B7%20One%20UI%208.5%20%C2%B7%20Android%2016-orange" alt="Hardware Tested" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License" /></a>
 </p>
 
@@ -54,6 +53,20 @@ ScrcpyDeX supports both **Microsoft Windows** (10/11 x64) and **Linux** (Ubuntu 
 |---|---|---|---|
 | **ScrcpyDeX CLI** | `scrcpydex` (`src/ScrcpyDex.Cli`) | Linux x64, Windows x64 | Lightweight, headless, terminal-based control and scriptable workflows. |
 | **ScrcpyDeX Avalonia GUI** | `ScrcpyDex.App` (`src/ScrcpyDex.App`) | Linux x64 (X11 / XWayland), Windows x64 | Cross-platform desktop GUI with visual device management and inline configuration. |
+---
+
+## 📱 Compatibility Matrix
+
+Compatibility depends on native Samsung DeX availability in the device firmware. The table below delineates physically tested hardware configurations from expected configurations derived from programmatic requirements (`CompatCheck.java`: Android 11+ / SDK >= 30, Samsung manufacturer, and `SemWifiDisplayConfig` availability):
+
+| Tier | Device Family | One UI / Android Version | Host PC Platform | Status |
+|---|---|---|---|---|
+| **Tested** | Samsung Galaxy S23 (`SM-S911B`) | One UI 8.5 / Android 16 | Windows 10/11 x64<br>Linux Mint 22.3 (64-bit, Kernel 7.0.0-38-generic, X11) | Physically validated & fully functional |
+| **Expected (untested)** | Galaxy S-series (S9 to S25), Note-series (Note 9/10/20), Z Fold (Fold 2–6), Tab S (S4–S10) | One UI 3.1 to 8.x / Android 11 to 16 | Ubuntu 24.04 LTS, Debian 12, other Linux x86_64 distributions | Meets code requirements; physical run not yet submitted |
+| **Not Supported** | Galaxy A-series, Galaxy M-series, Galaxy Z Flip, non-Samsung Android devices | Any | Any | Unsupported by Samsung DeX firmware |
+
+To report test results for untested devices or Linux distributions, please submit a [Compatibility Report](.github/ISSUE_TEMPLATE/compatibility_report.md).
+
 ---
 
 ## 📋 System Prerequisites
@@ -214,7 +227,7 @@ ScrcpyDex/
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please review [**CONTRIBUTING.md**](.github/CONTRIBUTING.md) for details on clean-room engineering rules, Developer Certificate of Origin (DCO 1.1) sign-offs, and pull request guidelines.
+Contributions are welcome! Please review [**CONTRIBUTING.md**](.github/CONTRIBUTING.md) for details on contribution rules, Developer Certificate of Origin (DCO 1.1) sign-offs, and pull request guidelines.
 
 ---
 
@@ -222,5 +235,5 @@ Contributions are welcome! Please review [**CONTRIBUTING.md**](.github/CONTRIBUT
 
 * **License:** Distributed under the [Apache License, Version 2.0](LICENSE).
 * **Third-Party Notices:** See [docs/THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md) for licenses and copyright attributions of external dependencies (`scrcpy`, Avalonia UI, AOSP, FFmpeg).
-* **Legal & Interoperability Compliance:** See [docs/LEGAL_AND_LICENSING.md](docs/LEGAL_AND_LICENSING.md) for clean-room audit documentation and legal interoperability analysis (DMCA 17 U.S.C. § 1201(f), EU Directive 2009/24/EC, Brazilian Software Law No. 9.609/1998).
+* **Legal & Interoperability Compliance:** See [docs/LEGAL_AND_LICENSING.md](docs/LEGAL_AND_LICENSING.md) for independent interoperability analysis and legal frameworks (DMCA 17 U.S.C. § 1201(f), EU Directive 2009/24/EC, Brazilian Software Law No. 9.609/1998).
 * **Legal Disclaimer & Non-Affiliation:** See [docs/DISCLAIMER.md](docs/DISCLAIMER.md) for warranty disclaimers, Knox safety analysis, and trademark notices.

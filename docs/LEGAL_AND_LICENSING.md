@@ -15,7 +15,7 @@
 
 ScrcpyDeX is an independent, open-source interoperability tool designed to enable owners of compatible Samsung Android devices to access the desktop mode (Samsung DeX) on personal computers over standard USB connections.
 
-This document outlines the compliance architecture, intellectual property boundaries, clean-room development practices, and contributor requirements governing the ScrcpyDeX codebase.
+This document outlines the compliance architecture, intellectual property boundaries, independent interoperability practices, and contributor requirements governing the ScrcpyDeX codebase.
 
 The project is structured to operate within established statutory exemptions and judicial precedents governing software interoperability across the United States (DMCA 17 U.S.C. § 1201(f)), the European Union (Software Directive 2009/24/EC Art. 5(3) & 6), and Brazil (Lei de Software nº 9.609/1998 Art. 6º).
 
@@ -73,7 +73,7 @@ ScrcpyDeX interacts with external open-source tools and platform APIs. Full thir
 
 ---
 
-## 4. Interoperability Analysis, Clean-Room Implementation & Legal Precedents
+## 4. Interoperability Analysis, Independent Implementation & Legal Context
 
 ScrcpyDeX was created to achieve hardware and software interoperability, allowing owners of Samsung Galaxy smartphones to interact with the device's desktop mode interface (DeX) on personal computers over standard USB connections without requiring wireless network routing or proprietary cloud services.
 
@@ -82,8 +82,8 @@ ScrcpyDeX was created to achieve hardware and software interoperability, allowin
 The protocol analysis and implementation of ScrcpyDeX focus strictly on **Functional Interface Compatibility** and **Interoperability**. This technical approach is anchored in software interoperability exceptions and established judicial precedents:
 
 #### Interoperability Precedents (WINE, Samba, Google v. Oracle)
-1. **WINE Project Precedent (Clean-Room API Compatibility):**  
-   The WINE project established the industry standard for clean-room implementation: independent developers analyze documented and undocumented OS APIs and implement functional compatibility layers without utilizing proprietary source code. Implementing compatible interfaces to achieve software interoperability is an established industry practice.
+1. **WINE Project Precedent (Independent API Compatibility):**  
+   The WINE project established an industry precedent for interoperability implementation: independent developers analyze documented and undocumented OS APIs and implement functional compatibility layers without utilizing proprietary source code. Implementing compatible interfaces to achieve software interoperability is an established industry practice.
 2. **Samba Suite Precedent (Network Protocol Interoperability):**  
    The Samba project independently implemented SMB/CIFS network protocols by observing packet exchanges and functional interface specifications, affirming the right to analyze and implement interface specifications for cross-vendor interoperability.
 3. **Google LLC v. Oracle America, Inc., 141 S. Ct. 1183 (2021) (SCOTUS):**  
@@ -163,7 +163,7 @@ An inspection of the repository confirms that **no proprietary Samsung code or b
 
 | Artifact Inspected | Audit Finding | Status |
 | :--- | :--- | :--- |
-| **`server/scrcpydex-server.jar`** | Compiled exclusively from original Java sources in `server/src/com/scrcpydex/server/` using standard Google SDK tools (`javac` with `android-35/android.jar`, converted via `d8`). Contains solely `classes.dex` under namespace `com.scrcpydex.server.*`. | ✅ **Clean-Room Verified** |
+| **`server/scrcpydex-server.jar`** | Compiled exclusively from original Java sources in `server/src/com/scrcpydex/server/` using standard Google SDK tools (`javac` with `android-35/android.jar`, converted via `d8`). Contains solely `classes.dex` under namespace `com.scrcpydex.server.*`. | ✅ **Independent Implementation** |
 | **Samsung `framework.jar`** | **ABSENT.** Not committed or tracked in Git. | ✅ **Compliant** |
 | **Samsung `services.jar`** | **ABSENT.** Not committed or tracked in Git. | ✅ **Compliant** |
 | **Deodexed `.dex` / `.odex` / `.vdex` dumps** | **ABSENT.** Excluded by `.gitignore` rules. | ✅ **Compliant** |
@@ -257,11 +257,13 @@ CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process /data/local/tmp com.s
 
 ---
 
-## 10. Contributor Guidelines & Clean-Room Standards
+## 10. Contributor Guidelines & Code Hygiene Standards
 
 All contributors submitting code, documentation, or pull requests to ScrcpyDeX must comply with the guidelines defined in [`CONTRIBUTING.md`](../.github/CONTRIBUTING.md):
 
-1. **Strict Clean-Room Implementation:** No proprietary vendor bytecode, disassembled proprietary method bodies, or trademarked media may be committed.
+1. **Independent Implementation & Code Hygiene:** No proprietary vendor bytecode or disassembled proprietary method bodies may be committed. Framework APIs must be accessed solely via reflection.
+
+*Note: Legal citations in this document are provided for technical context only; this is not legal advice and does not assert compliance in any jurisdiction.*
 2. **Interface Compatibility:** Interactions with system features must rely on dynamic reflection or public Android APIs.
 3. **Developer Certificate of Origin (DCO):** Contributions must be submitted under the DCO 1.1 agreement using standard `Signed-off-by` commit trailers.
 4. **Notice & Takedown:** If any copyright holder believes content in this project infringes upon their rights, please open an issue or contact the project maintainer for immediate review and resolution.
