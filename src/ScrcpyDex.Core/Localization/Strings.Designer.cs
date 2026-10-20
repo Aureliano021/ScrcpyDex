@@ -141,7 +141,6 @@ namespace ScrcpyDex.Core.Localization
         // Actions
         public static string Action_StartSession => LocalizationManager.Instance.GetString(nameof(Action_StartSession));
         public static string Action_StopSession => LocalizationManager.Instance.GetString(nameof(Action_StopSession));
-        public static string Action_EmergencyKill => LocalizationManager.Instance.GetString(nameof(Action_EmergencyKill));
         public static string Action_Browse => LocalizationManager.Instance.GetString(nameof(Action_Browse));
         public static string Action_Refresh => LocalizationManager.Instance.GetString(nameof(Action_Refresh));
         public static string Action_Reset => LocalizationManager.Instance.GetString(nameof(Action_Reset));

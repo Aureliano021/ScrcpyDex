@@ -267,9 +267,6 @@
   <data name="Action_StopSession" xml:space="preserve">
     <value>Disconnect</value>
   </data>
-  <data name="Action_EmergencyKill" xml:space="preserve">
-    <value>Force Close</value>
-  </data>
   <data name="Action_Browse" xml:space="preserve">
     <value>Browse...</value>
   </data>

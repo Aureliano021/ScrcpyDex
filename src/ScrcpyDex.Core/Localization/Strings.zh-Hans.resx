@@ -267,9 +267,6 @@
   <data name="Action_StopSession" xml:space="preserve">
     <value>断开连接</value>
   </data>
-  <data name="Action_EmergencyKill" xml:space="preserve">
-    <value>强制关闭</value>
-  </data>
   <data name="Action_Browse" xml:space="preserve">
     <value>浏览...</value>
   </data>

@@ -41,7 +41,6 @@ namespace ScrcpyDex.Services
         Task<bool> StartAsync(ScrcpyDeXSettings settings, string? serial = null, int? displayId = null, CancellationToken ct = default);
         Task<bool> StartAsync(DisplayConfig config, string? serial = null, int? displayId = null, CancellationToken ct = default);
         Task StopAsync(TimeSpan? timeout = null);
-        Task EmergencyKillAsync();
     }
 
     /// <summary>
@@ -341,63 +340,6 @@ namespace ScrcpyDex.Services
             }
         }
 
-        /// <summary>
-        /// Immediately terminates the scrcpy process tree with zero grace period.
-        /// </summary>
-        public async Task EmergencyKillAsync()
-        {
-            Process? proc;
-            NonBlockingProcessStream? stream;
-
-            lock (_stateLock)
-            {
-                proc = _currentProcess;
-                stream = _processStream;
-                _currentProcess = null;
-                _processStream = null;
-                _stopping = false;
-                _streamingStartedFired = false;
-            }
-
-            if (proc != null)
-            {
-                try
-                {
-                    if (!proc.HasExited)
-                    {
-                        proc.Kill(entireProcessTree: true);
-                    }
-                }
-                catch { }
-                finally
-                {
-                    proc.Dispose();
-                }
-            }
-
-            // Terminate any remaining scrcpy.exe instances on Windows
-            try
-            {
-                foreach (var p in Process.GetProcessesByName("scrcpy"))
-                {
-                    try
-                    {
-                        if (!p.HasExited) p.Kill(entireProcessTree: true);
-                    }
-                    catch { }
-                }
-            }
-            catch { }
-
-            if (stream != null)
-            {
-                try
-                {
-                    await stream.DisposeAsync().ConfigureAwait(false);
-                }
-                catch { }
-            }
-        }
 
         /// <summary>
         /// Builds the list of scrcpy command line arguments based on ScrcpyDeXSettings.

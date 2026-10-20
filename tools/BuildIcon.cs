@@ -24,11 +24,11 @@ namespace ScrcpyDeX.Tools
     {
         static void Main(string[] args)
         {
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            string inputJpg = @"C:\Users\aurel\.gemini\antigravity\brain\c2534b4e-21ee-4609-bce2-3fccb40f8d70\.user_uploaded\media_1790430875843.jpg";
+            string inputJpg = args.Length > 0 ? args[0] : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon_source.png");
             
             if (!File.Exists(inputJpg))
             {
+                Console.WriteLine("Usage: BuildIcon <path-to-source-image>");
                 Console.WriteLine("Input image not found: " + inputJpg);
                 return;
             }

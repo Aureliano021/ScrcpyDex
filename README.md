@@ -148,7 +148,7 @@ For manual step-by-step installation, see the [**Linux Setup Guide**](docs/LINUX
 | **Toggle Fullscreen** | `Alt + F` | `Alt + F` | Toggles borderless fullscreen display mode. |
 | **Close & Restore Phone** | `Alt + F4` or Click `[X]` | `Alt + F4` or Click `[X]` | Closes the streaming window and automatically triggers the complete DeX teardown sequence. |
 | **Troubleshooting FAQ Drawer** | `F1` or `Escape` to close | `F1` or `Escape` to close | Opens or closes the in-app interactive troubleshooting side drawer. |
-| **Terminal Disconnect (Fallback)** | `stop-dex.bat` | `scrcpydex stop` / `stop-dex.sh` | Terminal utility to clean up lingering processes and reset ADB port forward tunnels. |
+| **Terminal Disconnect (Fallback)** | `scripts/windows/stop-dex.bat` | `scrcpydex stop` / `packaging/linux/stop-dex.sh` | Terminal utility to clean up lingering processes on device. |
 
 ---
 
@@ -167,6 +167,7 @@ ScrcpyDex/
 ├── packaging/            # Platform distribution files
 │   ├── linux/            # Linux udev rules (51-android.rules), desktop entry, and scripts
 │   └── windows/          # Windows deployment assets
+├── scripts/              # Platform setup, build, and session teardown scripts
 ├── server/               # Java loopback display daemon (scrcpydex-server.jar)
 ├── src/                  # Source code directory
 │   ├── ScrcpyDex.Core/   # Portable .NET 8 core library (models, state machine, platform abstractions)
@@ -176,7 +177,6 @@ ScrcpyDex/
 ├── tools/                # Build utilities, icon compilers, and fallback launchers
 ├── LICENSE               # Apache License 2.0
 ├── README.md             # Project documentation and landing page
-└── stop-dex.bat          # Windows emergency session disconnect script
 ```
 
 ---
