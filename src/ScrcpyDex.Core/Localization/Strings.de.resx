@@ -267,9 +267,6 @@
   <data name="Action_StopSession" xml:space="preserve">
     <value>Trennen</value>
   </data>
-  <data name="Action_EmergencyKill" xml:space="preserve">
-    <value>Sofort beenden</value>
-  </data>
   <data name="Action_Browse" xml:space="preserve">
     <value>Durchsuchen...</value>
   </data>

@@ -87,8 +87,7 @@ try {
     Copy-IfNotSame $jarPath (Join-Path $OutputDir "scrcpydex-server.jar")
 
     # Stop script
-    $stopBat = Join-Path $repoRoot "stop-dex.bat"
-    if (-not (Test-Path $stopBat)) { $stopBat = Join-Path $repoRoot "scripts\windows\stop-dex.bat" }
+    $stopBat = Join-Path $repoRoot "scripts\windows\stop-dex.bat"
     if (Test-Path $stopBat) {
         Copy-IfNotSame $stopBat (Join-Path $stageDir "stop-dex.bat")
         Copy-IfNotSame $stopBat (Join-Path $OutputDir "stop-dex.bat")
