@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    ScrcpyDeX — Windows Release Packaging Script
+    ScrcpyDeX - Windows Release Packaging Script
 .DESCRIPTION
     Compiles ScrcpyDex.App into a self-contained single-file win-x64 executable,
     assembles runtime distribution files, generates the release zip, and computes SHA-256 sums.
@@ -31,7 +31,7 @@ if (-not (Test-Path $OutputDir)) {
 }
 
 Write-Host "=================================================" -ForegroundColor Cyan
-Write-Host "   ScrcpyDeX — Windows Release Packaging Builder " -ForegroundColor Cyan
+Write-Host "   ScrcpyDeX - Windows Release Packaging Builder " -ForegroundColor Cyan
 Write-Host "=================================================" -ForegroundColor Cyan
 Write-Host "Version:       $Version"
 Write-Host "Configuration: $Configuration"
@@ -48,8 +48,16 @@ try {
         throw "ScrcpyDex.App project not found at $appProject"
     }
 
+    $dotnetCmd = "dotnet"
+    if ($env:LOCALAPPDATA) {
+        $userDotnet = Join-Path $env:LOCALAPPDATA "Microsoft\dotnet\dotnet.exe"
+        if (Test-Path $userDotnet) {
+            $dotnetCmd = $userDotnet
+        }
+    }
+
     Write-Host "[1/4] Publishing ScrcpyDex.App (win-x64 single file)..." -ForegroundColor Yellow
-    & dotnet publish $appProject `
+    & $dotnetCmd publish $appProject `
         -c $Configuration `
         -r win-x64 `
         --self-contained true `
