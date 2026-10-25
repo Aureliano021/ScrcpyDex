@@ -1,0 +1,200 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Primary Action Button -->
+    <Style Selector="Button.btn-primary">
+        <Setter Property="Background" Value="{StaticResource ThemeAccentBlueBrush}" />
+        <Setter Property="Foreground" Value="#FFFFFF" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.12" Easing="CubicEaseOut" />
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.08" Easing="CubicEaseOut" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Button.btn-primary:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource ThemeAccentBlueHoverBrush}" />
+    </Style>
+    <Style Selector="Button.btn-primary:pressed">
+        <Setter Property="RenderTransform" Value="scale(0.97)" />
+        <Setter Property="Background" Value="#0070E0" />
+    </Style>
+    <Style Selector="Button.btn-primary:disabled /template/ ContentPresenter">
+        <Setter Property="Opacity" Value="0.45" />
+    </Style>
+
+    <!-- Secondary Action Button -->
+    <Style Selector="Button.btn-secondary">
+        <Setter Property="Background" Value="{StaticResource ThemeControlBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource ThemeLabelPrimaryBrush}" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="BorderBrush" Value="{StaticResource ThemeBorderSubtleBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.12" Easing="CubicEaseOut" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Button.btn-secondary:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource ThemeControlHoverBrush}" />
+    </Style>
+    <Style Selector="Button.btn-secondary:pressed">
+        <Setter Property="RenderTransform" Value="scale(0.97)" />
+    </Style>
+    <Style Selector="Button.btn-secondary:disabled /template/ ContentPresenter">
+        <Setter Property="Opacity" Value="0.45" />
+    </Style>
+
+    <!-- Toolbar Pill Button (Titlebar Actions) -->
+    <Style Selector="Button.toolbar-button">
+        <Setter Property="Background" Value="#332A2A2D" />
+        <Setter Property="Foreground" Value="{StaticResource ThemeLabelPrimaryBrush}" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Height" Value="26" />
+        <Setter Property="Padding" Value="9,0" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="BorderBrush" Value="{StaticResource ThemeBorderSubtleBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.12" Easing="CubicEaseOut" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Button.toolbar-button:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#5538383D" />
+    </Style>
+    <Style Selector="Button.toolbar-button:pressed">
+        <Setter Property="RenderTransform" Value="scale(0.96)" />
+    </Style>
+
+    <!-- Destructive Action Button -->
+    <Style Selector="Button.btn-destructive">
+        <Setter Property="Background" Value="#35FF453A" />
+        <Setter Property="Foreground" Value="#FFFFFF" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="BorderBrush" Value="#55FF453A" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.12" Easing="CubicEaseOut" />
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.08" Easing="CubicEaseOut" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Button.btn-destructive:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#50FF453A" />
+    </Style>
+    <Style Selector="Button.btn-destructive:pressed">
+        <Setter Property="RenderTransform" Value="scale(0.97)" />
+    </Style>
+
+    <!-- Translucent Frosted Glass Card -->
+    <Style Selector="Border.glass-card">
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Background" Value="{StaticResource ThemeCardBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource ThemeBorderSubtleBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BoxShadow" Value="{StaticResource ThemeCardShadow}" />
+        <Setter Property="Padding" Value="14,12" />
+    </Style>
+
+    <!-- Toggle Switch Styling -->
+    <Style Selector="ToggleSwitch.dex-switch">
+        <Setter Property="OnContent" Value="" />
+        <Setter Property="OffContent" Value="" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="ToggleSwitch.dex-switch /template/ Border#SwitchKnobBounds">
+        <Setter Property="Background" Value="{StaticResource ThemeControlBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource ThemeBorderSubtleBrush}" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Width" Value="40" />
+        <Setter Property="Height" Value="22" />
+    </Style>
+    <Style Selector="ToggleSwitch.dex-switch:checked /template/ Border#SwitchKnobBounds">
+        <Setter Property="Background" Value="{StaticResource ThemeSystemGreenBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource ThemeSystemGreenBrush}" />
+    </Style>
+    <Style Selector="ToggleSwitch.dex-switch:pointerover /template/ Border#SwitchKnobBounds">
+        <Setter Property="Background" Value="{StaticResource ThemeControlHoverBrush}" />
+    </Style>
+    <Style Selector="ToggleSwitch.dex-switch:checked:pointerover /template/ Border#SwitchKnobBounds">
+        <Setter Property="Background" Value="#3CD965" />
+        <Setter Property="BorderBrush" Value="#3CD965" />
+    </Style>
+
+    <!-- Translucent Dropdown ComboBox -->
+    <Style Selector="ComboBox.dex-combobox">
+        <Setter Property="Background" Value="{StaticResource ThemeControlBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource ThemeLabelPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource ThemeBorderSubtleBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Padding" Value="9,0,6,0" />
+    </Style>
+    <Style Selector="ComboBox.dex-combobox:pointerover /template/ Border#Background">
+        <Setter Property="Background" Value="{StaticResource ThemeControlHoverBrush}" />
+    </Style>
+
+    <!-- Popover & Menu Flyout Styling -->
+    <Style Selector="FlyoutPresenter">
+        <Setter Property="Background" Value="#E6242428" />
+        <Setter Property="BorderBrush" Value="#38383C" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <Style Selector="MenuFlyoutPresenter">
+        <Setter Property="Background" Value="#E6242428" />
+        <Setter Property="BorderBrush" Value="#38383C" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="4" />
+    </Style>
+
+    <Style Selector="MenuItem">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{StaticResource ThemeLabelPrimaryBrush}" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="Padding" Value="10,5" />
+    </Style>
+    <Style Selector="MenuItem:pointerover /template/ Border#root">
+        <Setter Property="Background" Value="{StaticResource ThemeAccentBlueBrush}" />
+    </Style>
+
+</Styles>

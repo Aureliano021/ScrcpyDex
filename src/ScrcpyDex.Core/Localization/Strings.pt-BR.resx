@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -714,5 +714,11 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
     <value>1. Ative 'Turn off mobile screen' nas Quick Session Options.
 2. A tela do celular apagará totalmente, reduzindo a temperatura em até 8°C e evitando retenção de imagem no OLED.
 3. Conecte o telefone a uma porta USB 3.0 com fornecimento de energia adequado (1.5A a 3A).</value>
+  </data>
+  <data name="Telemetry_Header" xml:space="preserve">
+    <value>TELEMETRIA</value>
+  </data>
+  <data name="DeviceSelector_Header" xml:space="preserve">
+    <value>DISPOSITIVO CONECTADO</value>
   </data>
 </root>

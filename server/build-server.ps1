@@ -3,7 +3,7 @@
 
 param(
     [string]$JdkPath = "C:\Program Files\Android\Android Studio\jbr",
-    [string]$AndroidSdkPath = "C:\Users\aurel\AppData\Local\Android\Sdk",
+    [string]$AndroidSdkPath = "$env:LOCALAPPDATA\Android\Sdk",
     [string]$BuildToolsVersion = "35.0.0",
     [string]$PlatformVersion = "android-35"
 )

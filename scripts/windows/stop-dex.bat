@@ -3,10 +3,9 @@ title Disconnect ScrcpyDeX (Samsung DeX Compatible Client)
 echo =================================================
 echo        Disconnecting ScrcpyDeX Session           
 echo =================================================
-echo [1/3] Terminating local client processes (scrcpy, ffplay)...
-REM Terminates running scrcpy.exe and ffplay.exe instances on host PC.
+echo [1/2] Terminating local client process (scrcpy)...
+REM Terminates running scrcpy.exe instances on host PC.
 taskkill /F /IM scrcpy.exe 2>nul
-taskkill /F /IM ffplay.exe 2>nul
 
 REM Resolve adb executable location
 set "ADB_EXE=adb"
@@ -19,10 +18,9 @@ if %ERRORLEVEL% neq 0 (
     )
 )
 
-echo [2/3] Sending disconnect signal to Android device...
+echo [2/2] Sending disconnect signal to Android device...
 "%ADB_EXE%" shell "CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process /data/local/tmp com.scrcpydex.server.Server disconnect" 2>nul
 "%ADB_EXE%" shell "pkill -f com.scrcpydex.server.Server" 2>nul
-"%ADB_EXE%" shell "pkill -f DexTriggerTest" 2>nul
 
 
 echo.

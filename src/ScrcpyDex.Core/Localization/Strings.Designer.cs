@@ -75,9 +75,11 @@ namespace ScrcpyDex.Core.Localization
         public static string Tab_AudioInput => LocalizationManager.Instance.GetString(nameof(Tab_AudioInput));
         public static string Tab_DeviceSystem => LocalizationManager.Instance.GetString(nameof(Tab_DeviceSystem));
         public static string Tab_Logs => LocalizationManager.Instance.GetString(nameof(Tab_Logs));
+        public static string Tab_About => LocalizationManager.Instance.GetString(nameof(Tab_About));
 
         // Device Selection & State
         public static string DeviceSelector_Title => LocalizationManager.Instance.GetString(nameof(DeviceSelector_Title));
+        public static string DeviceSelector_Header => LocalizationManager.Instance.GetString(nameof(DeviceSelector_Header));
         public static string DeviceSelector_Refresh => LocalizationManager.Instance.GetString(nameof(DeviceSelector_Refresh));
         public static string DeviceSelector_NoDevices => LocalizationManager.Instance.GetString(nameof(DeviceSelector_NoDevices));
         public static string DeviceSelector_Unauthorized => LocalizationManager.Instance.GetString(nameof(DeviceSelector_Unauthorized));
@@ -193,6 +195,7 @@ namespace ScrcpyDex.Core.Localization
         public static string Device_DexModeReady => LocalizationManager.Instance.GetString(nameof(Device_DexModeReady));
         public static string DeviceSelector_TargetLabel => LocalizationManager.Instance.GetString(nameof(DeviceSelector_TargetLabel));
         public static string DeviceSelector_NoDevicesPlaceholder => LocalizationManager.Instance.GetString(nameof(DeviceSelector_NoDevicesPlaceholder));
+        public static string Telemetry_Header => LocalizationManager.Instance.GetString(nameof(Telemetry_Header));
         public static string Telemetry_Battery => LocalizationManager.Instance.GetString(nameof(Telemetry_Battery));
         public static string Telemetry_Temperature => LocalizationManager.Instance.GetString(nameof(Telemetry_Temperature));
         public static string Telemetry_Link => LocalizationManager.Instance.GetString(nameof(Telemetry_Link));
@@ -228,5 +231,83 @@ namespace ScrcpyDex.Core.Localization
         public static string Footer_AdbDaemon => LocalizationManager.Instance.GetString(nameof(Footer_AdbDaemon));
         public static string Footer_EncoderFormat => LocalizationManager.Instance.GetString(nameof(Footer_EncoderFormat));
         public static string Footer_RoundtripLabel => LocalizationManager.Instance.GetString(nameof(Footer_RoundtripLabel));
+
+        // FAQ & Troubleshooting Drawer
+        public static string Faq_Title => LocalizationManager.Instance.GetString(nameof(Faq_Title));
+        public static string Faq_Subtitle => LocalizationManager.Instance.GetString(nameof(Faq_Subtitle));
+        public static string Faq_SearchPlaceholder => LocalizationManager.Instance.GetString(nameof(Faq_SearchPlaceholder));
+        public static string Faq_Close => LocalizationManager.Instance.GetString(nameof(Faq_Close));
+        public static string Faq_Category_All => LocalizationManager.Instance.GetString(nameof(Faq_Category_All));
+        public static string Faq_Category_Connection => LocalizationManager.Instance.GetString(nameof(Faq_Category_Connection));
+        public static string Faq_Category_DeX => LocalizationManager.Instance.GetString(nameof(Faq_Category_DeX));
+        public static string Faq_Category_Display => LocalizationManager.Instance.GetString(nameof(Faq_Category_Display));
+        public static string Faq_Category_Input => LocalizationManager.Instance.GetString(nameof(Faq_Category_Input));
+        public static string Faq_Category_Battery => LocalizationManager.Instance.GetString(nameof(Faq_Category_Battery));
+        public static string Faq_Label_Symptom => LocalizationManager.Instance.GetString(nameof(Faq_Label_Symptom));
+        public static string Faq_Label_Cause => LocalizationManager.Instance.GetString(nameof(Faq_Label_Cause));
+        public static string Faq_Label_Solution => LocalizationManager.Instance.GetString(nameof(Faq_Label_Solution));
+        public static string Faq_Label_CopyCommand => LocalizationManager.Instance.GetString(nameof(Faq_Label_CopyCommand));
+        public static string Faq_NoResults => LocalizationManager.Instance.GetString(nameof(Faq_NoResults));
+        public static string Faq_NoResults_Desc => LocalizationManager.Instance.GetString(nameof(Faq_NoResults_Desc));
+
+        public static string Faq_Q1_Title => LocalizationManager.Instance.GetString(nameof(Faq_Q1_Title));
+        public static string Faq_Q1_Symptom => LocalizationManager.Instance.GetString(nameof(Faq_Q1_Symptom));
+        public static string Faq_Q1_Cause => LocalizationManager.Instance.GetString(nameof(Faq_Q1_Cause));
+        public static string Faq_Q1_Solution => LocalizationManager.Instance.GetString(nameof(Faq_Q1_Solution));
+
+        public static string Faq_Q2_Title => LocalizationManager.Instance.GetString(nameof(Faq_Q2_Title));
+        public static string Faq_Q2_Symptom => LocalizationManager.Instance.GetString(nameof(Faq_Q2_Symptom));
+        public static string Faq_Q2_Cause => LocalizationManager.Instance.GetString(nameof(Faq_Q2_Cause));
+        public static string Faq_Q2_Solution => LocalizationManager.Instance.GetString(nameof(Faq_Q2_Solution));
+
+        public static string Faq_Q3_Title => LocalizationManager.Instance.GetString(nameof(Faq_Q3_Title));
+        public static string Faq_Q3_Symptom => LocalizationManager.Instance.GetString(nameof(Faq_Q3_Symptom));
+        public static string Faq_Q3_Cause => LocalizationManager.Instance.GetString(nameof(Faq_Q3_Cause));
+        public static string Faq_Q3_Solution => LocalizationManager.Instance.GetString(nameof(Faq_Q3_Solution));
+
+        public static string Faq_Q4_Title => LocalizationManager.Instance.GetString(nameof(Faq_Q4_Title));
+        public static string Faq_Q4_Symptom => LocalizationManager.Instance.GetString(nameof(Faq_Q4_Symptom));
+        public static string Faq_Q4_Cause => LocalizationManager.Instance.GetString(nameof(Faq_Q4_Cause));
+        public static string Faq_Q4_Solution => LocalizationManager.Instance.GetString(nameof(Faq_Q4_Solution));
+
+        public static string Faq_Q5_Title => LocalizationManager.Instance.GetString(nameof(Faq_Q5_Title));
+        public static string Faq_Q5_Symptom => LocalizationManager.Instance.GetString(nameof(Faq_Q5_Symptom));
+        public static string Faq_Q5_Cause => LocalizationManager.Instance.GetString(nameof(Faq_Q5_Cause));
+        public static string Faq_Q5_Solution => LocalizationManager.Instance.GetString(nameof(Faq_Q5_Solution));
+
+        public static string Faq_Q6_Title => LocalizationManager.Instance.GetString(nameof(Faq_Q6_Title));
+        public static string Faq_Q6_Symptom => LocalizationManager.Instance.GetString(nameof(Faq_Q6_Symptom));
+        public static string Faq_Q6_Cause => LocalizationManager.Instance.GetString(nameof(Faq_Q6_Cause));
+        public static string Faq_Q6_Solution => LocalizationManager.Instance.GetString(nameof(Faq_Q6_Solution));
+
+        public static string Faq_Q7_Title => LocalizationManager.Instance.GetString(nameof(Faq_Q7_Title));
+        public static string Faq_Q7_Symptom => LocalizationManager.Instance.GetString(nameof(Faq_Q7_Symptom));
+        public static string Faq_Q7_Cause => LocalizationManager.Instance.GetString(nameof(Faq_Q7_Cause));
+        public static string Faq_Q7_Solution => LocalizationManager.Instance.GetString(nameof(Faq_Q7_Solution));
+
+        public static string Faq_Q8_Title => LocalizationManager.Instance.GetString(nameof(Faq_Q8_Title));
+        public static string Faq_Q8_Symptom => LocalizationManager.Instance.GetString(nameof(Faq_Q8_Symptom));
+        public static string Faq_Q8_Cause => LocalizationManager.Instance.GetString(nameof(Faq_Q8_Cause));
+        public static string Faq_Q8_Solution => LocalizationManager.Instance.GetString(nameof(Faq_Q8_Solution));
+
+        public static string Faq_Q9_Title => LocalizationManager.Instance.GetString(nameof(Faq_Q9_Title));
+        public static string Faq_Q9_Symptom => LocalizationManager.Instance.GetString(nameof(Faq_Q9_Symptom));
+        public static string Faq_Q9_Cause => LocalizationManager.Instance.GetString(nameof(Faq_Q9_Cause));
+        public static string Faq_Q9_Solution => LocalizationManager.Instance.GetString(nameof(Faq_Q9_Solution));
+
+        public static string Faq_Q10_Title => LocalizationManager.Instance.GetString(nameof(Faq_Q10_Title));
+        public static string Faq_Q10_Symptom => LocalizationManager.Instance.GetString(nameof(Faq_Q10_Symptom));
+        public static string Faq_Q10_Cause => LocalizationManager.Instance.GetString(nameof(Faq_Q10_Cause));
+        public static string Faq_Q10_Solution => LocalizationManager.Instance.GetString(nameof(Faq_Q10_Solution));
+
+        public static string Faq_Q11_Title => LocalizationManager.Instance.GetString(nameof(Faq_Q11_Title));
+        public static string Faq_Q11_Symptom => LocalizationManager.Instance.GetString(nameof(Faq_Q11_Symptom));
+        public static string Faq_Q11_Cause => LocalizationManager.Instance.GetString(nameof(Faq_Q11_Cause));
+        public static string Faq_Q11_Solution => LocalizationManager.Instance.GetString(nameof(Faq_Q11_Solution));
+
+        public static string Faq_Q12_Title => LocalizationManager.Instance.GetString(nameof(Faq_Q12_Title));
+        public static string Faq_Q12_Symptom => LocalizationManager.Instance.GetString(nameof(Faq_Q12_Symptom));
+        public static string Faq_Q12_Cause => LocalizationManager.Instance.GetString(nameof(Faq_Q12_Cause));
+        public static string Faq_Q12_Solution => LocalizationManager.Instance.GetString(nameof(Faq_Q12_Solution));
     }
 }

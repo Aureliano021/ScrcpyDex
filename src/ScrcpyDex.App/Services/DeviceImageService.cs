@@ -29,8 +29,6 @@ namespace ScrcpyDex.App.Services
     {
         private static readonly ConcurrentDictionary<string, Bitmap?> BitmapCache = new(StringComparer.OrdinalIgnoreCase);
 
-        // User explicit processed images directory
-        private static readonly string UserDownloadsPath = @"C:\Users\aurel\Downloads\imagens aparelhos\processadas";
 
         /// <summary>
         /// Retrieves the device image bitmap for the given device, or null if no image is available.
@@ -176,18 +174,7 @@ namespace ScrcpyDex.App.Services
         {
             try
             {
-                // 1. Primary check: User's explicit downloads folder
-                if (Directory.Exists(UserDownloadsPath))
-                {
-                    string path = Path.Combine(UserDownloadsPath, filename);
-                    if (File.Exists(path))
-                    {
-                        using var stream = File.OpenRead(path);
-                        return new Bitmap(stream);
-                    }
-                }
-
-                // 2. Application local Assets/Devices directory
+                // 1. Application local Assets/Devices directory
                 var searchDirs = new[]
                 {
                     Path.Combine(AppContext.BaseDirectory, "Assets", "Devices"),

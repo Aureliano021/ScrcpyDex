@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -714,5 +714,11 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
     <value>1. Enable 'Turn off mobile screen' in Quick Session Options.
 2. Phone screen shuts off completely, reducing temperature by up to 8°C and preventing OLED burn-in.
 3. Connect phone to a USB 3.0 port capable of delivering adequate power (1.5A to 3A).</value>
+  </data>
+  <data name="Telemetry_Header" xml:space="preserve">
+    <value>TELEMETRY</value>
+  </data>
+  <data name="DeviceSelector_Header" xml:space="preserve">
+    <value>CONNECTED DEVICE</value>
   </data>
 </root>

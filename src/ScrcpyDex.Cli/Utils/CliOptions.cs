@@ -156,9 +156,24 @@ namespace ScrcpyDex.Cli.Utils
             // Flag parsing
             while (index < args.Length)
             {
-                string arg = args[index];
+                string rawArg = args[index];
+                string opt = rawArg;
+                string? inlineVal = null;
+                int eqIdx = rawArg.IndexOf('=');
+                if (eqIdx > 0 && rawArg.StartsWith("-"))
+                {
+                    opt = rawArg.Substring(0, eqIdx);
+                    inlineVal = rawArg.Substring(eqIdx + 1);
+                }
 
-                switch (arg)
+                string? GetVal()
+                {
+                    if (inlineVal != null) return inlineVal;
+                    if (index + 1 < args.Length) return args[++index];
+                    return null;
+                }
+
+                switch (opt)
                 {
                     case "-h":
                     case "--help":
@@ -170,21 +185,22 @@ namespace ScrcpyDex.Cli.Utils
                         break;
                     case "-s":
                     case "--serial":
-                        if (++index < args.Length) options.Serial = args[index];
+                        options.Serial = GetVal();
                         break;
                     case "--resolution":
-                        if (++index < args.Length) options.Resolution = args[index];
+                    case "--max-size":
+                        options.Resolution = GetVal();
                         break;
                     case "--fps":
-                        if (++index < args.Length && int.TryParse(args[index], out int fps))
+                    case "--max-fps":
+                        if (int.TryParse(GetVal(), out int fps))
                             options.Fps = fps;
                         break;
                     case "--bitrate":
-                        if (++index < args.Length)
-                            options.Bitrate = ParseBitrate(args[index]);
+                        options.Bitrate = ParseBitrate(GetVal());
                         break;
                     case "--codec":
-                        if (++index < args.Length) options.Codec = args[index].ToLowerInvariant();
+                        options.Codec = GetVal()?.ToLowerInvariant();
                         break;
                     case "--stay-awake":
                         options.StayAwake = true;
@@ -196,20 +212,20 @@ namespace ScrcpyDex.Cli.Utils
                         options.Fullscreen = true;
                         break;
                     case "--mouse":
-                        if (++index < args.Length) options.MouseDriver = args[index];
+                        options.MouseDriver = GetVal();
                         break;
                     case "--render-driver":
-                        if (++index < args.Length) options.RenderDriver = args[index];
+                        options.RenderDriver = GetVal();
                         break;
                     case "--no-audio":
                         options.AudioEnabled = false;
                         break;
                     case "--config":
                     case "--config-path":
-                        if (++index < args.Length) options.CustomConfigPath = args[index];
+                        options.CustomConfigPath = GetVal();
                         break;
                     default:
-                        options.UnrecognizedArgs.Add(arg);
+                        options.UnrecognizedArgs.Add(rawArg);
                         break;
                 }
 
@@ -219,7 +235,7 @@ namespace ScrcpyDex.Cli.Utils
             return options;
         }
 
-        private static int? ParseBitrate(string raw)
+        private static int? ParseBitrate(string? raw)
         {
             if (string.IsNullOrWhiteSpace(raw)) return null;
 

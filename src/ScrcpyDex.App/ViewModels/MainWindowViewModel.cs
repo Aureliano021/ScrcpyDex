@@ -183,10 +183,40 @@ namespace ScrcpyDex.App.ViewModels
         public IReadOnlyList<int> AvailableFps { get; } = new[] { 30, 60, 90, 120 };
 
         [ObservableProperty]
-        private int _bitrateMbps = 18;
+        private int _bitrateMbps = 24;
+
+        public IReadOnlyList<string> BitratePresets { get; } = new[]
+        {
+            "8 Mbps",
+            "16 Mbps",
+            "24 Mbps (Recommended)",
+            "32 Mbps",
+            "50 Mbps"
+        };
 
         [ObservableProperty]
-        private string _bitrateStatusHint = "18 Mbps • Ideal Performance Balance";
+        private string _selectedBitratePreset = "24 Mbps (Recommended)";
+
+        partial void OnSelectedBitratePresetChanged(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return;
+            int target = value switch
+            {
+                var s when s.StartsWith("8") => 8,
+                var s when s.StartsWith("16") => 16,
+                var s when s.StartsWith("24") => 24,
+                var s when s.StartsWith("32") => 32,
+                var s when s.StartsWith("50") => 50,
+                _ => BitrateMbps
+            };
+            if (BitrateMbps != target)
+            {
+                BitrateMbps = target;
+            }
+        }
+
+        [ObservableProperty]
+        private string _bitrateStatusHint = "24 Mbps • Ideal Performance Balance";
 
         [ObservableProperty]
         private string _selectedCodec = "h265";
@@ -244,6 +274,15 @@ namespace ScrcpyDex.App.ViewModels
         #region Observable Properties - Logs & Telemetry
 
         public BoundedRingBuffer<ProcessLogEntry> LogEntries { get; }
+
+        [ObservableProperty]
+        private bool _isLogExpanded = true;
+
+        [RelayCommand]
+        public void ToggleLogInspector()
+        {
+            IsLogExpanded = !IsLogExpanded;
+        }
 
         #endregion
 
@@ -530,6 +569,20 @@ namespace ScrcpyDex.App.ViewModels
 
         partial void OnBitrateMbpsChanged(int value)
         {
+            string newPreset = value switch
+            {
+                8 => "8 Mbps",
+                16 => "16 Mbps",
+                24 => "24 Mbps (Recommended)",
+                32 => "32 Mbps",
+                50 => "50 Mbps",
+                _ => $"{value} Mbps"
+            };
+            if (SelectedBitratePreset != newPreset)
+            {
+                SelectedBitratePreset = newPreset;
+            }
+
             BitrateStatusHint = value switch
             {
                 <= 8 => $"{value} Mbps • Low Latency & High Compression",

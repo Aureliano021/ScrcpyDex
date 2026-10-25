@@ -308,20 +308,6 @@ namespace ScrcpyDex.Services
                 catch { }
             }
 
-            // Also terminate any stray scrcpy.exe processes on the host PC
-            try
-            {
-                foreach (var p in Process.GetProcessesByName("scrcpy"))
-                {
-                    try
-                    {
-                        if (!p.HasExited) p.Kill(entireProcessTree: true);
-                    }
-                    catch { }
-                }
-            }
-            catch { }
-
             if (stream != null)
             {
                 try

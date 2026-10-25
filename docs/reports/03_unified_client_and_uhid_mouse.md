@@ -99,7 +99,7 @@ When ScrcpyDeX launches with `--mouse=uhid`:
 When Samsung DeX is initialized via loopback RTSP, Android dynamically allocates a new virtual display ID. The assigned ID can vary between sessions (e.g., `Display 13`, `Display 44`, `Display 52`) depending on the device's current power state, connected peripherals, or background services.
 
 ### Precision Extraction (`run-scrcpydex.ps1`)
-To guarantee that the client attaches exclusively to the desktop workspace—and never mirrors the phone's primary screen (`Display 0`) or residual virtual displays—the orchestrator polls `dumpsys display` using targeted regular expressions:
+To ensure that the client attaches exclusively to the desktop workspace—and never mirrors the phone's primary screen (`Display 0`) or residual virtual displays—the orchestrator polls `dumpsys display` using targeted regular expressions:
 
 ```powershell
 # Extract newly allocated display matching the ScrcpyDeX alias
@@ -135,7 +135,7 @@ if %ERRORLEVEL% EQU 0 (
 )
 ```
 
-### 4.2. Guaranteed Clean Disconnect via PowerShell `try...finally`
+### 4.2. Validated Clean Disconnect via PowerShell `try...finally`
 The main orchestrator (`run-scrcpydex.ps1`) wraps the client invocation in a resilient `try...finally` block:
 ```powershell
 try {
@@ -162,7 +162,7 @@ finally {
 
 ### 4.3. Emergency Stop / Kill Switch (`stop-dex.bat`)
 For manual overrides or recovering from interrupted terminal sessions, a non-interactive emergency script cleans all processes and ADB tunnels:
-* Terminates host processes: `taskkill /F /IM scrcpy.exe /IM ffplay.exe`
+* Terminates host processes: `taskkill /F /IM scrcpy.exe`
 * Dispatches phone disconnect command: `app_process ... com.scrcpydex.server.Server disconnect`
 * Cleans device processes: `adb shell "pkill -f com.scrcpydex.server.Server"`
 * Removes ADB tunnels: `adb forward --remove tcp:27183`, `adb forward --remove tcp:27184`

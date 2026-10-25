@@ -139,7 +139,7 @@ Stored atomically at `%APPDATA%\ScrcpyDeX\settings.json`:
 
 ## 5. Automated Verification Suite (7/7 Passed)
 
-Validation script [`test-ui-prototype.ps1`](../../test-ui-prototype.ps1) verified 100% compliance:
+Historical validation script (`test-ui-prototype.ps1`) verified functional compliance:
 
 ```text
 =================================================

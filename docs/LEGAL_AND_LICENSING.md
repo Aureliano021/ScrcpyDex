@@ -60,16 +60,12 @@ ScrcpyDeX interacts with external open-source tools and platform APIs. Full thir
 * **License:** Apache License, Version 2.0
 * **Copyright:** © 2018–2024 Genymobile, Romain Vimont
 * **Repository:** [https://github.com/Genymobile/scrcpy](https://github.com/Genymobile/scrcpy)
-* **Integration Model:** ScrcpyDeX does **not** package, bundle, fork, or alter the `scrcpy` binary in this repository. ScrcpyDeX acts solely as an external session orchestrator. In standard operation (`run-scrcpydex.ps1`), it invokes the user's pre-installed `scrcpy` executable as an independent operating system process via standard CLI arguments.
+* **Integration Model:** ScrcpyDeX does **not** package, bundle, fork, or alter the `scrcpy` binary in this repository. ScrcpyDeX acts solely as an external session orchestrator. In standard operation (`ScrcpyDex.App` or `scrcpydex`), it invokes the user's pre-installed `scrcpy` executable as an independent operating system process via standard CLI arguments.
 
 ### 3.2 Google Android Open Source Project (AOSP) & Android SDK
 * **License:** Apache License, Version 2.0 (userspace framework) / GNU GPL v2 (Linux kernel)
 * **Copyright:** © The Android Open Source Project
-* **Usage:** ScrcpyDeX server components compile against Google's public `android.jar` (API Level 30–35) and are converted to Dalvik bytecode using Google's `d8` tool. ScrcpyDeX uses standard Android IPC interfaces (`IBinder`, `InputEvent`, `VirtualDisplay`, `MediaCodec`). No proprietary Google or AOSP source files are redistributed.
-
-### 3.3 FFmpeg / FFplay (Optional Standalone Client Mode)
-* **License:** GNU Lesser General Public License (LGPL) v2.1+ / GNU General Public License (GPL) v2+
-* **Usage:** An alternative standalone client script (`client/ScrcpyDeXClient.ps1`) allows users to display raw H.264 streams via an external, locally installed `ffplay` process. No FFmpeg libraries or binaries are bundled, linked with, or hosted in this repository.
+* **Usage:** ScrcpyDeX server components compile against Google's public `android.jar` (API Level 30–35) and are converted to Dalvik bytecode using Google's `d8` tool. ScrcpyDeX uses standard Android IPC interfaces (`IBinder`, `VirtualDisplay`). No proprietary Google or AOSP source files are redistributed.
 
 ---
 
@@ -139,8 +135,6 @@ ScrcpyDeX interacts with Samsung-specific Android subsystem services without red
 │  • android.hardware.display.SemWifiDisplayConfig       │
 │  • android.hardware.display.IDisplayManager$Stub       │
 │  • android.hardware.display.DisplayManagerGlobal       │
-│  • android.os.ServiceManager                           │
-│  • android.hardware.input.IInputManager                │
 └────────────────────────────────────────────────────────┘
 ```
 
@@ -149,8 +143,8 @@ ScrcpyDeX interacts with Samsung-specific Android subsystem services without red
   ScrcpyDeX constructs an interoperability payload targeting `127.0.0.1:7236` (localhost loopback) using standard data types (`String`, `int`). The parameter names and constants (e.g., `MODE_WIRELESS_DEX = 2`) constitute functional interface parameters necessary to instruct the device's system server to instantiate a virtual display session.
 * **`android.hardware.display.DisplayManagerGlobal` & `DisplayListener`:**  
   ScrcpyDeX monitors display instantiation events using standard Java dynamic proxies (`java.lang.reflect.Proxy`), detecting when the display labeled `"ScrcpyDeX"` is allocated an internal integer display ID.
-* **`android.os.ServiceManager` & `android.hardware.input.IInputManager`:**  
-  ScrcpyDeX locates the native system binder service to inject standard Android input events (`MotionEvent`, `KeyEvent`) into the targeted display ID.
+* **Input Handling (Zero Reflection):**  
+  Desktop input (mouse, keyboard) is handled directly by official upstream `scrcpy` communicating with the Linux kernel `/dev/uhid` driver on the device, requiring no framework reflection or input injection code in `scrcpydex-server.jar`.
 
 **Crucial Technical Fact:**  
 All reflection targets resolve against classes **already pre-installed on the user's physical device** by the manufacturer. ScrcpyDeX contains zero copies of Samsung's implementation code or binary libraries.
@@ -175,9 +169,9 @@ An inspection of the repository confirms that **no proprietary Samsung code or b
 Users and auditors can independently verify the distributed `server/scrcpydex-server.jar`:
 
 * **File Name:** `scrcpydex-server.jar`
-* **File Size:** `18,993 bytes`
-* **SHA-256 Checksum:** `aeb4329bec1ad16f051c2fa0ce415b33a1c99b078d323b27b0d7a0860a930c6f`
-* **Archive Contents:** Strictly 1 entry (`classes.dex`, 38,244 bytes uncompressed)
+* **File Size:** `13,291 bytes`
+* **SHA-256 Checksum:** `c57d704ab4116fc43e0370d746455c6c80170391f17082561d80cc926ab0c15c`
+* **Archive Contents:** Strictly 1 entry (`classes.dex`, 26,680 bytes uncompressed)
 
 #### Verification Command (Windows PowerShell):
 ```powershell
@@ -203,20 +197,20 @@ $zip.Entries | Select-Object FullName, Length, CompressedLength
 ScrcpyDeX maintains a strict separation of concerns regarding external executables:
 
 ```
-┌───────────────────────────────┐
-│        ScrcpyDeX CLI          │
-│   (PowerShell Orchestrator)   │
-└──────┬─────────────────┬──────┘
-       │ Process Spawn   │ Process Spawn
-       ▼                 ▼
-┌──────────────┐  ┌──────────────┐
-│   adb.exe    │  │  scrcpy.exe  │
-│ (Google SDK) │  │ (Genymobile) │
-└──────────────┘  └──────────────┘
+┌───────────────────────────────────────────────┐
+│             ScrcpyDeX Client                  │
+│       (C# / .NET 8 GUI / CLI Orchestrator)    │
+└──────┬─────────────────────────────────┬──────┘
+       │ Process Spawn                   │ Process Spawn
+       ▼                                 ▼
+┌──────────────┐                  ┌──────────────┐
+│     adb      │                  │    scrcpy    │
+│ (Google SDK) │                  │ (Genymobile) │
+└──────────────┘                  └──────────────┘
 ```
 
-1. **Subprocess Invocation:** db and scrcpy are invoked via standard operating system process execution pipelines.
-2. **Device Activation & Streaming:** The host application executes scrcpydex-server.jar via db shell app_process to initialize the Samsung DeX virtual display, captures the assigned display identifier (DEX_ACTIVATED_DISPLAY_ID=<id>), and spawns upstream scrcpy pointing to that display (--display-id=<id>).
+1. **Subprocess Invocation:** `adb` and `scrcpy` are invoked via standard operating system process execution pipelines.
+2. **Device Activation & Streaming:** The host application executes `scrcpydex-server.jar` via `adb shell app_process` to initialize the Samsung DeX virtual display, captures the assigned display identifier (`DEX_ACTIVATED_DISPLAY_ID=<id>`), and spawns upstream `scrcpy` pointing to that display (`--display-id=<id>`).
 3. **No Dynamic/Static Linking:** Because communication takes place exclusively across standard operating system process boundaries and ADB pipelines, ScrcpyDeX maintains complete architectural and legal independence.
 
 ---
@@ -240,16 +234,15 @@ Any reference to third-party trademarks, product names, or logos within this rep
 ### 9.1 ADB Privilege Context (UID 2000)
 The ScrcpyDeX server process executes on the target Android device via:
 ```bash
-CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process /data/local/tmp com.scrcpydex.server.Server
+CLASSPATH=/data/local/tmp/scrcpydex-server.jar app_process /data/local/tmp com.scrcpydex.server.Server activate
 ```
 * **Privilege Level:** Operates under Android `shell` user credentials (`UID 2000`).
 * **Root Requirements:** Does **not** require, request, or attempt to gain `root` (UID 0) privileges.
-* **Scope:** Uses standard development capabilities granted by the Android OS to authorized ADB connections (display creation, input injection).
+* **Scope:** Uses standard development capabilities granted by the Android OS to authorized ADB connections (virtual display creation and teardown).
 
-### 9.2 Local Loopback & Transport Security
-* **Local Loopback Only:** Video streaming and control sockets bind to `127.0.0.1` on both host and device.
-* **USB Recommended:** The recommended and supported connection method is a direct physical USB cable with `adb forward`.
-* **Wi-Fi ADB Warning:** The ScrcpyDeX control channel does not implement transport layer encryption or session token authentication. **Using Wi-Fi ADB over unencrypted or shared public Wi-Fi networks is strongly discouraged**, as unauthorized devices on the local network could theoretically connect to an exposed ADB port.
+### 9.2 Transport Security & Connection Recommendations
+* **USB Recommended:** The recommended and primary connection method is a direct physical USB cable with standard ADB communication.
+* **Wi-Fi ADB Warning:** If connecting via wireless ADB (`adb connect`), note that ADB wireless debugging over public or unencrypted networks exposes the ADB daemon. Connecting over a trusted private network or physical USB connection is strongly advised.
 
 ### 9.3 Device Authorization & Intended Use
 * ScrcpyDeX is designed exclusively for use on devices owned or legitimately authorized for testing and personal productivity by the user.

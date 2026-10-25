@@ -32,16 +32,9 @@
 
 ## ⚡ Key Features
 
-* **Runs Over USB (No Wi-Fi Needed):** Streams directly through standard ADB port forwards over a USB cable, bypassing wireless network congestion, bandwidth throttles, and local network restrictions.
-* **Cross-Platform Hardware Acceleration:** 60 FPS video decoding handled via `scrcpy` using Direct3D11 on Windows and OpenGL with VA-API hardware decoding on Linux (Intel i965/iHD, AMD radeonsi).
-* **"Galaxy DeX Studio" Desktop Client:** Cross-platform Avalonia UI featuring Deep Space Navy aesthetics, live hardware telemetry (battery level %, temperature °C, USB link speed, ping latency), bitrate preset chips, and MP4 session recording.
-* **Native Desktop Mouse Emulation (UHID):** Injects pointer events via Linux kernel `/dev/uhid` so Android recognizes a physical USB mouse—supporting native desktop cursor icons, hover states, fluid scroll wheel, and right-click context menus.
-* **Instant Device Recognition & Disconnect Handling:** Discovers Samsung Galaxy models via ADB `track-devices-l` and friendly model resolution (`SM-S911B` -> "Samsung Galaxy S23") immediately upon startup, resetting the interface instantly if unplugged.
-* **Audio Forwarding:** Captures DeX audio on the device and forwards it to PC speakers or headphones over USB (WASAPI on Windows, SDL/PipeWire/PulseAudio on Linux).
-* **Multilingual Localization:** Runtime language selection across 6 languages (English, Portuguese, Spanish, German, French, Simplified Chinese).
-* **Interactive Troubleshooting & FAQ Drawer (`F1`):** Retractable in-app drawer providing real-time search, category filters, and 1-click clipboard terminal command copying for rapid resolution of ADB, DeX, audio, and display issues.
-* **Standard ADB Privileges (UID 2000):** Operates under standard development user context (`UID 2000 shell`) without root access — Knox warranty bit (`0x0`) remained untouched on tested devices.
-* **Unified Graceful Session Teardown:** Closes the session, unregisters Samsung `system_server` virtual display buffers, restores the mobile display, and clears ADB tunnels automatically when closing the window (`Alt+F4` or `[X]`) or clicking **Stop Session**. No emergency kill switch needed.
+* **Runs Directly Over USB:** Connect via a standard USB cable without requiring Wi-Fi, wireless pairing, or local network configuration.
+* **Cross-Platform Support:** Native desktop client available for both Windows (10/11 x64) and Linux (x86_64).
+* **Multi-Language Support:** Fully localized interface with runtime switching across 6 languages (English, Portuguese, Spanish, German, French, and Simplified Chinese).
 
 ---
 

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -714,5 +714,11 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
     <value>1. Activez 'Turn off mobile screen' dans les Quick Session Options.
 2. L'écran s'éteint complètement, réduisant la température de 8°C et prévenant le marquage OLED.
 3. Branchez le téléphone sur un port USB 3.0 capable de délivrer suffisamment d'énergie (1.5A à 3A).</value>
+  </data>
+  <data name="Telemetry_Header" xml:space="preserve">
+    <value>TÉLÉMÉTRIE</value>
+  </data>
+  <data name="DeviceSelector_Header" xml:space="preserve">
+    <value>APPAREIL CONNECTÉ</value>
   </data>
 </root>

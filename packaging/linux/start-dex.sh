@@ -90,7 +90,7 @@ if ! command -v "$SCRCPY_BIN" >/dev/null 2>&1 && [ ! -x "$SCRCPY_BIN" ]; then
     exit 1
 fi
 
-exec "$SCRCPY_BIN" \
+"$SCRCPY_BIN" \
     -s "$SERIAL" \
     --display-id="$DEX_ID" \
     --mouse=uhid \

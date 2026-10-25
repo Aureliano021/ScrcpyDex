@@ -448,7 +448,7 @@ namespace ScrcpyDex.Services
             {
                 // Step 2: Fallback broadcast to stop desktop mode launcher and terminate remaining server processes
                 await _resilience.ExecuteDirectAsync(
-                    $"{target}shell \"am broadcast -a com.sec.android.app.desktoplauncher.ACTION_STOP_DESKTOP_MODE ; am broadcast -a com.samsung.android.desktopmode.action.DESKTOP_MODE_UPDATE --ez enabled false ; pkill -f com.scrcpydex.server.Server ; pkill -f scrcpy ; pkill -f DexTriggerTest\"",
+                    $"{target}shell \"am broadcast -a com.sec.android.app.desktoplauncher.ACTION_STOP_DESKTOP_MODE ; am broadcast -a com.samsung.android.desktopmode.action.DESKTOP_MODE_UPDATE --ez enabled false ; pkill -f com.scrcpydex.server.Server ; pkill -f scrcpy\"",
                     TimeSpan.FromSeconds(2),
                     ct).ConfigureAwait(false);
             }

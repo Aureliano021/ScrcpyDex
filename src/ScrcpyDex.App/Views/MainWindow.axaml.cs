@@ -33,6 +33,14 @@ namespace ScrcpyDex.App.Views
             InitializeComponent();
         }
 
+        private void OnTitleBarPointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+        {
+            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+            {
+                BeginMoveDrag(e);
+            }
+        }
+
         protected override void OnOpened(EventArgs e)
         {
             base.OnOpened(e);

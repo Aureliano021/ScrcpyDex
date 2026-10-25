@@ -10,12 +10,10 @@ This project incorporates dependencies, build tools, or interfaces with external
 | :--- | :--- | :--- | :--- |
 | **`scrcpy`** | Genymobile / Romain Vimont | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) | **External Dependency:** Not bundled. Invoked as an external OS process installed by the user. |
 | **Android SDK (`android.jar`, `d8`)** | Google LLC / AOSP | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) / Android SDK Terms | **Build-Time Dependency:** Public API stubs (`android.jar`) and `d8` dex compiler used during build. Not bundled in repository. |
-| **FFmpeg / `ffplay`** | FFmpeg Developers | [LGPL-2.1-or-later](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html) / [GPL-2.0-or-later](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) | **Optional External Dependency:** Standalone client script can use external `ffplay` process. Not bundled or linked. |
-| **`WPF-UI`** | Lepoco / Leszek Pomian | [MIT](https://opensource.org/licenses/MIT) | **Compiled Dependency:** Modern Fluent UI controls for WPF. Bundled into `ScrcpyDeX.exe`. |
-| **`CommunityToolkit.Mvvm`** | .NET Foundation and Contributors | [MIT](https://opensource.org/licenses/MIT) | **Compiled Dependency:** High-performance MVVM library. Bundled into `ScrcpyDeX.exe`. |
-| **`System.Text.Json`** | Microsoft Corporation | [MIT](https://opensource.org/licenses/MIT) | **Compiled Dependency:** High-performance JSON serialization. Bundled into `ScrcpyDeX.exe`. |
-| **Microsoft .NET 8 Runtime** | Microsoft Corporation | [MIT](https://github.com/dotnet/runtime/blob/main/LICENSE.TXT) | **Embedded Runtime:** Single-file host distribution bundle. |
 | **`Avalonia UI`** | Avalonia Community / .NET Foundation | [MIT](https://opensource.org/licenses/MIT) | **Compiled Dependency:** Cross-platform XAML GUI framework for Linux and Windows. Bundled into `ScrcpyDex.App`. |
+| **`CommunityToolkit.Mvvm`** | .NET Foundation and Contributors | [MIT](https://opensource.org/licenses/MIT) | **Compiled Dependency:** High-performance MVVM library. Bundled into `ScrcpyDex.App` and `ScrcpyDex.Cli`. |
+| **`System.Text.Json`** | Microsoft Corporation | [MIT](https://opensource.org/licenses/MIT) | **Compiled Dependency:** High-performance JSON serialization. Bundled into `ScrcpyDex.App` and `ScrcpyDex.Cli`. |
+| **Microsoft .NET 8 Runtime** | Microsoft Corporation | [MIT](https://github.com/dotnet/runtime/blob/main/LICENSE.TXT) | **Embedded Runtime:** Single-file host distribution bundle. |
 | **Android Robot Asset** | Google LLC | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) | **Modified Asset:** Icon artwork based on Android Robot, created and shared by Google. |
 | **Device Preview Renders** | Samsung / Third-Party Product Renders | Informational / Identification | **Asset:** Device preview images in src/ScrcpyDex.App/Assets/Devices/ used for identification only. Trademarks belong to their respective owners. |
 
@@ -41,25 +39,25 @@ This project incorporates dependencies, build tools, or interfaces with external
 
 ---
 
-### 2.3 FFmpeg / FFplay (Optional)
+### 2.3 Avalonia UI
 
-* **Copyright:** © 2000–2024 the FFmpeg developers
-* **Website:** [https://ffmpeg.org/](https://ffmpeg.org/)
-* **License:** LGPL v2.1 or later (standard builds) / GPL v2 or later (if compiled with `--enable-gpl`)
-* **Usage in ScrcpyDeX:** An optional test client (`client/ScrcpyDeXClient.ps1`) allows playing raw H.264 streams directly via `ffplay` over a TCP socket. FFmpeg is not bundled, compiled into, or linked into this project. Users acquire FFmpeg independently.
+* **Copyright:** © 2013–2024 Avalonia Community
+* **Website / Repository:** [https://github.com/AvaloniaUI/Avalonia](https://github.com/AvaloniaUI/Avalonia)
+* **License:** MIT License
+* **Usage in ScrcpyDeX:** Provides cross-platform desktop UI controls, windowing abstractions, and rendering backends for Linux and Windows desktop clients (`ScrcpyDex.App`). Compiled into the application binary.
 
 ---
 
-### 2.5 CommunityToolkit.Mvvm
+### 2.4 CommunityToolkit.Mvvm
 
 * **Copyright:** © .NET Foundation and Contributors
 * **Website / Repository:** [https://github.com/CommunityToolkit/dotnet](https://github.com/CommunityToolkit/dotnet)
 * **License:** MIT License
-* **Usage in ScrcpyDeX:** Powers the reactive MVVM architecture, observable properties, and relay commands in `MainViewModel.cs`.
+* **Usage in ScrcpyDeX:** Powers the reactive MVVM architecture, observable properties, and relay commands in `MainWindowViewModel.cs`.
 
 ---
 
-### 2.6 System.Text.Json & Microsoft .NET 8 Runtime
+### 2.5 System.Text.Json & Microsoft .NET 8 Runtime
 
 * **Copyright:** © Microsoft Corporation
 * **Website / Repository:** [https://github.com/dotnet/runtime](https://github.com/dotnet/runtime)
@@ -68,21 +66,12 @@ This project incorporates dependencies, build tools, or interfaces with external
 
 ---
 
-### 2.7 Google Android Robot Artwork
+### 2.6 Google Android Robot Artwork
 
 * **Copyright:** © Google LLC
 * **Website:** [https://developer.android.com/distribute/marketing-tools/brand-guidelines](https://developer.android.com/distribute/marketing-tools/brand-guidelines)
 * **License:** Creative Commons Attribution 3.0 Unported (CC BY 3.0)
 * **Usage in ScrcpyDeX:** The application icon incorporates stylized adaptations of the Android Robot. The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License.
-
----
-
-### 2.8 Avalonia UI
-
-* **Copyright:** © 2013–2024 Avalonia Community
-* **Website / Repository:** [https://github.com/AvaloniaUI/Avalonia](https://github.com/AvaloniaUI/Avalonia)
-* **License:** MIT License
-* **Usage in ScrcpyDeX:** Provides cross-platform desktop UI controls, windowing abstractions, and rendering backends for Linux and Windows desktop clients (`ScrcpyDex.App`). Compiled into the application binary.
 
 ---
 
@@ -257,7 +246,7 @@ END OF TERMS AND CONDITIONS
 
 ### The MIT License (MIT)
 
-*Applicable to: `WPF-UI`, `Avalonia UI`, `CommunityToolkit.Mvvm`, `System.Text.Json`, Microsoft .NET 8 Runtime assemblies*
+*Applicable to: `Avalonia UI`, `CommunityToolkit.Mvvm`, `System.Text.Json`, Microsoft .NET 8 Runtime assemblies*
 
 ```
 The MIT License (MIT)

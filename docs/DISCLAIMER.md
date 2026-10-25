@@ -115,7 +115,7 @@ ScrcpyDeX is developed independently for interoperability. The repository contai
 * **Zero Proprietary Binary Redistribution:** ScrcpyDeX does **NOT** redistribute, package, ship, or mirror any Samsung proprietary JAR files (e.g., `framework.jar`, `services.jar`), deodexed classes, `.odex` / `.vdex` bytecode caches, or native ARM/ARM64 `.so` libraries.
 * **Dynamic Java Runtime Reflection:** All calls to Samsung-specific subsystem classes (e.g., `android.hardware.display.SemWifiDisplayConfig$Builder`, `android.hardware.display.DisplayManagerGlobal`) are performed purely via dynamic reflection (`java.lang.reflect.Method.invoke()`, `Class.forName()`). The compiled `scrcpydex-server.jar` contains exclusively original Java class implementations under the namespace `com.scrcpydex.server.*`.
 * **Execution Against Pre-Installed Resident Code:** Reflected methods and classes resolve exclusively against system libraries already present on the user's legally purchased device firmware.
-* **Separation of Executables:** Upstream binaries (`scrcpy.exe`, `adb.exe`, `ffplay.exe`) are not bundled inside ScrcpyDeX code, but invoked independently via standard operating system subprocess calls.
+* **Separation of Executables:** Upstream binaries (`scrcpy.exe`, `adb.exe`) are not bundled inside ScrcpyDeX code, but invoked independently via standard operating system subprocess calls.
 
 ### 5.2 Server JAR Checksum
 To ensure full transparency, non-tampering, and auditability, the server JAR distributed with ScrcpyDeX matches the following verifiable integrity specification:

@@ -4,32 +4,40 @@
              x:Class="ScrcpyDex.App.App"
              RequestedThemeVariant="Dark">
     <Application.Resources>
-        <!-- Converters -->
-        <converters:StatusToBrushConverter x:Key="StatusToBrushConverter" />
-        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
-        <converters:LogEntryBrushConverter x:Key="LogEntryBrushConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://ScrcpyDex.App/Styles/ThemeColors.axaml" />
+                <ResourceInclude Source="avares://ScrcpyDex.App/Styles/ThemeIcons.axaml" />
+            </ResourceDictionary.MergedDictionaries>
 
-        <!-- Deep Space Navy Design Tokens -->
-        <SolidColorBrush x:Key="AppBackgroundBrush" Color="#0B0F17" />
-        <SolidColorBrush x:Key="AppHeaderFooterBrush" Color="#0E131D" />
-        <SolidColorBrush x:Key="AppPanelBrush" Color="#111723" />
-        <SolidColorBrush x:Key="AppCardBrush" Color="#161F2E" />
-        <SolidColorBrush x:Key="AppInputBrush" Color="#0E1420" />
-        <SolidColorBrush x:Key="AppBorderBrush" Color="#1E293B" />
-        <SolidColorBrush x:Key="AppBorderHoverBrush" Color="#334155" />
-        <SolidColorBrush x:Key="AccentPrimaryBrush" Color="#2563EB" />
-        <SolidColorBrush x:Key="AccentHoverBrush" Color="#1D4ED8" />
-        <SolidColorBrush x:Key="StatusSuccessBrush" Color="#10B981" />
-        <SolidColorBrush x:Key="StatusWarningBrush" Color="#F59E0B" />
-        <SolidColorBrush x:Key="StatusDangerBrush" Color="#E11D48" />
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F1F5F9" />
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#94A3B8" />
-        <SolidColorBrush x:Key="TextMutedBrush" Color="#64748B" />
+            <!-- Converters -->
+            <converters:StatusToBrushConverter x:Key="StatusToBrushConverter" />
+            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <converters:LogEntryBrushConverter x:Key="LogEntryBrushConverter" />
+
+            <!-- Legacy Design Tokens (preserves compatibility) -->
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#0B0F17" />
+            <SolidColorBrush x:Key="AppHeaderFooterBrush" Color="#0E131D" />
+            <SolidColorBrush x:Key="AppPanelBrush" Color="#111723" />
+            <SolidColorBrush x:Key="AppCardBrush" Color="#161F2E" />
+            <SolidColorBrush x:Key="AppInputBrush" Color="#0E1420" />
+            <SolidColorBrush x:Key="AppBorderBrush" Color="#1E293B" />
+            <SolidColorBrush x:Key="AppBorderHoverBrush" Color="#334155" />
+            <SolidColorBrush x:Key="AccentPrimaryBrush" Color="#2563EB" />
+            <SolidColorBrush x:Key="AccentHoverBrush" Color="#1D4ED8" />
+            <SolidColorBrush x:Key="StatusSuccessBrush" Color="#10B981" />
+            <SolidColorBrush x:Key="StatusWarningBrush" Color="#F59E0B" />
+            <SolidColorBrush x:Key="StatusDangerBrush" Color="#E11D48" />
+            <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F1F5F9" />
+            <SolidColorBrush x:Key="TextSecondaryBrush" Color="#94A3B8" />
+            <SolidColorBrush x:Key="TextMutedBrush" Color="#64748B" />
+        </ResourceDictionary>
     </Application.Resources>
 
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="avares://ScrcpyDex.App/Styles/ThemeControls.axaml" />
         
         <!-- Surface & Card Styles -->
         <Style Selector="Border.panel">

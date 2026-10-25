@@ -1,0 +1,52 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Dark Neutral Translucent Glass Semantic Colors -->
+    <Color x:Key="Color_ThemeWindowBackground">#00000000</Color>
+    <Color x:Key="Color_ThemeCardBackground">#C4222226</Color>
+    <Color x:Key="Color_ThemeCardElevated">#D828282D</Color>
+    <Color x:Key="Color_ThemeControlBackground">#4036363B</Color>
+    <Color x:Key="Color_ThemeControlHover">#5A424248</Color>
+    <Color x:Key="Color_ThemeBorderSubtle">#28FFFFFF</Color>
+    <Color x:Key="Color_ThemeDivider">#20FFFFFF</Color>
+
+    <!-- Text & Label Colors -->
+    <Color x:Key="Color_ThemeLabelPrimary">#FFFFFF</Color>
+    <Color x:Key="Color_ThemeLabelSecondary">#9C9CA1</Color>
+    <Color x:Key="Color_ThemeLabelTertiary">#68686C</Color>
+
+    <!-- Accent & Metric State Colors -->
+    <Color x:Key="Color_ThemeAccentBlue">#0A84FF</Color>
+    <Color x:Key="Color_ThemeAccentBlueHover">#409CFF</Color>
+    <Color x:Key="Color_ThemeSystemGreen">#30D158</Color>
+    <Color x:Key="Color_ThemeSystemOrange">#FF9F0A</Color>
+    <Color x:Key="Color_ThemeSystemRed">#FF453A</Color>
+    <Color x:Key="Color_ThemeSystemPurple">#BF5AF2</Color>
+    <Color x:Key="Color_ThemeSystemTeal">#64D2FF</Color>
+
+    <!-- Solid / Translucent Brushes -->
+    <SolidColorBrush x:Key="ThemeWindowBackgroundBrush" Color="{StaticResource Color_ThemeWindowBackground}" />
+    <SolidColorBrush x:Key="ThemeCardBackgroundBrush" Color="{StaticResource Color_ThemeCardBackground}" />
+    <SolidColorBrush x:Key="ThemeCardElevatedBrush" Color="{StaticResource Color_ThemeCardElevated}" />
+    <SolidColorBrush x:Key="ThemeControlBackgroundBrush" Color="{StaticResource Color_ThemeControlBackground}" />
+    <SolidColorBrush x:Key="ThemeControlHoverBrush" Color="{StaticResource Color_ThemeControlHover}" />
+    <SolidColorBrush x:Key="ThemeBorderSubtleBrush" Color="{StaticResource Color_ThemeBorderSubtle}" />
+    <SolidColorBrush x:Key="ThemeDividerBrush" Color="{StaticResource Color_ThemeDivider}" />
+
+    <SolidColorBrush x:Key="ThemeLabelPrimaryBrush" Color="{StaticResource Color_ThemeLabelPrimary}" />
+    <SolidColorBrush x:Key="ThemeLabelSecondaryBrush" Color="{StaticResource Color_ThemeLabelSecondary}" />
+    <SolidColorBrush x:Key="ThemeLabelTertiaryBrush" Color="{StaticResource Color_ThemeLabelTertiary}" />
+
+    <SolidColorBrush x:Key="ThemeAccentBlueBrush" Color="{StaticResource Color_ThemeAccentBlue}" />
+    <SolidColorBrush x:Key="ThemeAccentBlueHoverBrush" Color="{StaticResource Color_ThemeAccentBlueHover}" />
+    <SolidColorBrush x:Key="ThemeSystemGreenBrush" Color="{StaticResource Color_ThemeSystemGreen}" />
+    <SolidColorBrush x:Key="ThemeSystemOrangeBrush" Color="{StaticResource Color_ThemeSystemOrange}" />
+    <SolidColorBrush x:Key="ThemeSystemRedBrush" Color="{StaticResource Color_ThemeSystemRed}" />
+    <SolidColorBrush x:Key="ThemeSystemPurpleBrush" Color="{StaticResource Color_ThemeSystemPurple}" />
+    <SolidColorBrush x:Key="ThemeSystemTealBrush" Color="{StaticResource Color_ThemeSystemTeal}" />
+
+    <!-- Elevation Shadows -->
+    <BoxShadows x:Key="ThemeCardShadow">0 4 20 0 #30000000, 0 1 2 0 #18000000</BoxShadows>
+    <BoxShadows x:Key="ThemeElevatedShadow">0 8 32 0 #40000000, 0 2 4 0 #20000000</BoxShadows>
+
+</ResourceDictionary>

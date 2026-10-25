@@ -38,7 +38,7 @@ flowchart TD
   4. *(Linux)* Udev rule for Samsung Vendor ID (`04e8`) is missing or user does not belong to `plugdev` group.
 * **Rapid Fix:**
   * **Phone:** Settings > Developer Options > Enable **USB Debugging**.
-  * **Hardware:** Reconnect using a certified USB 3.0 / 3.1 Type-C cable directly into the motherboard.
+  * **Hardware:** Reconnect using a USB data cable (with data lines, not a power-only/charge-only cable) directly into a motherboard USB port.
   * **Windows:** Install the Samsung Mobile USB Composite Driver or check optional updates.
   * **Linux:** Run `bash scripts/setup-linux.sh` or execute:
     ```bash
@@ -91,7 +91,7 @@ flowchart TD
 * **Rapid Fix:**
   * Ensure the phone screen is unlocked before clicking **START DEX SESSION**.
   * Click **Stop Session** or tap **Rescan** to trigger an automatic teardown broadcast (`ACTION_STOP_DESKTOP_MODE`).
-  * Verify model compatibility against the supported device matrix (Galaxy S8 through S24, Note 8 through Note 20, Z Fold 1 through 6).
+  * Verify model compatibility against the supported device matrix (Galaxy S8 through S25, Note 8 through Note 20, Z Fold 1 through 6).
 
 #### Issue 6: Server JAR Deployment Error (`scrcpydex-server.jar not found or failed to push`)
 * **Error / Symptom:** Log: `scrcpydex-server.jar not found at '...'` or `Failed to push server JAR to device`.

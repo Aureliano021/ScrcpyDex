@@ -25,22 +25,47 @@ namespace ScrcpyDex.Core.Tests
     {
         private static string ResolveLocalizationDirectory()
         {
-            var dir = new DirectoryInfo(AppContext.BaseDirectory);
-            for (int i = 0; i < 6 && dir != null; i++)
+            // 1. Check SCRCPYDEX_ROOT environment variable
+            string? envRoot = Environment.GetEnvironmentVariable("SCRCPYDEX_ROOT");
+            if (!string.IsNullOrWhiteSpace(envRoot) && Directory.Exists(envRoot))
             {
-                string candidate = Path.Combine(dir.FullName, "src", "ScrcpyDex.Core", "Localization");
-                if (Directory.Exists(candidate))
-                {
-                    return candidate;
-                }
+                string envCandidate = Path.Combine(envRoot, "src", "ScrcpyDex.Core", "Localization");
+                if (Directory.Exists(envCandidate)) return envCandidate;
 
-                string candidateNested = Path.Combine(dir.FullName, "ScrcpyDex", "src", "ScrcpyDex.Core", "Localization");
-                if (Directory.Exists(candidateNested))
-                {
-                    return candidateNested;
-                }
+                string envCandidateNested = Path.Combine(envRoot, "ScrcpyDex", "src", "ScrcpyDex.Core", "Localization");
+                if (Directory.Exists(envCandidateNested)) return envCandidateNested;
 
-                dir = dir.Parent;
+                if (File.Exists(Path.Combine(envRoot, "Strings.resx"))) return envRoot;
+            }
+
+            // 2. Search starting from AppContext.BaseDirectory and Directory.GetCurrentDirectory()
+            var startDirs = new[]
+            {
+                Directory.GetCurrentDirectory(),
+                AppContext.BaseDirectory
+            };
+
+            foreach (var startDir in startDirs.Distinct())
+            {
+                if (string.IsNullOrWhiteSpace(startDir) || !Directory.Exists(startDir)) continue;
+
+                var dir = new DirectoryInfo(startDir);
+                while (dir != null)
+                {
+                    string candidate = Path.Combine(dir.FullName, "src", "ScrcpyDex.Core", "Localization");
+                    if (Directory.Exists(candidate))
+                    {
+                        return candidate;
+                    }
+
+                    string candidateNested = Path.Combine(dir.FullName, "ScrcpyDex", "src", "ScrcpyDex.Core", "Localization");
+                    if (Directory.Exists(candidateNested))
+                    {
+                        return candidateNested;
+                    }
+
+                    dir = dir.Parent;
+                }
             }
 
             throw new DirectoryNotFoundException("Could not locate src/ScrcpyDex.Core/Localization directory from test runner.");

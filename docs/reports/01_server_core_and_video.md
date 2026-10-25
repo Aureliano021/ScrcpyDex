@@ -72,7 +72,7 @@ graph TD
 Before initiating any IPC calls or allocating network sockets, `Server.java` ensures runtime safety through two critical modules:
 
 ### 2.1. Dynamic Compatibility Check (`CompatCheck.java`)
-The server interrogates system properties and class loaders to guarantee device support:
+The server interrogates system properties and class loaders to verify device support:
 1. **Manufacturer Validation:** Verifies `Build.MANUFACTURER.equalsIgnoreCase("samsung")`. Non-Samsung devices lack `SemWifiDisplay` and fail fast with an informative exception.
 2. **API Level Assurance:** Verifies `Build.VERSION.SDK_INT >= 30` (Android 11+). ScrcpyDeX has been verified on Android 16 (`SDK 36`, One UI 8.5).
 3. **Proprietary Class Introspection:** Probes for Samsung's `SemWifiDisplayConfig` and `SemWifiDisplayParameter` via Java reflection (`Class.forName()`).

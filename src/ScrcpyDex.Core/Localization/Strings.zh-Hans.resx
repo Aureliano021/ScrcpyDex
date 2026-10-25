@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -713,5 +713,11 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
     <value>1. 在快速会话选项中勾选“Turn off mobile screen”。
 2. 手机机身屏幕将彻底熄灭，可有效降低温度达 8°C 并杜绝 OLED 烧屏隐患。
 3. 将手机连接至供电充足的 USB 3.0 接口（1.5A 至 3A）。</value>
+  </data>
+  <data name="Telemetry_Header" xml:space="preserve">
+    <value>遥测监控</value>
+  </data>
+  <data name="DeviceSelector_Header" xml:space="preserve">
+    <value>已连接设备</value>
   </data>
 </root>

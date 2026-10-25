@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -714,5 +714,11 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
     <value>1. 'Turn off mobile screen' in den Quick Session Options aktivieren.
 2. Der Bildschirm schaltet sich komplett ab, was die Temperatur um bis zu 8°C senkt und Einbrennen verhindert.
 3. Smartphone an einen USB 3.0-Port mit ausreichender Stromabgabe (1.5A bis 3A) anschließen.</value>
+  </data>
+  <data name="Telemetry_Header" xml:space="preserve">
+    <value>TELEMETRIE</value>
+  </data>
+  <data name="DeviceSelector_Header" xml:space="preserve">
+    <value>VERBUNDENES GERÄT</value>
   </data>
 </root>

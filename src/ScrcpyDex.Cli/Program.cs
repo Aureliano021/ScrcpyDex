@@ -116,8 +116,8 @@ namespace ScrcpyDex.Cli
 
             Console.WriteLine(AnsiConsole.Colorize("OPTIONS (for 'start' command):", AnsiConsole.Bold));
             Console.WriteLine("  -s, --serial <ID>       Specify target device serial number");
-            Console.WriteLine("  --resolution <WxH>      Custom display resolution (e.g., 1920x1080, 2560x1440)");
-            Console.WriteLine("  --fps <FPS>             Maximum video frame rate (e.g., 60, 120)");
+            Console.WriteLine("  --resolution, --max-size <WxH>  Custom display resolution (e.g., 1920x1080, 2560x1440)");
+            Console.WriteLine("  --fps, --max-fps <FPS>          Maximum video frame rate (e.g., 60, 120)");
             Console.WriteLine("  --bitrate <RATE>        Video encoding bit rate (e.g., 8M, 12000000)");
             Console.WriteLine("  --codec <CODEC>         Video codec: h264 or h265 (default: h264)");
             Console.WriteLine("  --mouse <DRIVER>        Mouse input driver: uhid (default) or sdk");
