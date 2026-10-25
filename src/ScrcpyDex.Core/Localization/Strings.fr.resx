@@ -494,6 +494,9 @@
   <data name="Console_CopyCli" xml:space="preserve">
     <value>Copier la CLI</value>
   </data>
+  <data name="Console_CopyLogs" xml:space="preserve">
+    <value>Copier Journaux</value>
+  </data>
   <data name="Footer_AdbDaemon" xml:space="preserve">
     <value>Démon ADB : {0}</value>
   </data>

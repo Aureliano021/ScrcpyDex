@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
+// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,20 +19,31 @@ namespace ScrcpyDex.Core.IO
     {
         public DateTime Timestamp { get; }
         public string Text { get; }
-        public bool IsError { get; }
+        public ProcessLogLevel Level { get; }
 
-        public ProcessLogEntry(DateTime timestamp, string text, bool isError)
+        public bool IsError => Level == ProcessLogLevel.Error;
+        public bool IsWarning => Level == ProcessLogLevel.Warning;
+
+        public ProcessLogEntry(DateTime timestamp, string text, ProcessLogLevel level)
         {
             Timestamp = timestamp;
             Text = text ?? string.Empty;
-            IsError = isError;
+            Level = level;
         }
 
-        public override string ToString() => $"[{Timestamp:HH:mm:ss.fff}] {(IsError ? "[ERR] " : "[OUT] ")}{Text}";
+        public ProcessLogEntry(DateTime timestamp, string text, bool isError)
+            : this(timestamp, text, isError ? ProcessLogLevel.Error : ProcessLogLevel.Info)
+        {
+        }
 
-        public bool Equals(ProcessLogEntry other) => Timestamp == other.Timestamp && Text == other.Text && IsError == other.IsError;
+        public override string ToString() =>
+            $"[{Timestamp:HH:mm:ss.fff}] [{(Level == ProcessLogLevel.Error ? "ERR" : Level == ProcessLogLevel.Warning ? "WARN" : "OUT")}] {Text}";
+
+        public bool Equals(ProcessLogEntry other) =>
+            Timestamp == other.Timestamp && Text == other.Text && Level == other.Level;
+
         public override bool Equals(object? obj) => obj is ProcessLogEntry other && Equals(other);
-        public override int GetHashCode() => HashCode.Combine(Timestamp, Text, IsError);
+        public override int GetHashCode() => HashCode.Combine(Timestamp, Text, Level);
 
         public static bool operator ==(ProcessLogEntry left, ProcessLogEntry right) => left.Equals(right);
         public static bool operator !=(ProcessLogEntry left, ProcessLogEntry right) => !left.Equals(right);

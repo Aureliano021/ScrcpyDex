@@ -228,6 +228,7 @@ namespace ScrcpyDex.Core.Localization
         public static string Console_Header => LocalizationManager.Instance.GetString(nameof(Console_Header));
         public static string Console_ActivePipe => LocalizationManager.Instance.GetString(nameof(Console_ActivePipe));
         public static string Console_CopyCli => LocalizationManager.Instance.GetString(nameof(Console_CopyCli));
+        public static string Console_CopyLogs => LocalizationManager.Instance.GetString(nameof(Console_CopyLogs));
         public static string Footer_AdbDaemon => LocalizationManager.Instance.GetString(nameof(Footer_AdbDaemon));
         public static string Footer_EncoderFormat => LocalizationManager.Instance.GetString(nameof(Footer_EncoderFormat));
         public static string Footer_RoundtripLabel => LocalizationManager.Instance.GetString(nameof(Footer_RoundtripLabel));

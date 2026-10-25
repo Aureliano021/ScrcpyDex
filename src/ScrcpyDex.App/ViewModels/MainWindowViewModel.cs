@@ -529,7 +529,7 @@ namespace ScrcpyDex.App.ViewModels
             }
             catch (Exception ex)
             {
-                LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Warning: Failed to save settings: {ex.Message}", true));
+                LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Warning: Failed to save settings: {ex.Message}", ProcessLogLevel.Warning));
             }
         }
 
@@ -548,7 +548,7 @@ namespace ScrcpyDex.App.ViewModels
                 {
                     IsScrcpyDetected = false;
                     StatusWarning = "scrcpy executable not detected in PATH or custom directory.";
-                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, "Warning: scrcpy binary was not found. Please configure its location.", true));
+                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, "Warning: scrcpy binary was not found. Please configure its location.", ProcessLogLevel.Warning));
                 }
             });
         }
@@ -1091,7 +1091,7 @@ namespace ScrcpyDex.App.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Warning: Could not prepare recording directory: {ex.Message}", true));
+                        LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Warning: Could not prepare recording directory: {ex.Message}", ProcessLogLevel.Warning));
                     }
                 }
 
@@ -1229,6 +1229,52 @@ namespace ScrcpyDex.App.ViewModels
         {
             LogEntries.ClearAll();
             LogEntries.Push(new ProcessLogEntry(DateTime.Now, "Terminal logs cleared.", false));
+        }
+
+        [RelayCommand]
+        public async Task CopyTerminalLogsAsync()
+        {
+            try
+            {
+                if (LogEntries.Count == 0)
+                {
+                    return;
+                }
+
+                var sb = new System.Text.StringBuilder();
+                foreach (var entry in LogEntries)
+                {
+                    var prefix = entry.IsError ? "[ERR] " : (entry.IsWarning ? "[WARN] " : "");
+                    sb.AppendLine($"[{entry.Timestamp:HH:mm:ss}] {prefix}{entry.Text}");
+                }
+                string allLogs = sb.ToString();
+
+                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
+                {
+                    var clipboard = desktop.MainWindow.Clipboard;
+                    if (clipboard != null)
+                    {
+                        await clipboard.SetTextAsync(allLogs).ConfigureAwait(false);
+                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            LogEntries.Push(new ProcessLogEntry(DateTime.Now, "Terminal logs copied to clipboard.", false));
+                        });
+                        return;
+                    }
+                }
+
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, "Clipboard is not available.", ProcessLogLevel.Warning));
+                });
+            }
+            catch (Exception ex)
+            {
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Failed to copy terminal logs: {ex.Message}", true));
+                });
+            }
         }
 
         [RelayCommand]

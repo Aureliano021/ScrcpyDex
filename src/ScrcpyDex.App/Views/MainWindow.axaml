@@ -557,6 +557,14 @@
                                         <Button Classes="btn-secondary"
                                                 Height="20"
                                                 Padding="8,0"
+                                                Command="{Binding CopyTerminalLogsCommand}"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding [Console_CopyLogs], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10" />
+                                        </Button>
+
+                                        <Button Classes="btn-secondary"
+                                                Height="20"
+                                                Padding="8,0"
                                                 Command="{Binding ClearLogsCommand}"
                                                 VerticalAlignment="Center">
                                             <TextBlock Text="{Binding [Action_Clear], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10" />
@@ -568,45 +576,28 @@
                             <!-- Terminal Content Stream -->
                             <ScrollViewer x:Name="TerminalScrollViewer"
                                           Grid.Row="1"
-                                          Padding="12,6"
+                                          Padding="12,8,12,20"
                                           HorizontalScrollBarVisibility="Disabled"
                                           VerticalScrollBarVisibility="Auto">
-                                <ItemsControl ItemsSource="{Binding LogEntries}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="io:ProcessLogEntry">
-                                            <Grid ColumnDefinitions="Auto, Auto, *" Margin="0,1">
-                                                <!-- Timestamp -->
-                                                <TextBlock Grid.Column="0"
-                                                           Text="{Binding Timestamp, StringFormat='[{0:HH:mm:ss}]'}"
-                                                           FontFamily="Cascadia Code, Consolas, monospace"
-                                                           FontSize="10"
-                                                           Foreground="#475569"
-                                                           Margin="0,0,6,0" />
-
-                                                <!-- ERR badge -->
-                                                <Border Grid.Column="1"
-                                                        CornerRadius="3"
-                                                        Padding="4,0"
-                                                        Margin="0,0,6,0"
-                                                        Background="#E11D48"
-                                                        IsVisible="{Binding IsError}">
-                                                    <TextBlock Text="ERR"
-                                                               FontSize="9"
-                                                               FontWeight="Bold"
-                                                               Foreground="#FFFFFF" />
-                                                </Border>
-
-                                                <!-- Log Text -->
-                                                <TextBlock Grid.Column="2"
-                                                           Text="{Binding Text}"
-                                                           FontFamily="Cascadia Code, Consolas, monospace"
-                                                           FontSize="10"
-                                                           Foreground="{Binding Converter={StaticResource LogEntryBrushConverter}}"
-                                                           TextWrapping="Wrap" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
+                                <SelectableTextBlock x:Name="TerminalTextBlock"
+                                                     FontFamily="Cascadia Code, Consolas, monospace"
+                                                     FontSize="10"
+                                                     TextWrapping="Wrap"
+                                                     Background="Transparent"
+                                                     SelectionBrush="#2563EB"
+                                                     Margin="0,0,0,12">
+                                    <SelectableTextBlock.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="{Binding [Console_CopyLogs], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                      Command="{Binding CopyTerminalLogsCommand}" />
+                                            <MenuItem Header="{Binding [Console_CopyCli], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                      Command="{Binding CopyCliCommandCommand}" />
+                                            <Separator />
+                                            <MenuItem Header="{Binding [Action_Clear], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                      Command="{Binding ClearLogsCommand}" />
+                                        </ContextMenu>
+                                    </SelectableTextBlock.ContextMenu>
+                                </SelectableTextBlock>
                             </ScrollViewer>
                         </Grid>
                     </Border>

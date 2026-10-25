@@ -14,8 +14,11 @@
 using System;
 using System.Collections.Specialized;
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
+using Avalonia.Media;
 using Avalonia.Threading;
 using ScrcpyDex.App.ViewModels;
+using ScrcpyDex.Core.IO;
 
 namespace ScrcpyDex.App.Views
 {
@@ -24,9 +27,16 @@ namespace ScrcpyDex.App.Views
     /// </summary>
     public partial class MainWindow : Window
     {
+        private static readonly IBrush TimestampBrush = new SolidColorBrush(Color.Parse("#64748B"));
+        private static readonly IBrush StandardTextBrush = new SolidColorBrush(Color.Parse("#E2E8F0"));
+        private static readonly IBrush WarningBrush = new SolidColorBrush(Color.Parse("#FBBF24"));
+        private static readonly IBrush ErrorBrush = new SolidColorBrush(Color.Parse("#FB7185"));
+
         private INotifyCollectionChanged? _subscribedLogEntries;
         private ScrollViewer? _terminalScroller;
-        private bool _autoScrollPending;
+        private SelectableTextBlock? _terminalTextBlock;
+        private MainWindowViewModel? _viewModel;
+        private int _scrollRequestsPending;
 
         public MainWindow()
         {
@@ -46,6 +56,8 @@ namespace ScrcpyDex.App.Views
             base.OnOpened(e);
 
             _terminalScroller = this.FindControl<ScrollViewer>("TerminalScrollViewer");
+            _terminalTextBlock = this.FindControl<SelectableTextBlock>("TerminalTextBlock");
+
             if (_terminalScroller != null)
             {
                 _terminalScroller.LayoutUpdated += OnTerminalLayoutUpdated;
@@ -53,6 +65,7 @@ namespace ScrcpyDex.App.Views
 
             if (DataContext is MainWindowViewModel vm)
             {
+                _viewModel = vm;
                 vm.SetStorageProvider(StorageProvider);
 
                 if (_subscribedLogEntries != null)
@@ -65,28 +78,108 @@ namespace ScrcpyDex.App.Views
                 {
                     _subscribedLogEntries.CollectionChanged += OnLogEntriesChanged;
                 }
+
+                RenderAllLogs();
             }
         }
 
         private void OnTerminalLayoutUpdated(object? sender, EventArgs e)
         {
-            if (_autoScrollPending && _terminalScroller != null)
+            if (_scrollRequestsPending > 0 && _terminalScroller != null)
             {
-                _autoScrollPending = false;
+                _scrollRequestsPending--;
                 _terminalScroller.ScrollToEnd();
             }
         }
 
         private void OnLogEntriesChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.Action == NotifyCollectionChangedAction.Add)
+            if (_terminalTextBlock == null) return;
+
+            if (e.Action == NotifyCollectionChangedAction.Reset)
             {
-                _autoScrollPending = true;
-                Dispatcher.UIThread.Post(() =>
-                {
-                    _terminalScroller?.ScrollToEnd();
-                }, DispatcherPriority.Render);
+                _terminalTextBlock.Inlines?.Clear();
+                return;
             }
+
+            if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems != null)
+            {
+                if (_terminalTextBlock.Inlines == null)
+                {
+                    _terminalTextBlock.Inlines = new InlineCollection();
+                }
+
+                foreach (ProcessLogEntry entry in e.NewItems)
+                {
+                    AppendLogEntry(_terminalTextBlock.Inlines, entry);
+                }
+                RequestTerminalScroll();
+            }
+            else
+            {
+                RenderAllLogs();
+            }
+        }
+
+        private void RenderAllLogs()
+        {
+            if (_terminalTextBlock == null || _viewModel == null) return;
+
+            var inlines = new InlineCollection();
+            foreach (var entry in _viewModel.LogEntries)
+            {
+                AppendLogEntry(inlines, entry);
+            }
+            _terminalTextBlock.Inlines = inlines;
+            RequestTerminalScroll();
+        }
+
+        private static void AppendLogEntry(InlineCollection inlines, ProcessLogEntry entry)
+        {
+            // Timestamp
+            inlines.Add(new Run($"[{entry.Timestamp:HH:mm:ss}] ")
+            {
+                Foreground = TimestampBrush
+            });
+
+            // Badge / Severity prefix
+            if (entry.IsError)
+            {
+                inlines.Add(new Run("[ERR] ")
+                {
+                    Foreground = ErrorBrush,
+                    FontWeight = FontWeight.Bold
+                });
+            }
+            else if (entry.IsWarning)
+            {
+                inlines.Add(new Run("[WARN] ")
+                {
+                    Foreground = WarningBrush,
+                    FontWeight = FontWeight.Bold
+                });
+            }
+
+            // Message text
+            var textBrush = entry.IsError ? ErrorBrush : (entry.IsWarning ? WarningBrush : StandardTextBrush);
+            inlines.Add(new Run(entry.Text)
+            {
+                Foreground = textBrush
+            });
+
+            // Newline
+            inlines.Add(new LineBreak());
+        }
+
+        private void RequestTerminalScroll()
+        {
+            if (_terminalScroller == null) return;
+
+            _scrollRequestsPending = 2;
+            Dispatcher.UIThread.Post(() =>
+            {
+                _terminalScroller.ScrollToEnd();
+            }, DispatcherPriority.Loaded);
         }
     }
 }

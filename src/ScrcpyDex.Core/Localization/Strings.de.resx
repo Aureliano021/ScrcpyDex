@@ -494,6 +494,9 @@
   <data name="Console_CopyCli" xml:space="preserve">
     <value>CLI kopieren</value>
   </data>
+  <data name="Console_CopyLogs" xml:space="preserve">
+    <value>Protokolle kopieren</value>
+  </data>
   <data name="Footer_AdbDaemon" xml:space="preserve">
     <value>ADB-Daemon: {0}</value>
   </data>

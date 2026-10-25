@@ -25,13 +25,26 @@ namespace ScrcpyDex.App.Converters
     public sealed class LogEntryBrushConverter : IValueConverter
     {
         private static readonly IBrush StandardBrush = new SolidColorBrush(Color.Parse("#E2E8F0"));
+        private static readonly IBrush WarningBrush = new SolidColorBrush(Color.Parse("#FBBF24"));
         private static readonly IBrush ErrorBrush = new SolidColorBrush(Color.Parse("#FB7185"));
 
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is ProcessLogEntry entry)
             {
-                return entry.IsError ? ErrorBrush : StandardBrush;
+                if (entry.IsError) return ErrorBrush;
+                if (entry.IsWarning) return WarningBrush;
+                return StandardBrush;
+            }
+
+            if (value is ProcessLogLevel level)
+            {
+                return level switch
+                {
+                    ProcessLogLevel.Error => ErrorBrush,
+                    ProcessLogLevel.Warning => WarningBrush,
+                    _ => StandardBrush
+                };
             }
 
             if (value is bool isError)
