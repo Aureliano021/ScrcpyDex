@@ -1,4 +1,4 @@
-// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
+﻿// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -184,7 +184,7 @@ namespace ScrcpyDex.Cli.Commands
                 if (!started)
                 {
                     AnsiConsole.Error("Failed to start scrcpy streaming client.");
-                    await CleanupSessionAsync(serial).ConfigureAwait(false);
+                    await CleanupSessionAsync(serial, devInfo.IsDexSupported).ConfigureAwait(false);
                     return 1;
                 }
 
@@ -213,7 +213,7 @@ namespace ScrcpyDex.Cli.Commands
                 }
                 catch { }
 
-                await CleanupSessionAsync(serial).ConfigureAwait(false);
+                await CleanupSessionAsync(serial, devInfo.IsDexSupported).ConfigureAwait(false);
                 AnsiConsole.Success("Session finished. Device display restored.");
             }
 
@@ -282,8 +282,9 @@ namespace ScrcpyDex.Cli.Commands
             }
         }
 
-        private static async Task CleanupSessionAsync(string? serial)
+        private static async Task CleanupSessionAsync(string? serial, bool isDex = true)
         {
+            if (!isDex) return;
             try
             {
                 await AdbService.Instance.StopDeXSessionAsync(serial).ConfigureAwait(false);

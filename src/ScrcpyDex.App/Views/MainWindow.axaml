@@ -154,13 +154,21 @@
                                                Foreground="{StaticResource ThemeLabelPrimaryBrush}"
                                                TextTrimming="CharacterEllipsis" />
                                     
-                                    <Border Background="#2A2A2E" CornerRadius="4" Padding="5,1" HorizontalAlignment="Left"
-                                            IsVisible="{Binding HasSelectedDevice}">
-                                        <TextBlock Text="{Binding DeviceModelCode}"
-                                                   FontSize="9.5"
-                                                   FontFamily="Cascadia Code, Consolas, monospace"
-                                                   Foreground="{StaticResource ThemeAccentBlueHoverBrush}" />
-                                    </Border>
+                                    <StackPanel Orientation="Horizontal" Spacing="4" IsVisible="{Binding HasSelectedDevice}">
+                                        <Border Background="#2A2A2E" CornerRadius="4" Padding="5,1">
+                                            <TextBlock Text="{Binding DeviceModelCode}"
+                                                       FontSize="9.5"
+                                                       FontFamily="Cascadia Code, Consolas, monospace"
+                                                       Foreground="{StaticResource ThemeAccentBlueHoverBrush}" />
+                                        </Border>
+                                        <Border Background="#2D2214" CornerRadius="4" Padding="5,1"
+                                                IsVisible="{Binding IsMirroringMode}">
+                                            <TextBlock Text="{Binding [Device_NonDexNotice], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                       FontSize="9"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="#F59E0B" />
+                                        </Border>
+                                    </StackPanel>
                                 </StackPanel>
 
                                 <!-- Target Device Selector Dropdown -->
@@ -226,7 +234,7 @@
                                         IsVisible="{Binding HasDeviceImage, Converter={StaticResource InverseBooleanConverter}}">
                                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="4">
                                         <PathIcon Data="{StaticResource Icon_Display}" Width="20" Height="20" Foreground="{StaticResource ThemeAccentBlueBrush}" />
-                                        <TextBlock Text="DeX" FontSize="10.5" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" />
+                                        <TextBlock Text="{Binding DeviceFrameFallbackText}" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
                             </Grid>
@@ -243,7 +251,7 @@
                                     Height="30">
                                 <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                                     <PathIcon Data="{StaticResource Icon_Play}" Width="10" Height="10" Foreground="#FFFFFF" />
-                                    <TextBlock Text="{Binding [Action_StartSession], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="11.5" />
+                                    <TextBlock Text="{Binding StartSessionButtonText}" FontWeight="SemiBold" FontSize="11.5" />
                                 </StackPanel>
                             </Button>
 

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -263,6 +263,15 @@
   <!-- Actions -->
   <data name="Action_StartSession" xml:space="preserve">
     <value>Start DeX Session</value>
+  </data>
+  <data name="Status_MirroringReady" xml:space="preserve">
+    <value>Screen Mirroring Ready</value>
+  </data>
+  <data name="Device_NonDexNotice" xml:space="preserve">
+    <value>Screen Mirroring Mode (Non-DeX)</value>
+  </data>
+  <data name="Action_StartMirroring" xml:space="preserve">
+    <value>Start Screen Mirroring</value>
   </data>
   <data name="Action_StopSession" xml:space="preserve">
     <value>Disconnect</value>

@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
-using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace ScrcpyDex.Models
 {
     /// <summary>
-    /// Utility to map Samsung hardware model codes (e.g. SM-S911B) to user-friendly marketing names and frame labels.
+    /// Utility to classify device capabilities and map hardware model codes to user-friendly marketing names and frame labels.
     /// </summary>
     public static class SamsungDeviceModelResolver
     {
@@ -28,14 +28,127 @@ namespace ScrcpyDex.Models
             return clean;
         }
 
-        public static string ResolveMarketingName(string? rawModel)
+        /// <summary>
+        /// Determines if the device belongs to Samsung based on manufacturer property and model naming conventions.
+        /// </summary>
+        public static bool IsSamsungDevice(string? rawModel, string? manufacturer = null)
+        {
+            if (!string.IsNullOrWhiteSpace(manufacturer))
+            {
+                if (manufacturer.Equals("samsung", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                // If manufacturer is explicitly set to another brand (e.g. Xiaomi, Google, Motorola), it is not Samsung
+                if (!string.IsNullOrWhiteSpace(rawModel) && !rawModel.StartsWith("SM-", StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(rawModel)) return false;
+            string model = NormalizeModelCode(rawModel);
+
+            return model.StartsWith("SM-", StringComparison.OrdinalIgnoreCase) ||
+                   model.StartsWith("SEC_", StringComparison.OrdinalIgnoreCase) ||
+                   model.Contains("Galaxy", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Identifies whether a Samsung device has native hardware/firmware support for Samsung DeX desktop mode.
+        /// </summary>
+        public static bool IsDeXSupportedSamsungModel(string? rawModel)
+        {
+            if (string.IsNullOrWhiteSpace(rawModel)) return false;
+            string model = NormalizeModelCode(rawModel);
+
+            // Z Flip series does NOT support DeX (DisplayPort/DeX disabled by vendor)
+            if (model.StartsWith("SM-F7", StringComparison.OrdinalIgnoreCase)) return false;
+
+            // Midrange Galaxy A, M, and F series do NOT support DeX
+            if (model.StartsWith("SM-A", StringComparison.OrdinalIgnoreCase) ||
+                model.StartsWith("SM-M", StringComparison.OrdinalIgnoreCase) ||
+                model.StartsWith("SM-E", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            // Galaxy S series (S8 through S26, including FE and Lite editions)
+            if (model.StartsWith("SM-S", StringComparison.OrdinalIgnoreCase) ||
+                model.StartsWith("SM-G95", StringComparison.OrdinalIgnoreCase) ||
+                model.StartsWith("SM-G96", StringComparison.OrdinalIgnoreCase) ||
+                model.StartsWith("SM-G97", StringComparison.OrdinalIgnoreCase) ||
+                model.StartsWith("SM-G98", StringComparison.OrdinalIgnoreCase) ||
+                model.StartsWith("SM-G99", StringComparison.OrdinalIgnoreCase) ||
+                model.StartsWith("SM-G78", StringComparison.OrdinalIgnoreCase) || // S20 FE
+                model.StartsWith("SM-G77", StringComparison.OrdinalIgnoreCase) || // S10 Lite
+                model.StartsWith("SM-G89", StringComparison.OrdinalIgnoreCase))   // S8 Active
+            {
+                return true;
+            }
+
+            // Galaxy Note series (Note 8 through Note 20 Ultra)
+            if (model.StartsWith("SM-N", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            // Galaxy Z Fold series (Fold 1 through 6)
+            if (model.StartsWith("SM-F9", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            // Galaxy Tab S series
+            if (model.StartsWith("SM-X", StringComparison.OrdinalIgnoreCase) ||
+                model.StartsWith("SM-T8", StringComparison.OrdinalIgnoreCase) ||
+                model.StartsWith("SM-T9", StringComparison.OrdinalIgnoreCase) ||
+                model.StartsWith("SM-T72", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Resolves the device capability (SamsungDeX, SamsungMirrorOnly, or GenericMirrorOnly).
+        /// </summary>
+        public static DeviceCapability ResolveCapability(string? rawModel, string? manufacturer = null)
+        {
+            if (!IsSamsungDevice(rawModel, manufacturer))
+            {
+                return DeviceCapability.GenericMirrorOnly;
+            }
+
+            if (IsDeXSupportedSamsungModel(rawModel))
+            {
+                return DeviceCapability.SamsungDeX;
+            }
+
+            return DeviceCapability.SamsungMirrorOnly;
+        }
+
+        public static string ResolveMarketingName(string? rawModel) => ResolveMarketingName(rawModel, null);
+
+        public static string ResolveMarketingName(string? rawModel, string? manufacturer)
         {
             if (string.IsNullOrWhiteSpace(rawModel) || rawModel.Equals("Unknown", StringComparison.OrdinalIgnoreCase))
             {
+                if (!string.IsNullOrWhiteSpace(manufacturer) && !manufacturer.Equals("samsung", StringComparison.OrdinalIgnoreCase))
+                {
+                    return $"{FormatManufacturer(manufacturer)} Device";
+                }
                 return "Samsung Galaxy Device";
             }
 
             string model = NormalizeModelCode(rawModel);
+
+            // Galaxy S25 Family
+            if (model.StartsWith("SM-S938", StringComparison.OrdinalIgnoreCase)) return "Samsung Galaxy S25 Ultra";
+            if (model.StartsWith("SM-S936", StringComparison.OrdinalIgnoreCase)) return "Samsung Galaxy S25+";
+            if (model.StartsWith("SM-S931", StringComparison.OrdinalIgnoreCase)) return "Samsung Galaxy S25";
 
             // Galaxy S24 Family
             if (model.StartsWith("SM-S928", StringComparison.OrdinalIgnoreCase)) return "Samsung Galaxy S24 Ultra";
@@ -105,6 +218,29 @@ namespace ScrcpyDex.Models
             if (model.StartsWith("SM-X80", StringComparison.OrdinalIgnoreCase)) return "Samsung Galaxy Tab S8+";
             if (model.StartsWith("SM-X70", StringComparison.OrdinalIgnoreCase)) return "Samsung Galaxy Tab S8";
 
+            // If not Samsung: preserve manufacturer and do not prepend "Samsung"
+            if (!IsSamsungDevice(rawModel, manufacturer))
+            {
+                string mfg = !string.IsNullOrWhiteSpace(manufacturer) ? FormatManufacturer(manufacturer) : string.Empty;
+                string cleanRaw = rawModel.Trim().Replace('_', ' ');
+
+                if (!string.IsNullOrEmpty(mfg))
+                {
+                    if (cleanRaw.StartsWith(mfg, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return cleanRaw;
+                    }
+                    return $"{mfg} {cleanRaw}";
+                }
+
+                return cleanRaw;
+            }
+
+            // Samsung A, M, F series
+            if (model.StartsWith("SM-A", StringComparison.OrdinalIgnoreCase)) return $"Samsung Galaxy A ({model})";
+            if (model.StartsWith("SM-M", StringComparison.OrdinalIgnoreCase)) return $"Samsung Galaxy M ({model})";
+            if (model.StartsWith("SM-E", StringComparison.OrdinalIgnoreCase)) return $"Samsung Galaxy F ({model})";
+
             if (model.Contains("Galaxy", StringComparison.OrdinalIgnoreCase))
             {
                 return model.StartsWith("Samsung", StringComparison.OrdinalIgnoreCase) ? model : $"Samsung {model}";
@@ -118,11 +254,23 @@ namespace ScrcpyDex.Models
             return $"Samsung {model}";
         }
 
-        public static string ResolveFrameLabel(string? rawModel)
+        public static string ResolveFrameLabel(string? rawModel) => ResolveFrameLabel(rawModel, null);
+
+        public static string ResolveFrameLabel(string? rawModel, string? manufacturer)
         {
             if (string.IsNullOrWhiteSpace(rawModel) || rawModel.Equals("Unknown", StringComparison.OrdinalIgnoreCase))
             {
+                if (!string.IsNullOrWhiteSpace(manufacturer) && !manufacturer.Equals("samsung", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "?";
+                }
                 return "GALAXY";
+            }
+
+            // Non-Samsung devices display a simple "?" in the frame
+            if (!IsSamsungDevice(rawModel, manufacturer))
+            {
+                return "?";
             }
 
             string model = NormalizeModelCode(rawModel);
@@ -161,6 +309,7 @@ namespace ScrcpyDex.Models
             if (model.StartsWith("SM-F731", StringComparison.OrdinalIgnoreCase)) return "Z Flip 5";
             if (model.StartsWith("SM-F721", StringComparison.OrdinalIgnoreCase)) return "Z Flip 4";
             if (model.StartsWith("SM-F711", StringComparison.OrdinalIgnoreCase)) return "Z Flip 3";
+            if (model.StartsWith("SM-F700", StringComparison.OrdinalIgnoreCase)) return "Z Flip";
 
             if (model.StartsWith("SM-X", StringComparison.OrdinalIgnoreCase)) return "Galaxy Tab";
 
@@ -171,8 +320,28 @@ namespace ScrcpyDex.Models
         {
             if (string.IsNullOrWhiteSpace(rawModel)) return serial ?? string.Empty;
             string clean = NormalizeModelCode(rawModel);
-            if (clean.StartsWith("SM-", StringComparison.OrdinalIgnoreCase)) return clean;
             return clean;
+        }
+
+        public static string FormatManufacturer(string? manufacturer)
+        {
+            if (string.IsNullOrWhiteSpace(manufacturer)) return string.Empty;
+            string trimmed = manufacturer.Trim();
+
+            if (trimmed.Equals("xiaomi", StringComparison.OrdinalIgnoreCase)) return "Xiaomi";
+            if (trimmed.Equals("motorola", StringComparison.OrdinalIgnoreCase)) return "Motorola";
+            if (trimmed.Equals("google", StringComparison.OrdinalIgnoreCase)) return "Google";
+            if (trimmed.Equals("oneplus", StringComparison.OrdinalIgnoreCase)) return "OnePlus";
+            if (trimmed.Equals("huawei", StringComparison.OrdinalIgnoreCase)) return "Huawei";
+            if (trimmed.Equals("samsung", StringComparison.OrdinalIgnoreCase)) return "Samsung";
+            if (trimmed.Equals("sony", StringComparison.OrdinalIgnoreCase)) return "Sony";
+            if (trimmed.Equals("asus", StringComparison.OrdinalIgnoreCase)) return "Asus";
+            if (trimmed.Equals("oppo", StringComparison.OrdinalIgnoreCase)) return "Oppo";
+            if (trimmed.Equals("vivo", StringComparison.OrdinalIgnoreCase)) return "Vivo";
+            if (trimmed.Equals("realme", StringComparison.OrdinalIgnoreCase)) return "Realme";
+
+            // Default title case
+            return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(trimmed.ToLowerInvariant());
         }
     }
 }

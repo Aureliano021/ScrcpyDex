@@ -19,7 +19,7 @@ namespace ScrcpyDex.Models
     {
         public string Serial { get; set; } = string.Empty;
         public string Model { get; set; } = "Unknown";
-        public string Manufacturer { get; set; } = "Samsung";
+        public string Manufacturer { get; set; } = string.Empty;
         public string State { get; set; } = "device";
         public string AndroidVersion { get; set; } = "";
         public string OneUiVersion { get; set; } = "";
@@ -29,17 +29,23 @@ namespace ScrcpyDex.Models
             set => State = value ? "device" : "offline";
         }
         public int DeXDisplayId { get; set; } = -1;
-        public string MarketingName => SamsungDeviceModelResolver.ResolveMarketingName(Model);
+
+        public DeviceCapability Capability => SamsungDeviceModelResolver.ResolveCapability(Model, Manufacturer);
+        public bool IsDexSupported => Capability == DeviceCapability.SamsungDeX;
+        public bool IsSamsung => Capability != DeviceCapability.GenericMirrorOnly;
+
+        public string MarketingName => SamsungDeviceModelResolver.ResolveMarketingName(Model, Manufacturer);
         public string ModelCode => SamsungDeviceModelResolver.ExtractModelCode(Model, Serial);
-        public string FrameLabel => SamsungDeviceModelResolver.ResolveFrameLabel(Model);
+        public string FrameLabel => SamsungDeviceModelResolver.ResolveFrameLabel(Model, Manufacturer);
 
         public DeviceInfo() { }
 
-        public DeviceInfo(string serial, string model, string state)
+        public DeviceInfo(string serial, string model, string state, string? manufacturer = null)
         {
             Serial = serial ?? string.Empty;
             Model = model ?? "Unknown";
             State = state ?? "offline";
+            Manufacturer = manufacturer ?? string.Empty;
         }
     }
 }

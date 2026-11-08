@@ -142,6 +142,9 @@ namespace ScrcpyDex.Core.Localization
 
         // Actions
         public static string Action_StartSession => LocalizationManager.Instance.GetString(nameof(Action_StartSession));
+        public static string Action_StartMirroring => LocalizationManager.Instance.GetString(nameof(Action_StartMirroring));
+        public static string Status_MirroringReady => LocalizationManager.Instance.GetString(nameof(Status_MirroringReady));
+        public static string Device_NonDexNotice => LocalizationManager.Instance.GetString(nameof(Device_NonDexNotice));
         public static string Action_StopSession => LocalizationManager.Instance.GetString(nameof(Action_StopSession));
         public static string Action_Browse => LocalizationManager.Instance.GetString(nameof(Action_Browse));
         public static string Action_Refresh => LocalizationManager.Instance.GetString(nameof(Action_Refresh));
