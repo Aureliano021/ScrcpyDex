@@ -36,7 +36,9 @@ namespace ScrcpyDex.App
                     DataContext = viewModel
                 };
                 viewModel.SetStorageProvider(window.StorageProvider);
+                viewModel.OpenConsoleWindowRequested = window.OpenOrActivateConsoleWindow;
                 desktop.MainWindow = window;
+                desktop.Exit += (_, _) => viewModel.Dispose();
             }
 
             base.OnFrameworkInitializationCompleted();

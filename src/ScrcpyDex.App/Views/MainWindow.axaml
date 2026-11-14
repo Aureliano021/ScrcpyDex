@@ -3,894 +3,949 @@
         xmlns:vm="using:ScrcpyDex.App.ViewModels"
         xmlns:models="using:ScrcpyDex.Models"
         xmlns:appModels="using:ScrcpyDex.App.Models"
-        xmlns:io="using:ScrcpyDex.Core.IO"
         xmlns:loc="using:ScrcpyDex.Core.Localization"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="940" d:DesignHeight="590"
+        mc:Ignorable="d" d:DesignWidth="680" d:DesignHeight="390"
         x:Class="ScrcpyDex.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="{Binding [MainWindow_Title], Source={x:Static loc:LocalizationManager.Instance}}"
         Icon="avares://ScrcpyDex.App/Assets/app_icon.ico"
-        Width="940" Height="590"
+        Width="680" Height="390" MinWidth="680" MaxWidth="680" MinHeight="390" MaxHeight="390"
         CanResize="False"
+        SystemDecorations="None"
+        ShowInTaskbar="True"
         WindowStartupLocation="CenterScreen"
-        ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="40"
-        TransparencyLevelHint="Mica, AcrylicBlur"
+        TransparencyLevelHint="AcrylicBlur"
         Background="Transparent"
-        FontFamily="Segoe UI, Inter, -apple-system, BlinkMacSystemFont, sans-serif">
+        FontFamily="fonts:Inter#Inter, Inter, Segoe UI, sans-serif">
 
     <Window.KeyBindings>
         <KeyBinding Gesture="Ctrl+Enter" Command="{Binding StartSessionCommand}" />
         <KeyBinding Gesture="Ctrl+Shift+W" Command="{Binding StopSessionCommand}" />
         <KeyBinding Gesture="F1" Command="{Binding ToggleFaqCommand}" />
-        <KeyBinding Gesture="Escape" Command="{Binding CloseFaqCommand}" />
+        <KeyBinding Gesture="Escape" Command="{Binding CloseSettingsCommand}" />
     </Window.KeyBindings>
 
-    <Panel Background="#55121215">
-        <Grid RowDefinitions="40, *">
+    <!-- Outer Translucent Charcoal Shell (#660E0E12, 14px Radius, #33333C Border — AudioEspacial Architecture) -->
+    <Border Background="#660E0E12"
+            BorderBrush="#33333C"
+            BorderThickness="1"
+            CornerRadius="14"
+            ClipToBounds="True">
+        <Grid RowDefinitions="Auto, *">
 
-            <!-- 1. INTEGRATED TITLEBAR -->
+            <!-- ========================================================================= -->
+            <!-- 1. COMPACT PRECISION HEADER (DRAGGABLE)                                   -->
+            <!-- ========================================================================= -->
             <Border Grid.Row="0"
-                    Background="#18181B20"
-                    BorderBrush="{StaticResource ThemeBorderSubtleBrush}"
-                    BorderThickness="0,0,0,1"
-                    Padding="16,0"
+                    Background="Transparent"
+                    Padding="22,16,20,10"
                     PointerPressed="OnTitleBarPointerPressed">
-                <Grid ColumnDefinitions="Auto, *, Auto" Background="Transparent">
-                    
-                    <!-- Left: Brand Identity & Toolbar Actions -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <!-- App Icon -->
-                        <Image Source="avares://ScrcpyDex.App/Assets/app_icon.png"
-                               Width="20" Height="20"
-                               VerticalAlignment="Center"
-                               RenderOptions.BitmapInterpolationMode="HighQuality" />
-
-                        <TextBlock Text="ScrcpyDeX"
-                                   FontSize="13"
+                <Grid ColumnDefinitions="*, Auto" VerticalAlignment="Center">
+                    <!-- Brand Micro-Label & Live Session Subtitle -->
+                    <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                        <TextBlock Text="SCRCPYDEX"
+                                   FontSize="10.5"
                                    FontWeight="SemiBold"
-                                   Foreground="{StaticResource ThemeLabelPrimaryBrush}"
-                                   VerticalAlignment="Center" />
-
-                        <!-- Version Badge -->
-                        <Border Background="#2A2A2E" CornerRadius="4" Padding="6,1" VerticalAlignment="Center">
-                            <TextBlock Text="v2.0.0"
-                                       FontSize="10"
-                                       FontWeight="Medium"
-                                       Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                        </Border>
-
-                        <Rectangle Width="1" Height="14" Fill="{StaticResource ThemeDividerBrush}" Margin="6,0" />
-
-                        <!-- Language Picker (Pull-down Menu on Left) -->
-                        <Button Classes="toolbar-button" ToolTip.Tip="{Binding [General_Language_Desc], Source={x:Static loc:LocalizationManager.Instance}}">
-                            <Button.Flyout>
-                                <MenuFlyout Placement="BottomEdgeAlignedLeft">
-                                    <MenuItem Header="English (EN)"
-                                              Command="{Binding ChangeLanguageCommand}"
-                                              CommandParameter="en" />
-                                    <MenuItem Header="Português (Brasil)"
-                                              Command="{Binding ChangeLanguageCommand}"
-                                              CommandParameter="pt-BR" />
-                                    <MenuItem Header="Español (ES)"
-                                              Command="{Binding ChangeLanguageCommand}"
-                                              CommandParameter="es" />
-                                    <MenuItem Header="Français (FR)"
-                                              Command="{Binding ChangeLanguageCommand}"
-                                              CommandParameter="fr" />
-                                    <MenuItem Header="Deutsch (DE)"
-                                              Command="{Binding ChangeLanguageCommand}"
-                                              CommandParameter="de" />
-                                    <MenuItem Header="简体中文 (ZH)"
-                                              Command="{Binding ChangeLanguageCommand}"
-                                              CommandParameter="zh-Hans" />
-                                </MenuFlyout>
-                            </Button.Flyout>
-                            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                <PathIcon Data="{StaticResource Icon_Globe}" Width="12" Height="12" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                <TextBlock Text="{Binding CurrentLanguageCode}" FontSize="11" FontWeight="Medium" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                <TextBlock Text="▾" FontSize="9" Opacity="0.6" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                            </StackPanel>
-                        </Button>
-
-                        <!-- Help & FAQ Drawer Trigger -->
-                        <Button Classes="toolbar-button"
-                                Command="{Binding ToggleFaqCommand}"
-                                ToolTip.Tip="{Binding [Faq_Title], Source={x:Static loc:LocalizationManager.Instance}}">
-                            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                <PathIcon Data="{StaticResource Icon_Help}" Width="12" Height="12" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                <TextBlock Text="FAQ" FontSize="11" FontWeight="Medium" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                            </StackPanel>
-                        </Button>
-
-                        <!-- Configure Scrcpy Binary Path -->
-                        <Button Classes="toolbar-button"
-                                Command="{Binding BrowseScrcpyPathCommand}"
-                                ToolTip.Tip="{Binding [Action_ConfigureScrcpyTooltip], Source={x:Static loc:LocalizationManager.Instance}}">
-                            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                <PathIcon Data="{StaticResource Icon_Gear}" Width="11" Height="11" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                <TextBlock Text="Scrcpy" FontSize="11" FontWeight="Medium" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                            </StackPanel>
-                        </Button>
+                                   LetterSpacing="0.8"
+                                   Foreground="#86868B" />
+                        <TextBlock Text="{Binding SessionStatusText}"
+                                   FontSize="9.5"
+                                   MaxWidth="390"
+                                   TextTrimming="CharacterEllipsis"
+                                   HorizontalAlignment="Left"
+                                   Foreground="#777780" />
                     </StackPanel>
 
-                    <!-- Right Column: Kept clear for native OS caption buttons -->
+                    <!-- Status Pill + Settings + Minimize + Close -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <!-- Status Pill -->
+                        <Border Background="#1B1B22"
+                                BorderBrush="#33333C"
+                                BorderThickness="1"
+                                CornerRadius="14"
+                                Padding="9,5"
+                                VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <Ellipse Width="6" Height="6" Fill="{Binding StatusBadgeColor}" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding StatusPillText}"
+                                           FontSize="9"
+                                           FontWeight="SemiBold"
+                                           LetterSpacing="0.4"
+                                           Foreground="#F5F5F7"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Settings Toggle Button -->
+                        <Button Classes="circle-icon"
+                                Command="{Binding ToggleSettingsCommand}"
+                                ToolTip.Tip="Settings">
+                            <PathIcon Data="{StaticResource Icon_Gear}"
+                                      Width="12" Height="12"
+                                      Foreground="#D0D0D7" />
+                        </Button>
+
+                        <!-- Minimize Window Button -->
+                        <Button Classes="circle-icon"
+                                Click="OnMinimizeButtonClick"
+                                Content="—"
+                                FontSize="11"
+                                Foreground="#D0D0D7"
+                                ToolTip.Tip="Minimize" />
+
+                        <!-- Close Window Button -->
+                        <Button Classes="circle-icon"
+                                Click="OnCloseButtonClick"
+                                Content="×"
+                                FontSize="15"
+                                Foreground="#D0D0D7"
+                                ToolTip.Tip="Close" />
+                    </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- 2. MAIN CONTENT AREA: TWO-PANE STREAMLINED LAYOUT -->
-            <Grid Grid.Row="1"
-                  Margin="16,12,16,14"
-                  ColumnDefinitions="300, 14, *"
-                  VerticalAlignment="Stretch">
+            <!-- ========================================================================= -->
+            <!-- 2. MAIN CONTENT AREA: DEVICE VIEW / SETTINGS / FAQ                        -->
+            <!-- ========================================================================= -->
+            <Grid Grid.Row="1" Margin="22,6,22,20">
 
-                <!-- CARD 1: CONNECTED DEVICE (HEADER INSIDE CARD, FULL HEIGHT TO WINDOW BOTTOM) -->
-                <Border Grid.Column="0"
-                        Classes="glass-card"
-                        VerticalAlignment="Stretch">
-                    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *, Auto">
+                <!-- 2A. PRIMARY DEVICE VIEW (Photo on Left without divider, height locked to right column) -->
+                <Grid IsVisible="{Binding IsMainDeviceViewVisible}"
+                      ColumnDefinitions="Auto, *"
+                      VerticalAlignment="Stretch">
 
-                        <!-- Row 0: Integrated Header INSIDE Card -->
-                        <StackPanel Grid.Row="0" Spacing="6" Margin="0,0,0,6">
-                            <TextBlock Text="{Binding [DeviceSelector_Header], Source={x:Static loc:LocalizationManager.Instance}}"
-                                       FontSize="9.5"
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource ThemeLabelSecondaryBrush}"
-                                       Margin="2,0,0,0" />
-                            <Rectangle Height="1" Fill="{StaticResource ThemeDividerBrush}" />
-                        </StackPanel>
+                    <!-- LEFT COLUMN: Device Photo Only (Height stretched to match top of title to bottom of Telemetry) -->
+                    <Grid Grid.Column="0"
+                          VerticalAlignment="Stretch"
+                          HorizontalAlignment="Center"
+                          Margin="0,2,20,0">
+                        <!-- Real Smartphone PNG Render -->
+                        <Image Source="{Binding DeviceImage}"
+                               Stretch="Uniform"
+                               MaxWidth="260"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Stretch"
+                               RenderOptions.BitmapInterpolationMode="HighQuality"
+                               IsVisible="{Binding HasDeviceImage}" />
 
-                        <!-- Row 1: Top Sub-Region: Device Info on Left, Smartphone Render on Right -->
-                        <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Height="124" Margin="0,0,0,6">
-                            
-                            <!-- Left side: Device Name, Model, Dropdown & Status Badge -->
-                            <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="5" Margin="0,0,8,0">
-                                <StackPanel Spacing="2">
-                                    <TextBlock Text="{Binding DeviceDisplayName}"
-                                               FontSize="14.5"
+                        <!-- Minimal Recessed Stage Frame Fallback (when no device PNG is loaded) -->
+                        <Border Width="168"
+                                Background="#121217"
+                                BorderBrush="#2B2B33"
+                                BorderThickness="1.5"
+                                CornerRadius="20"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Stretch"
+                                IsVisible="{Binding HasDeviceImage, Converter={StaticResource InverseBooleanConverter}}">
+                            <Grid RowDefinitions="Auto, *, Auto" Margin="12">
+                                <Ellipse Grid.Row="0" Width="5" Height="5" Fill="#2B2B33" HorizontalAlignment="Center" Margin="0,2,0,0" />
+                                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                                    <PathIcon Data="{StaticResource Icon_Display}" Width="22" Height="22" Foreground="#FF7A00" />
+                                    <TextBlock Text="{Binding DeviceFrameFallbackText}"
+                                               FontSize="13"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource ThemeLabelPrimaryBrush}"
-                                               TextTrimming="CharacterEllipsis" />
-                                    
-                                    <StackPanel Orientation="Horizontal" Spacing="4" IsVisible="{Binding HasSelectedDevice}">
-                                        <Border Background="#2A2A2E" CornerRadius="4" Padding="5,1">
+                                               LetterSpacing="0.6"
+                                               Foreground="#D0D0D7"
+                                               HorizontalAlignment="Center" />
+                                </StackPanel>
+                                <Border Grid.Row="2" Width="36" Height="3" CornerRadius="1.5" Background="#2B2B33" HorizontalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- RIGHT COLUMN: Device Title, Target Selector, Primary Actions & Telemetry Card -->
+                    <Grid Grid.Column="1"
+                          RowDefinitions="Auto, *, Auto, Auto"
+                          VerticalAlignment="Stretch"
+                          Margin="0,2,0,0">
+
+                        <!-- Top: Device Title, Model Badges & Target Selector Dropdown -->
+                        <StackPanel Grid.Row="0" Spacing="12">
+                            <StackPanel Spacing="3">
+                                <Grid ColumnDefinitions="*, Auto">
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding DeviceDisplayName}"
+                                               FontSize="20"
+                                               FontWeight="SemiBold"
+                                               Foreground="#F5F5F7"
+                                               TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" />
+
+                                    <StackPanel Grid.Column="1"
+                                                Orientation="Horizontal"
+                                                Spacing="5"
+                                                VerticalAlignment="Center"
+                                                IsVisible="{Binding HasSelectedDevice}">
+                                        <Border Background="#1B1B22"
+                                                BorderBrush="#33333C"
+                                                BorderThickness="1"
+                                                CornerRadius="6"
+                                                Padding="7,3">
                                             <TextBlock Text="{Binding DeviceModelCode}"
                                                        FontSize="9.5"
                                                        FontFamily="Cascadia Code, Consolas, monospace"
-                                                       Foreground="{StaticResource ThemeAccentBlueHoverBrush}" />
+                                                       Foreground="#D0D0D7" />
                                         </Border>
-                                        <Border Background="#2D2214" CornerRadius="4" Padding="5,1"
+                                        <Border Background="#26170A"
+                                                BorderBrush="#FF7A00"
+                                                BorderThickness="1"
+                                                CornerRadius="6"
+                                                Padding="7,3"
                                                 IsVisible="{Binding IsMirroringMode}">
-                                            <TextBlock Text="{Binding [Device_NonDexNotice], Source={x:Static loc:LocalizationManager.Instance}}"
+                                            <TextBlock Text="MIRROR"
                                                        FontSize="9"
                                                        FontWeight="SemiBold"
-                                                       Foreground="#F59E0B" />
+                                                       LetterSpacing="0.4"
+                                                       Foreground="#FF9A3D" />
                                         </Border>
                                     </StackPanel>
-                                </StackPanel>
+                                </Grid>
 
-                                <!-- Target Device Selector Dropdown -->
-                                <StackPanel Spacing="2">
-                                    <TextBlock Text="{Binding [DeviceSelector_TargetLabel], Source={x:Static loc:LocalizationManager.Instance}}"
-                                               FontSize="10"
-                                               FontWeight="Medium"
-                                               Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                    <ComboBox Classes="dex-combobox"
-                                              ItemsSource="{Binding DeviceList}"
-                                              SelectedItem="{Binding SelectedDevice}"
-                                              HorizontalAlignment="Stretch"
-                                              Height="26"
-                                              PlaceholderText="{Binding [DeviceSelector_NoDevicesPlaceholder], Source={x:Static loc:LocalizationManager.Instance}}">
-                                        <ComboBox.ItemTemplate>
-                                            <DataTemplate x:DataType="models:DeviceInfo">
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <TextBlock Text="{Binding Model}" FontWeight="SemiBold" />
-                                                    <TextBlock Text="{Binding Serial, StringFormat='({0})'}" Foreground="{StaticResource ThemeLabelTertiaryBrush}" />
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ComboBox.ItemTemplate>
-                                    </ComboBox>
-                                </StackPanel>
-
-                                <!-- Live Status Badge -->
-                                <Border Background="#1C3822"
-                                        BorderBrush="#256B34"
-                                        BorderThickness="1"
-                                        CornerRadius="9"
-                                        Padding="6,2"
-                                        HorizontalAlignment="Left">
-                                    <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                        <Ellipse Width="5" Height="5" Fill="{StaticResource ThemeSystemGreenBrush}" />
-                                        <TextBlock Text="{Binding SessionStatusText}"
-                                                   FontSize="9"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{StaticResource ThemeSystemGreenBrush}"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   MaxWidth="140" />
-                                    </StackPanel>
-                                </Border>
+                                <TextBlock Text="{Binding HardwareModelDisplay}"
+                                           FontSize="11"
+                                           Foreground="#86868B"
+                                           TextTrimming="CharacterEllipsis" />
                             </StackPanel>
 
-                            <!-- Right side: Real Smartphone Render or Fallback Graphical Frame -->
-                            <Grid Grid.Column="1" Width="100" Height="124" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <!-- Real Image -->
-                                <Image Source="{Binding DeviceImage}"
-                                       Stretch="Uniform"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       RenderOptions.BitmapInterpolationMode="HighQuality"
-                                       IsVisible="{Binding HasDeviceImage}" />
+                            <!-- Target Device Dropdown (Expands on Click) -->
+                            <StackPanel Spacing="5">
+                                <TextBlock Text="TARGET DEVICE"
+                                           FontSize="9.5"
+                                           FontWeight="SemiBold"
+                                           LetterSpacing="0.8"
+                                           Foreground="#86868B" />
+                                <ComboBox Classes="dex-combobox"
+                                          ItemsSource="{Binding DeviceList}"
+                                          SelectedItem="{Binding SelectedDevice}"
+                                          HorizontalAlignment="Stretch"
+                                          Height="34"
+                                          FontSize="12"
+                                          PlaceholderText="{Binding [DeviceSelector_NoDevicesPlaceholder], Source={x:Static loc:LocalizationManager.Instance}}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="models:DeviceInfo">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="{Binding MarketingName}" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                                                <TextBlock Text="{Binding Serial, StringFormat='({0})'}" Foreground="#86868B" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                        </StackPanel>
 
-                                <!-- Fallback Graphical Frame -->
-                                <Border Width="76" Height="115"
-                                        Background="#121214"
-                                        BorderBrush="#38383C"
-                                        BorderThickness="1.5"
-                                        CornerRadius="13"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        IsVisible="{Binding HasDeviceImage, Converter={StaticResource InverseBooleanConverter}}">
-                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="4">
-                                        <PathIcon Data="{StaticResource Icon_Display}" Width="20" Height="20" Foreground="{StaticResource ThemeAccentBlueBrush}" />
-                                        <TextBlock Text="{Binding DeviceFrameFallbackText}" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" />
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-                        </Grid>
-
-                        <!-- Row 2: Primary & Secondary Action Buttons -->
-                        <StackPanel Grid.Row="2" Spacing="6" Margin="0,0,0,6">
-                            <!-- Primary Start Session Button -->
-                            <Button Classes="btn-primary"
+                        <!-- Action Row: [START / STOP | SCAN] -->
+                        <Grid Grid.Row="2"
+                              ColumnDefinitions="*, 10, 108"
+                              Height="44"
+                              Margin="0,12,0,12">
+                            <!-- Start Session Button (Orange #FF7A00) -->
+                            <Button Grid.Column="0"
+                                    Classes="btn-primary"
                                     Command="{Binding StartSessionCommand}"
                                     IsEnabled="{Binding CanStart}"
                                     IsVisible="{Binding !CanStop}"
                                     HorizontalAlignment="Stretch"
-                                    Height="30">
-                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                    <PathIcon Data="{StaticResource Icon_Play}" Width="10" Height="10" Foreground="#FFFFFF" />
-                                    <TextBlock Text="{Binding StartSessionButtonText}" FontWeight="SemiBold" FontSize="11.5" />
+                                    Height="44">
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <PathIcon Data="{StaticResource Icon_Play}" Width="11" Height="11" Foreground="#F5F5F7" />
+                                    <TextBlock Text="{Binding StartSessionButtonText}"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"
+                                               LetterSpacing="0.3"
+                                               Foreground="#F5F5F7" />
                                 </StackPanel>
                             </Button>
 
-                            <!-- Destructive Stop Session Button -->
-                            <Button Classes="btn-destructive"
+                            <!-- Stop Session Button -->
+                            <Button Grid.Column="0"
+                                    Classes="btn-destructive"
                                     Command="{Binding StopSessionCommand}"
                                     IsEnabled="{Binding CanStop}"
                                     IsVisible="{Binding CanStop}"
                                     HorizontalAlignment="Stretch"
-                                    Height="30">
-                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                    <PathIcon Data="{StaticResource Icon_Stop}" Width="10" Height="10" Foreground="#FFFFFF" />
-                                    <TextBlock Text="{Binding [Action_StopSessionText], Source={x:Static loc:LocalizationManager.Instance}}" FontWeight="SemiBold" FontSize="11.5" />
+                                    Height="44">
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <PathIcon Data="{StaticResource Icon_Stop}" Width="11" Height="11" Foreground="#FF453A" />
+                                    <TextBlock Text="{Binding [Action_StopSessionText], Source={x:Static loc:LocalizationManager.Instance}}"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"
+                                               LetterSpacing="0.3"
+                                               Foreground="#F5F5F7" />
                                 </StackPanel>
                             </Button>
 
-                            <!-- Secondary Actions: Rescan & Logs (Side-by-side) -->
-                            <Grid ColumnDefinitions="*, 8, *">
-                                <Button Grid.Column="0"
-                                        Classes="btn-secondary"
-                                        Command="{Binding RefreshDevicesCommand}"
-                                        HorizontalAlignment="Stretch"
-                                        Height="26"
-                                        ToolTip.Tip="{Binding [DeviceSelector_RescanTooltip], Source={x:Static loc:LocalizationManager.Instance}}">
-                                    <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon_Refresh}" Width="10" Height="10" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                        <TextBlock Text="{Binding [Action_Rescan], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" />
-                                    </StackPanel>
-                                </Button>
+                            <!-- Scan Devices Button -->
+                            <Button Grid.Column="2"
+                                    Classes="btn-secondary"
+                                    Command="{Binding RefreshDevicesCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="44"
+                                    ToolTip.Tip="{Binding [DeviceSelector_RescanTooltip], Source={x:Static loc:LocalizationManager.Instance}}">
+                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <PathIcon Data="{StaticResource Icon_Refresh}" Width="12" Height="12" Foreground="#D0D0D7" />
+                                    <TextBlock Text="{Binding [Action_Rescan], Source={x:Static loc:LocalizationManager.Instance}}"
+                                               FontSize="11.5"
+                                               FontWeight="SemiBold"
+                                               LetterSpacing="0.3"
+                                               Foreground="#D0D0D7" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
 
-                                <Button Grid.Column="2"
-                                        Classes="btn-secondary"
-                                        Command="{Binding ToggleLogInspectorCommand}"
-                                        HorizontalAlignment="Stretch"
-                                        Height="26"
-                                        ToolTip.Tip="Toggle execution logs inspector">
-                                    <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon_Terminal}" Width="10" Height="10" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                        <TextBlock Text="Logs" FontSize="11" />
+                        <!-- Single Subtle Telemetry Card (#16161C, Border #2B2B33, Radius 14 — AudioEspacial INPUT LEVELS Card Pattern) -->
+                        <Border Grid.Row="3"
+                                Background="#16161C"
+                                BorderBrush="#2B2B33"
+                                BorderThickness="1"
+                                CornerRadius="14"
+                                Padding="16,13">
+                            <StackPanel Spacing="10">
+                                <!-- Card Header: TELEMETRY on Left, Active Mode on Right -->
+                                <Grid ColumnDefinitions="*, Auto">
+                                    <TextBlock Grid.Column="0"
+                                               Text="TELEMETRY"
+                                               FontSize="9.5"
+                                               FontWeight="SemiBold"
+                                               LetterSpacing="0.8"
+                                               Foreground="#86868B"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding ModeIndicatorText}"
+                                               FontSize="9"
+                                               FontWeight="SemiBold"
+                                               LetterSpacing="0.6"
+                                               Foreground="#FF7A00"
+                                               VerticalAlignment="Center" />
+                                </Grid>
+
+                                <!-- 4 Tabular Telemetry Columns -->
+                                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
+                                    <StackPanel Grid.Column="0" Spacing="3">
+                                        <TextBlock Text="BATTERY"
+                                                   FontSize="8.5"
+                                                   FontWeight="SemiBold"
+                                                   LetterSpacing="0.5"
+                                                   Foreground="#86868B" />
+                                        <TextBlock Text="{Binding BatteryLevel}"
+                                                   FontSize="13.5"
+                                                   FontWeight="SemiBold"
+                                                   FontFeatures="+tnum"
+                                                   Foreground="#F5F5F7" />
                                     </StackPanel>
-                                </Button>
-                            </Grid>
+
+                                    <StackPanel Grid.Column="1" Spacing="3">
+                                        <TextBlock Text="TEMP"
+                                                   FontSize="8.5"
+                                                   FontWeight="SemiBold"
+                                                   LetterSpacing="0.5"
+                                                   Foreground="#86868B" />
+                                        <TextBlock Text="{Binding BatteryTemperature}"
+                                                   FontSize="13.5"
+                                                   FontWeight="SemiBold"
+                                                   FontFeatures="+tnum"
+                                                   Foreground="#F5F5F7" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" Spacing="3">
+                                        <TextBlock Text="USB LINK"
+                                                   FontSize="8.5"
+                                                   FontWeight="SemiBold"
+                                                   LetterSpacing="0.5"
+                                                   Foreground="#86868B" />
+                                        <TextBlock Text="{Binding UsbLinkSpeed}"
+                                                   FontSize="13"
+                                                   FontWeight="SemiBold"
+                                                   FontFeatures="+tnum"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Foreground="#F5F5F7" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="3" Spacing="3">
+                                        <TextBlock Text="LATENCY"
+                                                   FontSize="8.5"
+                                                   FontWeight="SemiBold"
+                                                   LetterSpacing="0.5"
+                                                   Foreground="#86868B" />
+                                        <TextBlock Text="{Binding EstimatedLatencyMs}"
+                                                   FontSize="13.5"
+                                                   FontWeight="SemiBold"
+                                                   FontFeatures="+tnum"
+                                                   Foreground="#F5F5F7" />
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                    </Grid>
+                </Grid>
+
+                <!-- ========================================================================= -->
+                <!-- 2B. INTERNAL SETTINGS SCREEN (Same Window Dimension, Scrollable Cards)    -->
+                <!-- ========================================================================= -->
+                <Grid IsVisible="{Binding IsSettingsOpen}"
+                      RowDefinitions="Auto, *"
+                      RowSpacing="8">
+
+                    <!-- Settings Sub-Header: Back + Title on Left; Console & FAQ Triggers on Right -->
+                    <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Button Classes="pill-button"
+                                    Command="{Binding CloseSettingsCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                    <PathIcon Data="{StaticResource Icon_Back}" Width="10" Height="10" Foreground="#D0D0D7" />
+                                    <TextBlock Text="BACK" FontSize="9.5" FontWeight="SemiBold" LetterSpacing="0.5" Foreground="#D0D0D7" />
+                                </StackPanel>
+                            </Button>
+                            <TextBlock Text="CONFIGURATION"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       LetterSpacing="0.8"
+                                       Foreground="#86868B"
+                                       VerticalAlignment="Center" />
                         </StackPanel>
 
-                        <!-- Row 3: Divider -->
-                        <Rectangle Grid.Row="3" Height="1" Fill="{StaticResource ThemeDividerBrush}" Margin="0,2,0,6" />
-
-                        <!-- Row 4: Telemetry Header -->
-                        <TextBlock Grid.Row="4"
-                                   Text="{Binding [Telemetry_Header], Source={x:Static loc:LocalizationManager.Instance}}"
-                                   FontSize="8.5"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource ThemeLabelSecondaryBrush}"
-                                   Margin="2,0,0,6" />
-
-                        <!-- Row 5: 4 Telemetry Rows (Stacked Vertically, filling down to the footer) -->
-                        <Grid Grid.Row="5" RowDefinitions="*, 6, *, 6, *, 6, *" VerticalAlignment="Stretch">
-                            <!-- Battery -->
-                            <Border Grid.Row="0" CornerRadius="8" Background="#251E1E22" BorderBrush="#1CFFFFFF" BorderThickness="1" Padding="10,0">
-                                <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
-                                    <Border Grid.Column="0" Width="26" Height="26" CornerRadius="6" Background="#1C3822" VerticalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon_Battery}" Width="12" Height="12" Foreground="{StaticResource ThemeSystemGreenBrush}" />
-                                    </Border>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="9,0,0,0" Spacing="1">
-                                        <TextBlock Text="{Binding [Telemetry_Battery], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                        <TextBlock Text="Charge status" FontSize="9" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                    </StackPanel>
-                                    <TextBlock Grid.Column="2" Text="{Binding BatteryLevel}" FontSize="12.5" FontWeight="SemiBold" Foreground="{StaticResource ThemeSystemGreenBrush}" VerticalAlignment="Center" />
-                                </Grid>
-                            </Border>
-
-                            <!-- Temperature -->
-                            <Border Grid.Row="2" CornerRadius="8" Background="#251E1E22" BorderBrush="#1CFFFFFF" BorderThickness="1" Padding="10,0">
-                                <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
-                                    <Border Grid.Column="0" Width="26" Height="26" CornerRadius="6" Background="#38281C" VerticalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon_Thermometer}" Width="12" Height="12" Foreground="{StaticResource ThemeSystemOrangeBrush}" />
-                                    </Border>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="9,0,0,0" Spacing="1">
-                                        <TextBlock Text="{Binding [Telemetry_Temperature], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                        <TextBlock Text="Internal SoC" FontSize="9" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                    </StackPanel>
-                                    <TextBlock Grid.Column="2" Text="{Binding BatteryTemperature}" FontSize="12.5" FontWeight="SemiBold" Foreground="{StaticResource ThemeSystemOrangeBrush}" VerticalAlignment="Center" />
-                                </Grid>
-                            </Border>
-
-                            <!-- Link Speed -->
-                            <Border Grid.Row="4" CornerRadius="8" Background="#251E1E22" BorderBrush="#1CFFFFFF" BorderThickness="1" Padding="10,0">
-                                <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
-                                    <Border Grid.Column="0" Width="26" Height="26" CornerRadius="6" Background="#1C2E38" VerticalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon_Link}" Width="12" Height="12" Foreground="{StaticResource ThemeAccentBlueBrush}" />
-                                    </Border>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="9,0,0,0" Spacing="1">
-                                        <TextBlock Text="{Binding [Telemetry_Link], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                        <TextBlock Text="Host connection" FontSize="9" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                    </StackPanel>
-                                    <TextBlock Grid.Column="2" Text="{Binding UsbLinkSpeed}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeAccentBlueHoverBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="105" />
-                                </Grid>
-                            </Border>
-
-                            <!-- Latency -->
-                            <Border Grid.Row="6" CornerRadius="8" Background="#251E1E22" BorderBrush="#1CFFFFFF" BorderThickness="1" Padding="10,0">
-                                <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
-                                    <Border Grid.Column="0" Width="26" Height="26" CornerRadius="6" Background="#1C3538" VerticalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon_Latency}" Width="12" Height="12" Foreground="{StaticResource ThemeSystemTealBrush}" />
-                                    </Border>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="9,0,0,0" Spacing="1">
-                                        <TextBlock Text="{Binding [Telemetry_Latency], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                        <TextBlock Text="Pipeline latency" FontSize="9" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                    </StackPanel>
-                                    <TextBlock Grid.Column="2" Text="{Binding EstimatedLatencyMs}" FontSize="12.5" FontWeight="SemiBold" Foreground="{StaticResource ThemeSystemTealBrush}" VerticalAlignment="Center" />
-                                </Grid>
-                            </Border>
-                        </Grid>
-
-                        <!-- Row 6: Hardware Model Footer -->
-                        <TextBlock Grid.Row="6"
-                                   Text="{Binding HardwareModelDisplay}"
-                                   FontSize="9.5"
-                                   Foreground="{StaticResource ThemeLabelTertiaryBrush}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,8,0,0" />
-
-                    </Grid>
-                </Border>
-
-                <!-- RIGHT AREA: CARDS 2 & 3 AND EXPANDED CONSOLE (ALIGNED FLUSH AT TOP AND BOTTOM) -->
-                <Grid Grid.Column="2" RowDefinitions="Auto, 10, *" VerticalAlignment="Stretch">
-                    
-                    <!-- TWO-COLUMN GROUPED CARDS: DISPLAY & SESSION OPTIONS (ROW 0) -->
-                    <Grid Grid.Row="0" ColumnDefinitions="*, 12, *">
-
-                        <!-- CARD 2: DISPLAY & HARDWARE ENCODER (HEADER INSIDE CARD, 100% FLUSH AT TOP) -->
-                        <Border Grid.Column="0"
-                                Classes="glass-card">
-                            <StackPanel Spacing="8">
-                                <!-- Integrated Header INSIDE Card -->
-                                <TextBlock Text="{Binding [Display_CardHeader], Source={x:Static loc:LocalizationManager.Instance}}"
-                                           FontSize="9.5"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource ThemeLabelSecondaryBrush}"
-                                           Margin="2,0,0,0" />
-                                <Rectangle Height="1" Fill="{StaticResource ThemeDividerBrush}" />
-
-                                <!-- Row 1: Resolution -->
-                                <Grid Height="40" ColumnDefinitions="Auto, *, Auto" Margin="2,0">
-                                    <Border Grid.Column="0" Width="24" Height="24" CornerRadius="6" Background="{StaticResource ThemeAccentBlueBrush}" VerticalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon_Display}" Width="11" Height="11" Foreground="#FFFFFF" />
-                                    </Border>
-                                    <StackPanel Grid.Column="1" Margin="8,0" VerticalAlignment="Center" Spacing="1">
-                                        <TextBlock Text="{Binding [Display_ResolutionLabel], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                        <TextBlock Text="Monitor canvas" FontSize="9" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                    </StackPanel>
-                                    <ComboBox Grid.Column="2" Classes="dex-combobox" ItemsSource="{Binding AvailableResolutions}" SelectedItem="{Binding SelectedResolution}" Width="135" VerticalAlignment="Center" />
-                                </Grid>
-
-                                <Rectangle Height="1" Fill="{StaticResource ThemeDividerBrush}" Margin="34,0,0,0" />
-
-                                <!-- Row 2: Target Frame Rate -->
-                                <Grid Height="40" ColumnDefinitions="Auto, *, Auto" Margin="2,0">
-                                    <Border Grid.Column="0" Width="24" Height="24" CornerRadius="6" Background="{StaticResource ThemeSystemOrangeBrush}" VerticalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon_FrameRate}" Width="11" Height="11" Foreground="#FFFFFF" />
-                                    </Border>
-                                    <StackPanel Grid.Column="1" Margin="8,0" VerticalAlignment="Center" Spacing="1">
-                                        <TextBlock Text="{Binding [Display_TargetFrameRate], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                        <TextBlock Text="Refresh cadence" FontSize="9" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                    </StackPanel>
-                                    <ComboBox Grid.Column="2" Classes="dex-combobox" ItemsSource="{Binding AvailableFps}" SelectedItem="{Binding SelectedFps}" Width="135" VerticalAlignment="Center" />
-                                </Grid>
-
-                                <Rectangle Height="1" Fill="{StaticResource ThemeDividerBrush}" Margin="34,0,0,0" />
-
-                                <!-- Row 3: Video Codec -->
-                                <Grid Height="40" ColumnDefinitions="Auto, *, Auto" Margin="2,0">
-                                    <Border Grid.Column="0" Width="24" Height="24" CornerRadius="6" Background="{StaticResource ThemeSystemPurpleBrush}" VerticalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon_Codec}" Width="11" Height="11" Foreground="#FFFFFF" />
-                                    </Border>
-                                    <StackPanel Grid.Column="1" Margin="8,0" VerticalAlignment="Center" Spacing="1">
-                                        <TextBlock Text="{Binding [Display_VideoCodec], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                        <TextBlock Text="Hardware profile" FontSize="9" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                    </StackPanel>
-                                    <ComboBox Grid.Column="2" Classes="dex-combobox" ItemsSource="{Binding AvailableCodecs}" SelectedItem="{Binding SelectedCodec}" Width="135" VerticalAlignment="Center" />
-                                </Grid>
-
-                                <Rectangle Height="1" Fill="{StaticResource ThemeDividerBrush}" Margin="34,0,0,0" />
-
-                                <!-- Row 4: Render Driver -->
-                                <Grid Height="40" ColumnDefinitions="Auto, *, Auto" Margin="2,0">
-                                    <Border Grid.Column="0" Width="24" Height="24" CornerRadius="6" Background="{StaticResource ThemeSystemTealBrush}" VerticalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon_Driver}" Width="11" Height="11" Foreground="#FFFFFF" />
-                                    </Border>
-                                    <StackPanel Grid.Column="1" Margin="8,0" VerticalAlignment="Center" Spacing="1">
-                                        <TextBlock Text="{Binding [Display_RenderingDriver], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                        <TextBlock Text="GPU pipeline" FontSize="9" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                    </StackPanel>
-                                    <ComboBox Grid.Column="2" Classes="dex-combobox" ItemsSource="{Binding AvailableRenderDrivers}" SelectedItem="{Binding SelectedRenderDriver}" Width="135" VerticalAlignment="Center" />
-                                </Grid>
-
-                                <Rectangle Height="1" Fill="{StaticResource ThemeDividerBrush}" Margin="34,0,0,0" />
-
-                                <!-- Row 5: Transmission Bitrate -->
-                                <Grid Height="40" ColumnDefinitions="Auto, *, Auto" Margin="2,0">
-                                    <Border Grid.Column="0" Width="24" Height="24" CornerRadius="6" Background="{StaticResource ThemeSystemGreenBrush}" VerticalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon_Bitrate}" Width="11" Height="11" Foreground="#FFFFFF" />
-                                    </Border>
-                                    <StackPanel Grid.Column="1" Margin="8,0" VerticalAlignment="Center" Spacing="1">
-                                        <TextBlock Text="{Binding [Display_TransmissionBitrate], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                        <TextBlock Text="{Binding BitrateStatusHint}" FontSize="8.5" Foreground="{StaticResource ThemeLabelSecondaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="110" />
-                                    </StackPanel>
-                                    <ComboBox Grid.Column="2" Classes="dex-combobox" ItemsSource="{Binding BitratePresets}" SelectedItem="{Binding SelectedBitratePreset}" Width="135" VerticalAlignment="Center" />
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- CARD 3: SESSION OPTIONS & INTEGRATION (HEADER INSIDE CARD, 100% FLUSH AT TOP) -->
-                        <Border Grid.Column="2"
-                                Classes="glass-card">
-                            <StackPanel Spacing="8">
-                                <!-- Integrated Header INSIDE Card -->
-                                <TextBlock Text="{Binding [QuickOptions_Header], Source={x:Static loc:LocalizationManager.Instance}}"
-                                           FontSize="9.5"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource ThemeLabelSecondaryBrush}"
-                                           Margin="2,0,0,0" />
-                                <Rectangle Height="1" Fill="{StaticResource ThemeDividerBrush}" />
-
-                                <!-- Row 1: Screen Off -->
-                                <Grid Height="40" ColumnDefinitions="*, Auto" Margin="4,0">
-                                    <StackPanel VerticalAlignment="Center" Spacing="1">
-                                        <TextBlock Text="{Binding [QuickOptions_TurnScreenOff], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                        <TextBlock Text="{Binding [QuickOptions_TurnScreenOff_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                    </StackPanel>
-                                    <ToggleSwitch Grid.Column="1" Classes="dex-switch" IsChecked="{Binding TurnScreenOff}" VerticalAlignment="Center" />
-                                </Grid>
-
-                                <Rectangle Height="1" Fill="{StaticResource ThemeDividerBrush}" Margin="4,0,0,0" />
-
-                                <!-- Row 2: UHID Mouse -->
-                                <Grid Height="40" ColumnDefinitions="*, Auto" Margin="4,0">
-                                    <StackPanel VerticalAlignment="Center" Spacing="1">
-                                        <TextBlock Text="{Binding [QuickOptions_NativeUhidMouse], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                        <TextBlock Text="{Binding [QuickOptions_NativeUhidMouse_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                    </StackPanel>
-                                    <ToggleSwitch Grid.Column="1" Classes="dex-switch" IsChecked="{Binding MouseUhidEnabled}" VerticalAlignment="Center" />
-                                </Grid>
-
-                                <Rectangle Height="1" Fill="{StaticResource ThemeDividerBrush}" Margin="4,0,0,0" />
-
-                                <!-- Row 3: Forward Shortcuts -->
-                                <Grid Height="40" ColumnDefinitions="*, Auto" Margin="4,0">
-                                    <StackPanel VerticalAlignment="Center" Spacing="1">
-                                        <TextBlock Text="{Binding [QuickOptions_ForwardShortcuts], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                        <TextBlock Text="{Binding [QuickOptions_ForwardShortcuts_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                    </StackPanel>
-                                    <ToggleSwitch Grid.Column="1" Classes="dex-switch" IsChecked="{Binding ForwardShortcuts}" VerticalAlignment="Center" />
-                                </Grid>
-
-                                <Rectangle Height="1" Fill="{StaticResource ThemeDividerBrush}" Margin="4,0,0,0" />
-
-                                <!-- Row 4: Stay Awake -->
-                                <Grid Height="40" ColumnDefinitions="*, Auto" Margin="4,0">
-                                    <StackPanel VerticalAlignment="Center" Spacing="1">
-                                        <TextBlock Text="{Binding [QuickOptions_StayAwake], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                        <TextBlock Text="{Binding [QuickOptions_StayAwake_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                    </StackPanel>
-                                    <ToggleSwitch Grid.Column="1" Classes="dex-switch" IsChecked="{Binding StayAwake}" VerticalAlignment="Center" />
-                                </Grid>
-
-                                <Rectangle Height="1" Fill="{StaticResource ThemeDividerBrush}" Margin="4,0,0,0" />
-
-                                <!-- Row 5: Low Latency Audio -->
-                                <Grid Height="40" ColumnDefinitions="*, Auto" Margin="4,0">
-                                    <StackPanel VerticalAlignment="Center" Spacing="1">
-                                        <TextBlock Text="{Binding [QuickOptions_LowLatencyAudio], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeLabelPrimaryBrush}" />
-                                        <TextBlock Text="{Binding [QuickOptions_LowLatencyAudio_Desc], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                    </StackPanel>
-                                    <ToggleSwitch Grid.Column="1" Classes="dex-switch" IsChecked="{Binding LowLatencyAudio}" VerticalAlignment="Center" />
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-
-                    <!-- EXECUTION CONSOLE INSPECTOR (EXPANDS TO FILL REMAINING HEIGHT AND ALIGN WITH CARD 1 AT BOTTOM) -->
-                    <Border Grid.Row="2"
-                            Classes="glass-card"
-                            ClipToBounds="True"
-                            VerticalAlignment="Stretch"
-                            IsVisible="{Binding IsLogExpanded}"
-                            Padding="0">
-                        <Grid RowDefinitions="28, *">
-                            <!-- Inspector Sub-Header -->
-                            <Border Grid.Row="0"
-                                    Background="#E61A1A1D"
-                                    BorderBrush="{StaticResource ThemeBorderSubtleBrush}"
-                                    BorderThickness="0,0,0,1"
-                                    Padding="12,0">
-                                <Grid ColumnDefinitions="Auto, *, Auto">
-                                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon_Terminal}" Width="11" Height="11" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                        <TextBlock Text="{Binding [Console_Header], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                    </StackPanel>
-
-                                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                        <Button Classes="btn-secondary"
-                                                Height="20"
-                                                Padding="8,0"
-                                                Command="{Binding CopyCliCommandCommand}"
-                                                VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding [Console_CopyCli], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10" />
-                                        </Button>
-
-                                        <Button Classes="btn-secondary"
-                                                Height="20"
-                                                Padding="8,0"
-                                                Command="{Binding CopyTerminalLogsCommand}"
-                                                VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding [Console_CopyLogs], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10" />
-                                        </Button>
-
-                                        <Button Classes="btn-secondary"
-                                                Height="20"
-                                                Padding="8,0"
-                                                Command="{Binding ClearLogsCommand}"
-                                                VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding [Action_Clear], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10" />
-                                        </Button>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
-
-                            <!-- Terminal Content Stream -->
-                            <ScrollViewer x:Name="TerminalScrollViewer"
-                                          Grid.Row="1"
-                                          Padding="12,8,12,20"
-                                          HorizontalScrollBarVisibility="Disabled"
-                                          VerticalScrollBarVisibility="Auto">
-                                <SelectableTextBlock x:Name="TerminalTextBlock"
-                                                     FontFamily="Cascadia Code, Consolas, monospace"
-                                                     FontSize="10"
-                                                     TextWrapping="Wrap"
-                                                     Background="Transparent"
-                                                     SelectionBrush="#2563EB"
-                                                     Margin="0,0,0,12">
-                                    <SelectableTextBlock.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="{Binding [Console_CopyLogs], Source={x:Static loc:LocalizationManager.Instance}}"
-                                                      Command="{Binding CopyTerminalLogsCommand}" />
-                                            <MenuItem Header="{Binding [Console_CopyCli], Source={x:Static loc:LocalizationManager.Instance}}"
-                                                      Command="{Binding CopyCliCommandCommand}" />
-                                            <Separator />
-                                            <MenuItem Header="{Binding [Action_Clear], Source={x:Static loc:LocalizationManager.Instance}}"
-                                                      Command="{Binding ClearLogsCommand}" />
-                                        </ContextMenu>
-                                    </SelectableTextBlock.ContextMenu>
-                                </SelectableTextBlock>
-                            </ScrollViewer>
-                        </Grid>
-                    </Border>
-
-                </Grid>
-            </Grid>
-
-            <!-- 3. FAQ MODAL DIALOG OVERLAY (CENTERED OVER WINDOW CONTENT WITH DARK FROSTED BACKDROP) -->
-            <Grid Grid.Row="0"
-                  Grid.RowSpan="2"
-                  IsVisible="{Binding IsFaqOpen}"
-                  ZIndex="100">
-
-                <!-- Dark Frosted Backdrop (Dims background, provides depth, clicking outside closes dialog) -->
-                <Button Command="{Binding CloseFaqCommand}"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        Background="#B80A0D14"
-                        BorderThickness="0"
-                        Padding="0"
-                        Margin="0">
-                    <Button.Template>
-                        <ControlTemplate>
-                            <Border Background="{TemplateBinding Background}" />
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
-
-                <!-- Centered Modal Dialog Card (Window-in-a-Window) -->
-                <Border Width="680"
-                        Height="470"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        CornerRadius="14"
-                        Background="#F51A1A1F"
-                        BorderBrush="{StaticResource ThemeBorderSubtleBrush}"
-                        BorderThickness="1"
-                        BoxShadow="0 24 64 0 #90000000, 0 4 16 0 #50000000"
-                        ClipToBounds="True">
-                    <Grid RowDefinitions="44, Auto, Auto, *">
-
-                        <!-- 1. Modal Dialog Header -->
-                        <Border Grid.Row="0"
-                                Background="#E6202026"
-                                BorderBrush="{StaticResource ThemeBorderSubtleBrush}"
-                                BorderThickness="0,0,0,1"
-                                Padding="16,0">
-                            <Grid ColumnDefinitions="Auto, *, Auto">
-                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <Border Width="24" Height="24" CornerRadius="12" Background="{StaticResource ThemeAccentBlueBrush}">
-                                        <PathIcon Data="{StaticResource Icon_Help}" Width="12" Height="12" Foreground="#FFFFFF" />
-                                    </Border>
-                                    <TextBlock Text="{Binding [Faq_Title], Source={x:Static loc:LocalizationManager.Instance}}"
-                                               FontSize="13"
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <!-- Dedicated Console Window Trigger -->
+                            <Button Classes="pill-button"
+                                    Command="{Binding OpenConsoleWindowCommand}"
+                                    ToolTip.Tip="Open dedicated execution console window">
+                                <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                    <PathIcon Data="{StaticResource Icon_Terminal}" Width="10" Height="10" Foreground="#FF7A00" />
+                                    <TextBlock Text="CONSOLE  ↗"
+                                               FontSize="9.5"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource ThemeLabelPrimaryBrush}"
-                                               VerticalAlignment="Center" />
-                                    <TextBlock Text="•" Foreground="{StaticResource ThemeLabelTertiaryBrush}" VerticalAlignment="Center" />
-                                    <TextBlock Text="{Binding [Faq_Subtitle], Source={x:Static loc:LocalizationManager.Instance}}"
-                                               FontSize="11"
-                                               Foreground="{StaticResource ThemeLabelSecondaryBrush}"
-                                               VerticalAlignment="Center" />
+                                               LetterSpacing="0.4"
+                                               Foreground="#F5F5F7" />
                                 </StackPanel>
+                            </Button>
 
-                                <!-- Close Button -->
-                                <Button Grid.Column="2"
-                                        Classes="btn-secondary"
-                                        Command="{Binding CloseFaqCommand}"
-                                        Height="24"
-                                        Padding="8,0"
-                                        VerticalAlignment="Center"
-                                        ToolTip.Tip="{Binding [Faq_Close], Source={x:Static loc:LocalizationManager.Instance}}">
-                                    <TextBlock Text="✕" FontSize="11" FontWeight="Bold" Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                </Button>
-                            </Grid>
+                            <!-- FAQ & Diagnostics Sub-Screen Trigger -->
+                            <Button Classes="pill-button"
+                                    Command="{Binding OpenFaqFromSettingsCommand}"
+                                    ToolTip.Tip="{Binding [Faq_Title], Source={x:Static loc:LocalizationManager.Instance}}">
+                                <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                    <PathIcon Data="{StaticResource Icon_Help}" Width="10" Height="10" Foreground="#D0D0D7" />
+                                    <TextBlock Text="FAQ &amp; DOCTOR"
+                                               FontSize="9.5"
+                                               FontWeight="SemiBold"
+                                               LetterSpacing="0.4"
+                                               Foreground="#D0D0D7" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Scrollable Settings Cards -->
+                    <ScrollViewer Grid.Row="1"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Padding="0,0,6,2">
+                        <StackPanel Spacing="10">
+
+                            <!-- CARD 1: DISPLAY & HARDWARE ENCODER -->
+                            <Border Classes="glass-card">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="DISPLAY &amp; ENCODER"
+                                               FontSize="9"
+                                               FontWeight="SemiBold"
+                                               LetterSpacing="0.8"
+                                               Foreground="#86868B" />
+
+                                    <!-- Resolution -->
+                                    <Grid ColumnDefinitions="*, 180" Height="28">
+                                        <TextBlock Text="{Binding [Display_ResolutionLabel], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                   FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                        <ComboBox Grid.Column="1" Classes="dex-combobox"
+                                                  ItemsSource="{Binding AvailableResolutions}"
+                                                  SelectedItem="{Binding SelectedResolution}"
+                                                  HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <!-- Custom Width x Height (only visible when Resolution == Custom) -->
+                                    <Grid ColumnDefinitions="*, 84, 12, 84"
+                                          Height="28"
+                                          IsVisible="{Binding IsCustomResolution}">
+                                        <TextBlock Text="Custom Dimensions (px)"
+                                                   FontSize="10.5" Foreground="#86868B" VerticalAlignment="Center" />
+                                        <TextBox Grid.Column="1" Text="{Binding CustomWidth}" VerticalAlignment="Center" HorizontalContentAlignment="Center" />
+                                        <TextBlock Grid.Column="2" Text="×" FontSize="11" Foreground="#86868B" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <TextBox Grid.Column="3" Text="{Binding CustomHeight}" VerticalAlignment="Center" HorizontalContentAlignment="Center" />
+                                    </Grid>
+
+                                    <!-- Display Density (DPI) -->
+                                    <Grid ColumnDefinitions="*, 180" Height="28">
+                                        <TextBlock Text="Display Density (DPI)"
+                                                   FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                        <ComboBox Grid.Column="1" Classes="dex-combobox"
+                                                  ItemsSource="{Binding AvailableDpi}"
+                                                  SelectedItem="{Binding SelectedDpi}"
+                                                  HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <!-- Target Frame Rate -->
+                                    <Grid ColumnDefinitions="*, 180" Height="28">
+                                        <TextBlock Text="{Binding [Display_TargetFrameRate], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                   FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                        <ComboBox Grid.Column="1" Classes="dex-combobox"
+                                                  ItemsSource="{Binding AvailableFps}"
+                                                  SelectedItem="{Binding SelectedFps}"
+                                                  HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <!-- Video Codec -->
+                                    <Grid ColumnDefinitions="*, 180" Height="28">
+                                        <TextBlock Text="{Binding [Display_VideoCodec], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                   FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                        <ComboBox Grid.Column="1" Classes="dex-combobox"
+                                                  ItemsSource="{Binding AvailableCodecs}"
+                                                  SelectedItem="{Binding SelectedCodec}"
+                                                  HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <!-- Render Driver -->
+                                    <Grid ColumnDefinitions="*, 180" Height="28">
+                                        <TextBlock Text="{Binding [Display_RenderingDriver], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                   FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                        <ComboBox Grid.Column="1" Classes="dex-combobox"
+                                                  ItemsSource="{Binding AvailableRenderDrivers}"
+                                                  SelectedItem="{Binding SelectedRenderDriver}"
+                                                  HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <!-- Bitrate -->
+                                    <Grid ColumnDefinitions="*, 180" Height="28">
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding [Display_TransmissionBitrate], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                       FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" />
+                                            <TextBlock Text="{Binding BitrateStatusHint}"
+                                                       FontSize="8.5" Foreground="#86868B" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                        <ComboBox Grid.Column="1" Classes="dex-combobox"
+                                                  ItemsSource="{Binding BitratePresets}"
+                                                  SelectedItem="{Binding SelectedBitratePreset}"
+                                                  HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- CARD 2: SESSION & INPUT OPTIONS -->
+                            <Border Classes="glass-card">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="SESSION &amp; INPUT"
+                                               FontSize="9"
+                                               FontWeight="SemiBold"
+                                               LetterSpacing="0.8"
+                                               Foreground="#86868B" />
+
+                                    <!-- Mouse / Input Mode Dropdown -->
+                                    <Grid ColumnDefinitions="*, 180" Height="28">
+                                        <TextBlock Text="Mouse / Input Driver"
+                                                   FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                        <ComboBox Grid.Column="1" Classes="dex-combobox"
+                                                  ItemsSource="{Binding AvailableInputModes}"
+                                                  SelectedItem="{Binding SelectedInputMode}"
+                                                  HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <!-- Turn Screen Off -->
+                                    <Grid ColumnDefinitions="*, Auto" Height="26">
+                                        <TextBlock Text="{Binding [QuickOptions_TurnScreenOff], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                   FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                        <ToggleSwitch Grid.Column="1" Classes="dex-switch" IsChecked="{Binding TurnScreenOff}" />
+                                    </Grid>
+
+                                    <!-- Forward Shortcuts -->
+                                    <Grid ColumnDefinitions="*, Auto" Height="26">
+                                        <TextBlock Text="{Binding [QuickOptions_ForwardShortcuts], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                   FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                        <ToggleSwitch Grid.Column="1" Classes="dex-switch" IsChecked="{Binding ForwardShortcuts}" />
+                                    </Grid>
+
+                                    <!-- Stay Awake -->
+                                    <Grid ColumnDefinitions="*, Auto" Height="26">
+                                        <TextBlock Text="{Binding [QuickOptions_StayAwake], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                   FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                        <ToggleSwitch Grid.Column="1" Classes="dex-switch" IsChecked="{Binding StayAwake}" />
+                                    </Grid>
+
+                                    <!-- Low Latency Audio -->
+                                    <Grid ColumnDefinitions="*, Auto" Height="26">
+                                        <TextBlock Text="{Binding [QuickOptions_LowLatencyAudio], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                   FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                        <ToggleSwitch Grid.Column="1" Classes="dex-switch" IsChecked="{Binding LowLatencyAudio}" />
+                                    </Grid>
+
+                                    <!-- Fullscreen Window -->
+                                    <Grid ColumnDefinitions="*, Auto" Height="26">
+                                        <TextBlock Text="Launch in Fullscreen"
+                                                   FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                        <ToggleSwitch Grid.Column="1" Classes="dex-switch" IsChecked="{Binding Fullscreen}" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- CARD 3: SYSTEM, LANGUAGE & BINARY PATHS -->
+                            <Border Classes="glass-card">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="SYSTEM &amp; BINARIES"
+                                               FontSize="9"
+                                               FontWeight="SemiBold"
+                                               LetterSpacing="0.8"
+                                               Foreground="#86868B" />
+
+                                    <!-- Language Dropdown -->
+                                    <Grid ColumnDefinitions="*, 180" Height="28">
+                                        <TextBlock Text="{Binding [General_Language_Desc], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                   FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                        <ComboBox Grid.Column="1" Classes="dex-combobox"
+                                                  ItemsSource="{Binding AvailableLanguageOptions}"
+                                                  SelectedItem="{Binding SelectedLanguageOption}"
+                                                  HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <!-- scrcpy Binary Path -->
+                                    <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
+                                        <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
+                                            <TextBlock Text="scrcpy Executable" FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" />
+                                            <TextBlock Text="{Binding ScrcpyPath, TargetNullValue='Auto-detect from PATH'}"
+                                                       FontSize="9"
+                                                       FontFamily="Cascadia Code, Consolas, monospace"
+                                                       Foreground="#86868B"
+                                                       TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                        <Button Grid.Column="1"
+                                                Classes="pill-button"
+                                                Command="{Binding BrowseScrcpyPathCommand}"
+                                                VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                                <PathIcon Data="{StaticResource Icon_Folder}" Width="10" Height="10" Foreground="#D0D0D7" />
+                                                <TextBlock Text="BROWSE" FontSize="9.5" FontWeight="SemiBold" Foreground="#D0D0D7" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+
+                                    <!-- adb Binary Path -->
+                                    <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
+                                        <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
+                                            <TextBlock Text="adb Executable" FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" />
+                                            <TextBlock Text="{Binding AdbPath, TargetNullValue='Auto-detect from PATH'}"
+                                                       FontSize="9"
+                                                       FontFamily="Cascadia Code, Consolas, monospace"
+                                                       Foreground="#86868B"
+                                                       TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                        <Button Grid.Column="1"
+                                                Classes="pill-button"
+                                                Command="{Binding BrowseAdbPathCommand}"
+                                                VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                                <PathIcon Data="{StaticResource Icon_Folder}" Width="10" Height="10" Foreground="#D0D0D7" />
+                                                <TextBlock Text="BROWSE" FontSize="9.5" FontWeight="SemiBold" Foreground="#D0D0D7" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- ========================================================================= -->
+                <!-- 2C. INTERNAL FAQ & ENVIRONMENT DOCTOR SUB-SCREEN (Same Window Dimension)  -->
+                <!-- ========================================================================= -->
+                <Grid IsVisible="{Binding IsFaqOpen}"
+                      RowDefinitions="Auto, Auto, Auto, *"
+                      RowSpacing="6">
+
+                    <!-- Sub-Header -->
+                    <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Button Classes="pill-button"
+                                    Command="{Binding OpenSettingsCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                    <PathIcon Data="{StaticResource Icon_Back}" Width="10" Height="10" Foreground="#D0D0D7" />
+                                    <TextBlock Text="SETTINGS" FontSize="9.5" FontWeight="SemiBold" LetterSpacing="0.5" Foreground="#D0D0D7" />
+                                </StackPanel>
+                            </Button>
+                            <TextBlock Text="FAQ &amp; DIAGNOSTICS"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       LetterSpacing="0.8"
+                                       Foreground="#86868B"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <Button Grid.Column="2"
+                                Classes="pill-button"
+                                Command="{Binding RunDoctorCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                <PathIcon Data="{StaticResource Icon_Refresh}" Width="10" Height="10" Foreground="#FF7A00" />
+                                <TextBlock Text="CHECK ENV" FontSize="9.5" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <!-- Doctor Summary & Search Row -->
+                    <Grid Grid.Row="1" ColumnDefinitions="*, 180" ColumnSpacing="8">
+                        <Border Grid.Column="0"
+                                Background="#16161C"
+                                BorderBrush="#2B2B33"
+                                BorderThickness="1"
+                                CornerRadius="9"
+                                Padding="10,5">
+                            <TextBlock Text="{Binding DoctorSummaryText}"
+                                       FontSize="10"
+                                       Foreground="#D0D0D7"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" />
                         </Border>
+                        <TextBox Grid.Column="1"
+                                 Text="{Binding FaqSearchQuery, Mode=TwoWay}"
+                                 Watermark="{Binding [Faq_SearchPlaceholder], Source={x:Static loc:LocalizationManager.Instance}}"
+                                 FontSize="10.5" />
+                    </Grid>
 
-                        <!-- 2. Search Box -->
-                        <Border Grid.Row="1" Padding="16,10,16,6">
-                            <TextBox Text="{Binding FaqSearchQuery, Mode=TwoWay}"
-                                     Watermark="{Binding [Faq_SearchPlaceholder], Source={x:Static loc:LocalizationManager.Instance}}"
-                                     FontSize="11.5"
-                                     Padding="12,7"
-                                     CornerRadius="7" />
-                        </Border>
-
-                        <!-- 3. Category Filter Chips -->
-                        <ItemsControl Grid.Row="2"
-                                      ItemsSource="{Binding FaqCategories}"
-                                      Margin="16,2,16,8">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="appModels:FaqCategoryItem">
-                                    <Button Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).SelectFaqCategoryCommand}"
-                                            CommandParameter="{Binding Id}"
-                                            Padding="10,4"
-                                            Margin="0,0,6,6"
-                                            FontSize="10.5"
-                                            FontWeight="SemiBold"
-                                            CornerRadius="6"
-                                            BorderThickness="1"
-                                            Background="{Binding BackgroundBrush}"
-                                            BorderBrush="{Binding BorderBrushColor}"
-                                            Foreground="{Binding ForegroundBrush}"
-                                            Content="{Binding HeaderText}" />
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-
-                        <!-- 4. Scrollable FAQ Accordion List -->
-                        <ScrollViewer Grid.Row="3"
-                                      HorizontalScrollBarVisibility="Disabled"
-                                      VerticalScrollBarVisibility="Auto"
-                                      Padding="16,0,16,16">
-                            <StackPanel Spacing="6">
-                                <!-- No Results Notice (if empty) -->
-                                <Border IsVisible="{Binding HasNoFaqResults}"
-                                        Background="#201C1C1E"
-                                        BorderBrush="{StaticResource ThemeBorderSubtleBrush}"
+                    <!-- Category Filter Pills -->
+                    <ItemsControl Grid.Row="2" ItemsSource="{Binding FaqCategories}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="appModels:FaqCategoryItem">
+                                <Button Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).SelectFaqCategoryCommand}"
+                                        CommandParameter="{Binding Id}"
+                                        Padding="8,3"
+                                        Margin="0,0,5,4"
+                                        FontSize="9.5"
+                                        FontWeight="SemiBold"
+                                        CornerRadius="10"
                                         BorderThickness="1"
-                                        CornerRadius="8"
-                                        Padding="20"
-                                        Margin="0,16,0,0">
-                                    <StackPanel Spacing="5" HorizontalAlignment="Center">
-                                        <TextBlock Text="🔍" FontSize="22" HorizontalAlignment="Center" />
-                                        <TextBlock Text="{Binding [Faq_NoResults], Source={x:Static loc:LocalizationManager.Instance}}"
-                                                   FontSize="12"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{StaticResource ThemeLabelPrimaryBrush}"
-                                                   HorizontalAlignment="Center" />
-                                        <TextBlock Text="{Binding [Faq_NoResults_Desc], Source={x:Static loc:LocalizationManager.Instance}}"
-                                                   FontSize="11"
-                                                   Foreground="{StaticResource ThemeLabelSecondaryBrush}"
-                                                   TextWrapping="Wrap"
-                                                   HorizontalAlignment="Center"
-                                                   TextAlignment="Center" />
-                                    </StackPanel>
-                                </Border>
+                                        Background="{Binding BackgroundBrush}"
+                                        BorderBrush="{Binding BorderBrushColor}"
+                                        Foreground="{Binding ForegroundBrush}"
+                                        Content="{Binding HeaderText}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
-                                <!-- FAQ Items List -->
-                                <ItemsControl ItemsSource="{Binding FilteredFaqItems}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="appModels:FaqItem">
-                                            <Border Background="#201C1C1E"
-                                                    BorderBrush="{StaticResource ThemeBorderSubtleBrush}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="8"
-                                                    Margin="0,0,0,6">
-                                                <StackPanel>
-                                                    <!-- Card Header (Expander trigger) -->
-                                                    <Button Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ToggleFaqItemExpandedCommand}"
-                                                            CommandParameter="{Binding}"
-                                                            HorizontalAlignment="Stretch"
-                                                            HorizontalContentAlignment="Stretch"
-                                                            Background="Transparent"
-                                                            BorderThickness="0"
-                                                            Padding="12,9"
-                                                            CornerRadius="8">
-                                                        <Grid ColumnDefinitions="Auto, *, Auto">
-                                                            <Border Grid.Column="0"
-                                                                    Background="#2A2A2E"
-                                                                    CornerRadius="4"
-                                                                    Padding="6,2"
-                                                                    Margin="0,0,10,0"
-                                                                    VerticalAlignment="Center">
-                                                                <TextBlock Text="{Binding CategoryName}"
-                                                                           FontSize="9"
-                                                                           FontWeight="SemiBold"
-                                                                           Foreground="{StaticResource ThemeLabelSecondaryBrush}" />
-                                                            </Border>
+                    <!-- Scrollable FAQ Accordion List -->
+                    <ScrollViewer Grid.Row="3"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Padding="0,0,6,2">
+                        <ItemsControl ItemsSource="{Binding FilteredFaqItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="appModels:FaqItem">
+                                    <Border Background="#16161C"
+                                            BorderBrush="#2B2B33"
+                                            BorderThickness="1"
+                                            CornerRadius="10"
+                                            Margin="0,0,0,6">
+                                        <StackPanel>
+                                            <Button Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ToggleFaqItemExpandedCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    HorizontalAlignment="Stretch"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Padding="10,7"
+                                                    CornerRadius="10">
+                                                <Grid ColumnDefinitions="Auto, *, Auto">
+                                                    <Border Grid.Column="0"
+                                                            Background="#24242C"
+                                                            CornerRadius="5"
+                                                            Padding="5,2"
+                                                            Margin="0,0,8,0"
+                                                            VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding CategoryName}"
+                                                                   FontSize="8.5"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="#86868B" />
+                                                    </Border>
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding Title}"
+                                                               FontSize="11"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="#F5F5F7"
+                                                               TextWrapping="Wrap"
+                                                               VerticalAlignment="Center"
+                                                               Margin="0,0,8,0" />
+                                                    <TextBlock Grid.Column="2"
+                                                               Text="{Binding ExpandIcon}"
+                                                               FontSize="10"
+                                                               Foreground="#86868B"
+                                                               VerticalAlignment="Center" />
+                                                </Grid>
+                                            </Button>
 
-                                                            <TextBlock Grid.Column="1"
-                                                                       Text="{Binding Title}"
-                                                                       FontSize="11.5"
-                                                                       FontWeight="SemiBold"
-                                                                       Foreground="{StaticResource ThemeLabelPrimaryBrush}"
+                                            <Border IsVisible="{Binding IsExpanded}"
+                                                    BorderBrush="#24242C"
+                                                    BorderThickness="0,1,0,0"
+                                                    Padding="10,8"
+                                                    Background="#111115"
+                                                    CornerRadius="0,0,10,10">
+                                                <StackPanel Spacing="6">
+                                                    <TextBlock Text="{Binding Symptom}" FontSize="10.5" Foreground="#86868B" TextWrapping="Wrap" />
+                                                    <TextBlock Text="{Binding Solution}" FontSize="10.5" Foreground="#D0D0D7" TextWrapping="Wrap" />
+                                                    <Border IsVisible="{Binding HasCommand}"
+                                                            Background="#16161C"
+                                                            BorderBrush="#2B2B33"
+                                                            BorderThickness="1"
+                                                            CornerRadius="7"
+                                                            Padding="8,5">
+                                                        <Grid ColumnDefinitions="*, Auto">
+                                                            <TextBlock Grid.Column="0"
+                                                                       Text="{Binding CommandCode}"
+                                                                       FontFamily="Cascadia Code, Consolas, monospace"
+                                                                       FontSize="9.5"
+                                                                       Foreground="#FF9A3D"
                                                                        TextWrapping="Wrap"
-                                                                       VerticalAlignment="Center"
-                                                                       Margin="0,0,10,0" />
-
-                                                            <Border Grid.Column="2"
-                                                                    Width="22" Height="22"
-                                                                    CornerRadius="11"
-                                                                    Background="#2A2A2E"
-                                                                    VerticalAlignment="Center">
-                                                                <TextBlock Text="{Binding ExpandIcon}"
-                                                                           FontSize="9.5"
-                                                                           FontWeight="Bold"
-                                                                           Foreground="{StaticResource ThemeLabelSecondaryBrush}"
-                                                                           HorizontalAlignment="Center"
-                                                                           VerticalAlignment="Center" />
-                                                            </Border>
+                                                                       VerticalAlignment="Center" />
+                                                            <Button Grid.Column="1"
+                                                                    Classes="pill-button"
+                                                                    Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).CopyFaqCommandTextCommand}"
+                                                                    CommandParameter="{Binding CommandCode}"
+                                                                    Height="22"
+                                                                    Padding="8,0"
+                                                                    Margin="8,0,0,0">
+                                                                <TextBlock Text="COPY" FontSize="8.5" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                                                            </Button>
                                                         </Grid>
-                                                    </Button>
-
-                                                    <!-- Expanded Details -->
-                                                    <Border IsVisible="{Binding IsExpanded}"
-                                                            BorderBrush="{StaticResource ThemeDividerBrush}"
-                                                            BorderThickness="0,1,0,0"
-                                                            Padding="14,12"
-                                                            Background="#16161A">
-                                                        <StackPanel Spacing="9">
-                                                            <!-- Symptom -->
-                                                            <StackPanel Spacing="2">
-                                                                <TextBlock Text="{Binding [Faq_Label_Symptom], Source={x:Static loc:LocalizationManager.Instance}}"
-                                                                           FontSize="10"
-                                                                           FontWeight="Bold"
-                                                                           Foreground="{StaticResource ThemeSystemRedBrush}" />
-                                                                <TextBlock Text="{Binding Symptom}"
-                                                                           FontSize="11"
-                                                                           Foreground="{StaticResource ThemeLabelSecondaryBrush}"
-                                                                           TextWrapping="Wrap" />
-                                                            </StackPanel>
-
-                                                            <!-- Root Cause -->
-                                                            <StackPanel Spacing="2">
-                                                                <TextBlock Text="{Binding [Faq_Label_Cause], Source={x:Static loc:LocalizationManager.Instance}}"
-                                                                           FontSize="10"
-                                                                           FontWeight="Bold"
-                                                                           Foreground="{StaticResource ThemeSystemOrangeBrush}" />
-                                                                <TextBlock Text="{Binding Cause}"
-                                                                           FontSize="11"
-                                                                           Foreground="{StaticResource ThemeLabelSecondaryBrush}"
-                                                                           TextWrapping="Wrap" />
-                                                            </StackPanel>
-
-                                                            <!-- Solution -->
-                                                            <StackPanel Spacing="2">
-                                                                <TextBlock Text="{Binding [Faq_Label_Solution], Source={x:Static loc:LocalizationManager.Instance}}"
-                                                                           FontSize="10"
-                                                                           FontWeight="Bold"
-                                                                           Foreground="{StaticResource ThemeSystemGreenBrush}" />
-                                                                <TextBlock Text="{Binding Solution}"
-                                                                           FontSize="11"
-                                                                           Foreground="{StaticResource ThemeLabelPrimaryBrush}"
-                                                                           TextWrapping="Wrap" />
-                                                            </StackPanel>
-
-                                                            <!-- Command Snippet with Copy Button -->
-                                                            <Border IsVisible="{Binding HasCommand}"
-                                                                    Background="#0B0D11"
-                                                                    BorderBrush="{StaticResource ThemeBorderSubtleBrush}"
-                                                                    BorderThickness="1"
-                                                                    CornerRadius="5"
-                                                                    Padding="10,8"
-                                                                    Margin="0,4,0,0">
-                                                                <Grid ColumnDefinitions="*, Auto">
-                                                                    <TextBlock Grid.Column="0"
-                                                                               Text="{Binding CommandCode}"
-                                                                               FontFamily="Cascadia Code, Consolas, monospace"
-                                                                               FontSize="10"
-                                                                               Foreground="{StaticResource ThemeAccentBlueHoverBrush}"
-                                                                               TextWrapping="Wrap"
-                                                                               VerticalAlignment="Center"
-                                                                               Margin="0,0,10,0" />
-                                                                    <Button Grid.Column="1"
-                                                                            Classes="btn-secondary"
-                                                                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).CopyFaqCommandTextCommand}"
-                                                                            CommandParameter="{Binding CommandCode}"
-                                                                            Padding="8,2"
-                                                                            Height="24"
-                                                                            VerticalAlignment="Center">
-                                                                        <TextBlock Text="{Binding [Faq_Label_CopyCommand], Source={x:Static loc:LocalizationManager.Instance}}"
-                                                                                   FontSize="9.5"
-                                                                                   Foreground="{StaticResource ThemeAccentBlueBrush}" />
-                                                                    </Button>
-                                                                </Grid>
-                                                            </Border>
-                                                        </StackPanel>
                                                     </Border>
                                                 </StackPanel>
                                             </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </ScrollViewer>
-                    </Grid>
-                </Border>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+
             </Grid>
 
+            <!-- ========================================================================= -->
+            <!-- 3. FULL-WINDOW CRITICAL ERROR OVERLAY (Dark Translucent Backdrop)         -->
+            <!-- ========================================================================= -->
+            <Border Grid.Row="0"
+                    Grid.RowSpan="2"
+                    ZIndex="200"
+                    Background="#E60C0C10"
+                    CornerRadius="14"
+                    Padding="24"
+                    IsVisible="{Binding IsCriticalErrorOverlayVisible}"
+                    PointerPressed="OnTitleBarPointerPressed">
+                <Border Background="#16161C"
+                        BorderBrush="#35353E"
+                        BorderThickness="1"
+                        CornerRadius="14"
+                        Padding="20,18"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center">
+                    <StackPanel Spacing="12">
+                        <!-- Critical Alert Header -->
+                        <Grid ColumnDefinitions="Auto, *, Auto">
+                            <Border Grid.Column="0"
+                                    Background="#2A1616"
+                                    BorderBrush="#FF453A"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Padding="8,3"
+                                    VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                    <PathIcon Data="{StaticResource Icon_Alert}" Width="10" Height="10" Foreground="#FF453A" />
+                                    <TextBlock Text="CRITICAL ALERT"
+                                               FontSize="8.5"
+                                               FontWeight="SemiBold"
+                                               LetterSpacing="0.8"
+                                               Foreground="#FF453A" />
+                                </StackPanel>
+                            </Border>
+
+                            <Button Grid.Column="2"
+                                    Classes="circle-icon"
+                                    Click="OnCloseButtonClick"
+                                    Content="×"
+                                    FontSize="15"
+                                    Foreground="#D0D0D7"
+                                    ToolTip.Tip="Close window" />
+                        </Grid>
+
+                        <!-- Error Title & Detailed Description -->
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="{Binding CriticalErrorTitle}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="#F5F5F7"
+                                       TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding CriticalErrorDescription}"
+                                       FontSize="11.5"
+                                       Foreground="#A0A0A8"
+                                       TextWrapping="Wrap"
+                                       MaxHeight="90" />
+                        </StackPanel>
+
+                        <!-- Direct Resolution Action Buttons -->
+                        <WrapPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <Button Classes="btn-primary"
+                                    Command="{Binding BrowseScrcpyPathCommand}"
+                                    IsVisible="{Binding !IsScrcpyDetected}"
+                                    Height="32"
+                                    Padding="12,0"
+                                    Margin="0,0,6,6">
+                                <TextBlock Text="LOCATE SCRCPY" FontSize="10" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                            </Button>
+
+                            <Button Classes="btn-primary"
+                                    Command="{Binding BrowseAdbPathCommand}"
+                                    IsVisible="{Binding !IsAdbDetected}"
+                                    Height="32"
+                                    Padding="12,0"
+                                    Margin="0,0,6,6">
+                                <TextBlock Text="LOCATE ADB" FontSize="10" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                            </Button>
+
+                            <Button Classes="btn-secondary"
+                                    Command="{Binding RevalidateEnvironmentCommand}"
+                                    Height="32"
+                                    Padding="12,0"
+                                    Margin="0,0,6,6">
+                                <TextBlock Text="RETRY" FontSize="10" FontWeight="SemiBold" Foreground="#D0D0D7" />
+                            </Button>
+
+                            <Button Classes="btn-secondary"
+                                    Command="{Binding OpenSettingsFromErrorCommand}"
+                                    Height="32"
+                                    Padding="12,0"
+                                    Margin="0,0,6,6">
+                                <TextBlock Text="SETTINGS" FontSize="10" FontWeight="SemiBold" Foreground="#D0D0D7" />
+                            </Button>
+
+                            <Button Classes="btn-secondary"
+                                    Command="{Binding OpenConsoleWindowCommand}"
+                                    Height="32"
+                                    Padding="12,0"
+                                    Margin="0,0,6,6">
+                                <TextBlock Text="CONSOLE  ↗" FontSize="10" FontWeight="SemiBold" Foreground="#D0D0D7" />
+                            </Button>
+
+                            <Button Classes="btn-secondary"
+                                    Command="{Binding DismissCriticalErrorCommand}"
+                                    Height="32"
+                                    Padding="12,0"
+                                    Margin="0,0,0,6">
+                                <TextBlock Text="DISMISS" FontSize="10" FontWeight="SemiBold" Foreground="#86868B" />
+                            </Button>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+            </Border>
+
         </Grid>
-    </Panel>
+    </Border>
 </Window>

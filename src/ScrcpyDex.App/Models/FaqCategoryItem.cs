@@ -35,9 +35,9 @@ namespace ScrcpyDex.App.Models
         [NotifyPropertyChangedFor(nameof(ForegroundBrush))]
         private bool _isSelected;
 
-        public string BackgroundBrush => IsSelected ? "#2563EB" : "#161F2E";
-        public string BorderBrushColor => IsSelected ? "#3B82F6" : "#1E293B";
-        public string ForegroundBrush => IsSelected ? "#FFFFFF" : "#94A3B8";
+        public string BackgroundBrush => IsSelected ? "#FF7A00" : "#24242C";
+        public string BorderBrushColor => IsSelected ? "#FF9A3D" : "#35353E";
+        public string ForegroundBrush => IsSelected ? "#F5F5F7" : "#86868B";
 
         public void RefreshLocalizedStrings()
         {

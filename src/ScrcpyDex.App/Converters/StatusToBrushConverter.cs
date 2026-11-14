@@ -25,12 +25,12 @@ namespace ScrcpyDex.App.Converters
     /// </summary>
     public sealed class StatusToBrushConverter : IValueConverter
     {
-        private static readonly IBrush GreenBrush = new SolidColorBrush(Color.Parse("#10B981"));
-        private static readonly IBrush OrangeBrush = new SolidColorBrush(Color.Parse("#F59E0B"));
-        private static readonly IBrush RedBrush = new SolidColorBrush(Color.Parse("#E11D48"));
-        private static readonly IBrush GrayBrush = new SolidColorBrush(Color.Parse("#64748B"));
-        private static readonly IBrush BlueBrush = new SolidColorBrush(Color.Parse("#38BDF8"));
-        private static readonly IBrush DarkBorderBrush = new SolidColorBrush(Color.Parse("#1E293B"));
+        private static readonly IBrush GreenBrush = new SolidColorBrush(Color.Parse("#FF7A00"));
+        private static readonly IBrush OrangeBrush = new SolidColorBrush(Color.Parse("#FFAA00"));
+        private static readonly IBrush RedBrush = new SolidColorBrush(Color.Parse("#FF453A"));
+        private static readonly IBrush GrayBrush = new SolidColorBrush(Color.Parse("#A0A0B0"));
+        private static readonly IBrush BlueBrush = new SolidColorBrush(Color.Parse("#FF7A00"));
+        private static readonly IBrush DarkBorderBrush = new SolidColorBrush(Color.Parse("#33333C"));
 
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {

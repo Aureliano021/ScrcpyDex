@@ -1,52 +1,66 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Dark Neutral Translucent Glass Semantic Colors -->
-    <Color x:Key="Color_ThemeWindowBackground">#00000000</Color>
-    <Color x:Key="Color_ThemeCardBackground">#C4222226</Color>
-    <Color x:Key="Color_ThemeCardElevated">#D828282D</Color>
-    <Color x:Key="Color_ThemeControlBackground">#4036363B</Color>
-    <Color x:Key="Color_ThemeControlHover">#5A424248</Color>
-    <Color x:Key="Color_ThemeBorderSubtle">#28FFFFFF</Color>
-    <Color x:Key="Color_ThemeDivider">#20FFFFFF</Color>
+    <!-- Precision Instrument Charcoal & Orange Semantic Palette -->
+    <Color x:Key="Color_ThemeWindowBackground">#660E0E12</Color>
+    <Color x:Key="Color_ThemeCanvasSolid">#0E0E12</Color>
+    <Color x:Key="Color_ThemeStageDisc">#121217</Color>
+    <Color x:Key="Color_ThemeWellBackground">#111115</Color>
+    <Color x:Key="Color_ThemeCardBackground">#16161C</Color>
+    <Color x:Key="Color_ThemeCardElevated">#1B1B22</Color>
+    <Color x:Key="Color_ThemeControlBackground">#24242C</Color>
+    <Color x:Key="Color_ThemeControlHover">#292932</Color>
+    <Color x:Key="Color_ThemeControlSelected">#282832</Color>
 
-    <!-- Text & Label Colors -->
-    <Color x:Key="Color_ThemeLabelPrimary">#FFFFFF</Color>
-    <Color x:Key="Color_ThemeLabelSecondary">#9C9CA1</Color>
-    <Color x:Key="Color_ThemeLabelTertiary">#68686C</Color>
+    <!-- Borders & Dividers -->
+    <Color x:Key="Color_ThemeOuterBorder">#33333C</Color>
+    <Color x:Key="Color_ThemeCardBorder">#2B2B33</Color>
+    <Color x:Key="Color_ThemeControlBorder">#35353E</Color>
+    <Color x:Key="Color_ThemeDivider">#24242C</Color>
+    <Color x:Key="Color_ThemeBackdropOverlay">#D80A0A0E</Color>
 
-    <!-- Accent & Metric State Colors -->
-    <Color x:Key="Color_ThemeAccentBlue">#0A84FF</Color>
-    <Color x:Key="Color_ThemeAccentBlueHover">#409CFF</Color>
-    <Color x:Key="Color_ThemeSystemGreen">#30D158</Color>
-    <Color x:Key="Color_ThemeSystemOrange">#FF9F0A</Color>
-    <Color x:Key="Color_ThemeSystemRed">#FF453A</Color>
-    <Color x:Key="Color_ThemeSystemPurple">#BF5AF2</Color>
-    <Color x:Key="Color_ThemeSystemTeal">#64D2FF</Color>
+    <!-- Typography Colors -->
+    <Color x:Key="Color_ThemeLabelPrimary">#F5F5F7</Color>
+    <Color x:Key="Color_ThemeLabelBright">#D0D0D7</Color>
+    <Color x:Key="Color_ThemeLabelSecondary">#86868B</Color>
+    <Color x:Key="Color_ThemeLabelTertiary">#777780</Color>
 
-    <!-- Solid / Translucent Brushes -->
+    <!-- Accent & State Colors (85 / 10 / 5 Discipline) -->
+    <Color x:Key="Color_ThemeAccentOrange">#FF7A00</Color>
+    <Color x:Key="Color_ThemeAccentOrangeHover">#FF8C1A</Color>
+    <Color x:Key="Color_ThemeAccentOrangeBorder">#FF9A3D</Color>
+    <Color x:Key="Color_ThemeWarningAmber">#FFAA00</Color>
+    <Color x:Key="Color_ThemeDangerRed">#FF453A</Color>
+
+    <!-- Brushes -->
     <SolidColorBrush x:Key="ThemeWindowBackgroundBrush" Color="{StaticResource Color_ThemeWindowBackground}" />
+    <SolidColorBrush x:Key="ThemeCanvasSolidBrush" Color="{StaticResource Color_ThemeCanvasSolid}" />
+    <SolidColorBrush x:Key="ThemeStageDiscBrush" Color="{StaticResource Color_ThemeStageDisc}" />
+    <SolidColorBrush x:Key="ThemeWellBackgroundBrush" Color="{StaticResource Color_ThemeWellBackground}" />
     <SolidColorBrush x:Key="ThemeCardBackgroundBrush" Color="{StaticResource Color_ThemeCardBackground}" />
     <SolidColorBrush x:Key="ThemeCardElevatedBrush" Color="{StaticResource Color_ThemeCardElevated}" />
     <SolidColorBrush x:Key="ThemeControlBackgroundBrush" Color="{StaticResource Color_ThemeControlBackground}" />
     <SolidColorBrush x:Key="ThemeControlHoverBrush" Color="{StaticResource Color_ThemeControlHover}" />
-    <SolidColorBrush x:Key="ThemeBorderSubtleBrush" Color="{StaticResource Color_ThemeBorderSubtle}" />
+    <SolidColorBrush x:Key="ThemeControlSelectedBrush" Color="{StaticResource Color_ThemeControlSelected}" />
+
+    <SolidColorBrush x:Key="ThemeOuterBorderBrush" Color="{StaticResource Color_ThemeOuterBorder}" />
+    <SolidColorBrush x:Key="ThemeBorderSubtleBrush" Color="{StaticResource Color_ThemeCardBorder}" />
+    <SolidColorBrush x:Key="ThemeControlBorderBrush" Color="{StaticResource Color_ThemeControlBorder}" />
     <SolidColorBrush x:Key="ThemeDividerBrush" Color="{StaticResource Color_ThemeDivider}" />
+    <SolidColorBrush x:Key="ThemeBackdropOverlayBrush" Color="{StaticResource Color_ThemeBackdropOverlay}" />
 
     <SolidColorBrush x:Key="ThemeLabelPrimaryBrush" Color="{StaticResource Color_ThemeLabelPrimary}" />
+    <SolidColorBrush x:Key="ThemeLabelBrightBrush" Color="{StaticResource Color_ThemeLabelBright}" />
     <SolidColorBrush x:Key="ThemeLabelSecondaryBrush" Color="{StaticResource Color_ThemeLabelSecondary}" />
     <SolidColorBrush x:Key="ThemeLabelTertiaryBrush" Color="{StaticResource Color_ThemeLabelTertiary}" />
 
-    <SolidColorBrush x:Key="ThemeAccentBlueBrush" Color="{StaticResource Color_ThemeAccentBlue}" />
-    <SolidColorBrush x:Key="ThemeAccentBlueHoverBrush" Color="{StaticResource Color_ThemeAccentBlueHover}" />
-    <SolidColorBrush x:Key="ThemeSystemGreenBrush" Color="{StaticResource Color_ThemeSystemGreen}" />
-    <SolidColorBrush x:Key="ThemeSystemOrangeBrush" Color="{StaticResource Color_ThemeSystemOrange}" />
-    <SolidColorBrush x:Key="ThemeSystemRedBrush" Color="{StaticResource Color_ThemeSystemRed}" />
-    <SolidColorBrush x:Key="ThemeSystemPurpleBrush" Color="{StaticResource Color_ThemeSystemPurple}" />
-    <SolidColorBrush x:Key="ThemeSystemTealBrush" Color="{StaticResource Color_ThemeSystemTeal}" />
-
-    <!-- Elevation Shadows -->
-    <BoxShadows x:Key="ThemeCardShadow">0 4 20 0 #30000000, 0 1 2 0 #18000000</BoxShadows>
-    <BoxShadows x:Key="ThemeElevatedShadow">0 8 32 0 #40000000, 0 2 4 0 #20000000</BoxShadows>
+    <SolidColorBrush x:Key="ThemeAccentOrangeBrush" Color="{StaticResource Color_ThemeAccentOrange}" />
+    <SolidColorBrush x:Key="ThemeAccentOrangeHoverBrush" Color="{StaticResource Color_ThemeAccentOrangeHover}" />
+    <SolidColorBrush x:Key="ThemeAccentOrangeBorderBrush" Color="{StaticResource Color_ThemeAccentOrangeBorder}" />
+    <SolidColorBrush x:Key="ThemeSystemOrangeBrush" Color="{StaticResource Color_ThemeWarningAmber}" />
+    <SolidColorBrush x:Key="ThemeSystemRedBrush" Color="{StaticResource Color_ThemeDangerRed}" />
+    <SolidColorBrush x:Key="ThemeSystemGreenBrush" Color="{StaticResource Color_ThemeAccentOrange}" />
+    <SolidColorBrush x:Key="ThemeAccentBlueBrush" Color="{StaticResource Color_ThemeAccentOrange}" />
+    <SolidColorBrush x:Key="ThemeAccentBlueHoverBrush" Color="{StaticResource Color_ThemeAccentOrangeBorder}" />
 
 </ResourceDictionary>

@@ -29,6 +29,7 @@ namespace ScrcpyDex.App
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
+                .With(new Win32PlatformOptions { WinUICompositionBackdropCornerRadius = 14f })
                 .WithInterFont()
                 .LogToTrace();
     }

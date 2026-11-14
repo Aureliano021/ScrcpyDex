@@ -60,6 +60,21 @@ namespace ScrcpyDex.App.ViewModels
         private DispatcherTimer? _telemetryTimer;
         private bool _isDisposed;
 
+        public Action? OpenConsoleWindowRequested { get; set; }
+
+        #region Observable Properties - Navigation & Overlays
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsMainDeviceViewVisible))]
+        [NotifyPropertyChangedFor(nameof(IsCriticalErrorOverlayVisible))]
+        private bool _isSettingsOpen;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsCriticalErrorOverlayVisible))]
+        private bool _isCriticalErrorDismissed;
+
+        #endregion
+
         #region Observable Properties - Device & Session State
 
         [ObservableProperty]
@@ -76,6 +91,13 @@ namespace ScrcpyDex.App.ViewModels
         [NotifyPropertyChangedFor(nameof(ConnectionDetailsText))]
         [NotifyPropertyChangedFor(nameof(HardwareModelDisplay))]
         [NotifyPropertyChangedFor(nameof(HasDeviceImage))]
+        [NotifyPropertyChangedFor(nameof(StatusPillText))]
+        [NotifyPropertyChangedFor(nameof(StatusBadgeColor))]
+        [NotifyPropertyChangedFor(nameof(ModeIndicatorText))]
+        [NotifyPropertyChangedFor(nameof(IsDexMode))]
+        [NotifyPropertyChangedFor(nameof(IsMirroringMode))]
+        [NotifyPropertyChangedFor(nameof(StartSessionButtonText))]
+        [NotifyPropertyChangedFor(nameof(DeviceFrameFallbackText))]
         [NotifyCanExecuteChangedFor(nameof(StartSessionCommand))]
         private DeviceInfo? _selectedDevice;
 
@@ -91,11 +113,16 @@ namespace ScrcpyDex.App.ViewModels
         [NotifyPropertyChangedFor(nameof(CanStop))]
         [NotifyPropertyChangedFor(nameof(IsStreaming))]
         [NotifyPropertyChangedFor(nameof(StatusBadgeColor))]
+        [NotifyPropertyChangedFor(nameof(StatusPillText))]
+        [NotifyPropertyChangedFor(nameof(IsCriticalErrorOverlayVisible))]
+        [NotifyPropertyChangedFor(nameof(CriticalErrorTitle))]
+        [NotifyPropertyChangedFor(nameof(CriticalErrorDescription))]
         [NotifyCanExecuteChangedFor(nameof(StartSessionCommand))]
         [NotifyCanExecuteChangedFor(nameof(StopSessionCommand))]
         private SessionState _connectionState = SessionState.Idle;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CriticalErrorDescription))]
         private string _sessionStatusText = "Idle — Ready to start session";
 
         [ObservableProperty]
@@ -106,15 +133,22 @@ namespace ScrcpyDex.App.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CanStart))]
+        [NotifyPropertyChangedFor(nameof(IsCriticalErrorOverlayVisible))]
+        [NotifyPropertyChangedFor(nameof(CriticalErrorTitle))]
+        [NotifyPropertyChangedFor(nameof(CriticalErrorDescription))]
         [NotifyCanExecuteChangedFor(nameof(StartSessionCommand))]
         private bool _isScrcpyDetected = true;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CanStart))]
+        [NotifyPropertyChangedFor(nameof(IsCriticalErrorOverlayVisible))]
+        [NotifyPropertyChangedFor(nameof(CriticalErrorTitle))]
+        [NotifyPropertyChangedFor(nameof(CriticalErrorDescription))]
         [NotifyCanExecuteChangedFor(nameof(StartSessionCommand))]
         private bool _isAdbDetected = true;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CriticalErrorDescription))]
         private string? _statusWarning;
 
         #endregion
@@ -126,6 +160,9 @@ namespace ScrcpyDex.App.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasDoctorIssues))]
+        [NotifyPropertyChangedFor(nameof(IsCriticalErrorOverlayVisible))]
+        [NotifyPropertyChangedFor(nameof(CriticalErrorTitle))]
+        [NotifyPropertyChangedFor(nameof(CriticalErrorDescription))]
         private bool _hasDoctorErrors;
 
         [ObservableProperty]
@@ -149,11 +186,43 @@ namespace ScrcpyDex.App.ViewModels
         [ObservableProperty]
         private string _currentLanguageCode = "EN";
 
+        public IReadOnlyList<string> AvailableLanguageOptions { get; } = new[]
+        {
+            "English (en)",
+            "Português (pt-BR)",
+            "Español (es)",
+            "Français (fr)",
+            "Deutsch (de)",
+            "简体中文 (zh-Hans)"
+        };
+
+        private bool _isSyncingLanguageOption;
+
+        [ObservableProperty]
+        private string _selectedLanguageOption = "English (en)";
+
+        partial void OnSelectedLanguageOptionChanged(string value)
+        {
+            if (_isSyncingLanguageOption || string.IsNullOrWhiteSpace(value)) return;
+            string code = value switch
+            {
+                var s when s.Contains("pt-BR", StringComparison.OrdinalIgnoreCase) => "pt-BR",
+                var s when s.Contains("(es)", StringComparison.OrdinalIgnoreCase) => "es",
+                var s when s.Contains("(fr)", StringComparison.OrdinalIgnoreCase) => "fr",
+                var s when s.Contains("(de)", StringComparison.OrdinalIgnoreCase) => "de",
+                var s when s.Contains("zh-Hans", StringComparison.OrdinalIgnoreCase) => "zh-Hans",
+                _ => "en"
+            };
+            _ = ChangeLanguageAsync(code);
+        }
+
         #endregion
 
         #region Observable Properties - Troubleshooting FAQ
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsMainDeviceViewVisible))]
+        [NotifyPropertyChangedFor(nameof(IsCriticalErrorOverlayVisible))]
         private bool _isFaqOpen;
 
         [ObservableProperty]
@@ -416,17 +485,95 @@ namespace ScrcpyDex.App.ViewModels
 
         public bool IsStreaming => ConnectionState == SessionState.StreamingActive;
 
+        public bool IsMainDeviceViewVisible => !IsSettingsOpen && !IsFaqOpen;
+
+        public bool HasCriticalErrorCondition =>
+            !IsScrcpyDetected ||
+            !IsAdbDetected ||
+            HasDoctorErrors ||
+            ConnectionState == SessionState.Error;
+
+        public bool IsCriticalErrorOverlayVisible =>
+            HasCriticalErrorCondition &&
+            !IsCriticalErrorDismissed &&
+            !IsSettingsOpen &&
+            !IsFaqOpen;
+
+        public string CriticalErrorTitle
+        {
+            get
+            {
+                if (!IsScrcpyDetected) return "SCRCPY EXECUTABLE NOT FOUND";
+                if (!IsAdbDetected) return "ADB EXECUTABLE NOT FOUND";
+                if (HasDoctorErrors) return "CRITICAL ENVIRONMENT ERROR";
+                if (ConnectionState == SessionState.Error) return "SESSION EXECUTION ERROR";
+                return "CRITICAL ERROR";
+            }
+        }
+
+        public string CriticalErrorDescription
+        {
+            get
+            {
+                if (!IsScrcpyDetected)
+                {
+                    return "The scrcpy binary (v2.4+) is required to stream the display and was not detected in your system PATH or configured directory.";
+                }
+                if (!IsAdbDetected)
+                {
+                    return "Android Debug Bridge (adb) is required to communicate with your device and was not found in your system PATH or alongside scrcpy.";
+                }
+                if (HasDoctorErrors)
+                {
+                    var errLines = DoctorItems
+                        .Where(i => i.Status == DiagnosticStatus.Error)
+                        .Select(i => $"{i.Name}: {i.Summary}")
+                        .ToList();
+                    if (errLines.Count > 0)
+                    {
+                        return string.Join("\n", errLines);
+                    }
+                }
+                if (!string.IsNullOrWhiteSpace(StatusWarning))
+                {
+                    return StatusWarning;
+                }
+                return SessionStatusText;
+            }
+        }
+
+        public string StatusPillText => ConnectionState switch
+        {
+            SessionState.StreamingActive => IsMirroringMode ? "MIRROR LIVE" : "DEX LIVE",
+            SessionState.DeviceConnecting or
+            SessionState.ServerDeploying or
+            SessionState.DisplayNegotiating => "STARTING",
+            SessionState.Teardown => "STOPPING",
+            SessionState.Error => "ERROR",
+            SessionState.Idle => HasSelectedDevice ? (IsDexMode ? "DEX READY" : "MIRROR") : "OFFLINE",
+            _ => "OFFLINE"
+        };
+
         public string StatusBadgeColor => ConnectionState switch
         {
-            SessionState.StreamingActive => "#10B981",
+            SessionState.StreamingActive => "#FF7A00",
             SessionState.DeviceConnecting or
             SessionState.ServerDeploying or
             SessionState.DisplayNegotiating or
-            SessionState.Teardown => "#F59E0B",
-            SessionState.Error => "#E11D48",
-            SessionState.Idle => "#64748B",
-            _ => "#64748B"
+            SessionState.Teardown => "#FFAA00",
+            SessionState.Error => "#FF453A",
+            SessionState.Idle => HasSelectedDevice ? "#F5F5F7" : "#777780",
+            _ => "#777780"
         };
+
+        public string ModeIndicatorText
+        {
+            get
+            {
+                if (!HasSelectedDevice) return "NO TARGET";
+                return IsDexMode ? "SAMSUNG DEX" : "SCREEN MIRROR";
+            }
+        }
 
         public string SelectedDeviceSummary => SelectedDevice != null
             ? $"{SelectedDevice.MarketingName} ({SelectedDevice.Serial}) — {SelectedDevice.State}"
@@ -444,9 +591,9 @@ namespace ScrcpyDex.App.ViewModels
 
         public string ConnectionStatusText => HasSelectedDevice ? "Connected" : "Disconnected";
 
-        public string ConnectionStatusColor => HasSelectedDevice ? "#10B981" : "#64748B";
+        public string ConnectionStatusColor => HasSelectedDevice ? "#FF7A00" : "#777780";
 
-        public string ConnectionStatusBackground => HasSelectedDevice ? "#132E27" : "#1E293B";
+        public string ConnectionStatusBackground => HasSelectedDevice ? "#241912" : "#1B1B22";
 
         public bool IsDexMode => SelectedDevice != null && SelectedDevice.IsDexSupported;
 
@@ -1042,6 +1189,10 @@ namespace ScrcpyDex.App.ViewModels
         {
             Dispatcher.UIThread.Post(() =>
             {
+                if (e.CurrentState == SessionState.Error)
+                {
+                    IsCriticalErrorDismissed = false;
+                }
                 ConnectionState = e.CurrentState;
                 SessionStatusText = $"{e.CurrentState}: {e.Message ?? GetDefaultStateMessage(e.CurrentState)}";
                 LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"State transition: {e.PreviousState} -> {e.CurrentState} ({e.Trigger})", false));
@@ -1651,6 +1802,26 @@ namespace ScrcpyDex.App.ViewModels
             CurrentLanguage = LocalizationManager.Instance.CurrentCulture.Name;
             CurrentLanguageCode = ResolveLanguageCode(CurrentLanguage);
 
+            _isSyncingLanguageOption = true;
+            try
+            {
+                SelectedLanguageOption = CurrentLanguageCode switch
+                {
+                    "PT" => AvailableLanguageOptions[1],
+                    "ES" => AvailableLanguageOptions[2],
+                    "FR" => AvailableLanguageOptions[3],
+                    "DE" => AvailableLanguageOptions[4],
+                    "ZH" => AvailableLanguageOptions[5],
+                    _ => AvailableLanguageOptions[0]
+                };
+            }
+            finally
+            {
+                _isSyncingLanguageOption = false;
+            }
+
+            OnPropertyChanged(nameof(StartSessionButtonText));
+
             foreach (var cat in FaqCategories)
             {
                 cat.RefreshLocalizedStrings();
@@ -1663,9 +1834,89 @@ namespace ScrcpyDex.App.ViewModels
         }
 
         [RelayCommand]
+        public void ToggleSettings()
+        {
+            if (IsSettingsOpen)
+            {
+                CloseSettings();
+            }
+            else
+            {
+                IsFaqOpen = false;
+                IsSettingsOpen = true;
+            }
+        }
+
+        [RelayCommand]
+        public void OpenSettings()
+        {
+            IsFaqOpen = false;
+            IsSettingsOpen = true;
+        }
+
+        [RelayCommand]
+        public void CloseSettings()
+        {
+            IsSettingsOpen = false;
+            _ = SaveCurrentSettingsAsync();
+        }
+
+        [RelayCommand]
+        public void OpenConsoleWindow()
+        {
+            OpenConsoleWindowRequested?.Invoke();
+        }
+
+        [RelayCommand]
+        public void OpenFaqFromSettings()
+        {
+            IsSettingsOpen = false;
+            IsFaqOpen = true;
+            _ = RunDoctorAsync();
+        }
+
+        [RelayCommand]
+        public async Task RevalidateEnvironmentAsync()
+        {
+            IsCriticalErrorDismissed = false;
+            if (_stateMachine.CurrentState == SessionState.Error)
+            {
+                await _stateMachine.FireAsync(SessionTrigger.Reset, "User revalidated after error").ConfigureAwait(false);
+            }
+            await VerifyScrcpyExecutableAsync().ConfigureAwait(false);
+            await RefreshDevicesAsync().ConfigureAwait(false);
+        }
+
+        [RelayCommand]
+        public async Task DismissCriticalErrorAsync()
+        {
+            IsCriticalErrorDismissed = true;
+            if (_stateMachine.CurrentState == SessionState.Error)
+            {
+                await _stateMachine.FireAsync(SessionTrigger.Reset, "User dismissed session error").ConfigureAwait(false);
+            }
+        }
+
+        [RelayCommand]
+        public void OpenSettingsFromError()
+        {
+            IsFaqOpen = false;
+            IsSettingsOpen = true;
+        }
+
+        [RelayCommand]
         public void ToggleFaq()
         {
-            IsFaqOpen = !IsFaqOpen;
+            if (IsFaqOpen)
+            {
+                IsFaqOpen = false;
+            }
+            else
+            {
+                IsSettingsOpen = false;
+                IsFaqOpen = true;
+                _ = RunDoctorAsync();
+            }
         }
 
         [RelayCommand]

@@ -35,9 +35,6 @@
 - Classify process output into three distinct tiers: `Info` (progress, transfer statistics, daemon notices), `Warning` (non-fatal alerts, DRM buffer notices, deprecations), and `Error` (critical failures, fatal exceptions, unhandled crashes).
 - Never use blanket process termination commands (`taskkill /F /IM ...`, `pkill`) that could terminate unrelated host processes; scope process termination strictly to managed child PIDs.
 
-## UI & Layout Invariants
-- In Avalonia/XAML item templates, status badges (`ERR`, `WARN`, `INFO`) positioned next to multiline or wrapping text must explicitly specify `VerticalAlignment="Top"` to prevent vertical badge stretching.
-
 ## Build & Verification Safety
 - When .NET builds encounter file access locks (`MSB3026` / `MSB3027`) caused by active user testing, do not terminate running application processes. Verify compilation using `/t:Compile` or an isolated output directory (`-o <temp>`), and run unit tests against test project assemblies.
 

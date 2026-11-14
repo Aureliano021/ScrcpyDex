@@ -1,0 +1,104 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ScrcpyDex.App.ViewModels"
+        xmlns:loc="using:ScrcpyDex.Core.Localization"
+        x:Class="ScrcpyDex.App.Views.ConsoleWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Width="700" Height="460" MinWidth="540" MinHeight="340"
+        Title="ScrcpyDeX · Console"
+        Icon="avares://ScrcpyDex.App/Assets/app_icon.ico"
+        Background="#0E0E12"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid RowDefinitions="Auto,*" Margin="22" RowSpacing="16">
+        <!-- Header (AudioEspacial ExpandedWindow / CalibrationWindow Architecture) -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+            <StackPanel Spacing="3">
+                <TextBlock Text="SCRCPYDEX"
+                           FontSize="10"
+                           FontWeight="SemiBold"
+                           LetterSpacing="1"
+                           Foreground="#86868B" />
+                <TextBlock Text="{Binding [Console_Header], Source={x:Static loc:LocalizationManager.Instance}}"
+                           FontSize="20"
+                           FontWeight="SemiBold"
+                           Foreground="#F5F5F7" />
+                <TextBlock Text="Real-time scrcpy &amp; ADB diagnostic stream"
+                           FontSize="11.5"
+                           Foreground="#86868B" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <Button Classes="pill-button"
+                        Command="{Binding CopyCliCommandCommand}"
+                        Padding="12,0"
+                        Height="30"
+                        CornerRadius="15">
+                    <TextBlock Text="{Binding [Console_CopyCli], Source={x:Static loc:LocalizationManager.Instance}}"
+                               FontSize="10"
+                               FontWeight="SemiBold"
+                               LetterSpacing="0.4"
+                               Foreground="#D0D0D7" />
+                </Button>
+
+                <Button Classes="pill-button"
+                        Command="{Binding CopyTerminalLogsCommand}"
+                        Padding="12,0"
+                        Height="30"
+                        CornerRadius="15">
+                    <TextBlock Text="{Binding [Console_CopyLogs], Source={x:Static loc:LocalizationManager.Instance}}"
+                               FontSize="10"
+                               FontWeight="SemiBold"
+                               LetterSpacing="0.4"
+                               Foreground="#D0D0D7" />
+                </Button>
+
+                <Button Classes="pill-button"
+                        Command="{Binding ClearLogsCommand}"
+                        Padding="12,0"
+                        Height="30"
+                        CornerRadius="15">
+                    <TextBlock Text="{Binding [Action_Clear], Source={x:Static loc:LocalizationManager.Instance}}"
+                               FontSize="10"
+                               FontWeight="SemiBold"
+                               LetterSpacing="0.4"
+                               Foreground="#86868B" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Terminal Stream Card -->
+        <Border Grid.Row="1"
+                Background="#111115"
+                BorderBrush="#2B2B33"
+                BorderThickness="1"
+                CornerRadius="14"
+                ClipToBounds="True">
+            <ScrollViewer x:Name="TerminalScrollViewer"
+                          Padding="14,12,14,20"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                <SelectableTextBlock x:Name="TerminalTextBlock"
+                                     FontFamily="Cascadia Code, Consolas, monospace"
+                                     FontSize="11"
+                                     LineHeight="17"
+                                     TextWrapping="Wrap"
+                                     Background="Transparent"
+                                     SelectionBrush="#FF7A00"
+                                     Margin="0,0,0,10">
+                    <SelectableTextBlock.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="{Binding [Console_CopyLogs], Source={x:Static loc:LocalizationManager.Instance}}"
+                                      Command="{Binding CopyTerminalLogsCommand}" />
+                            <MenuItem Header="{Binding [Console_CopyCli], Source={x:Static loc:LocalizationManager.Instance}}"
+                                      Command="{Binding CopyCliCommandCommand}" />
+                            <Separator />
+                            <MenuItem Header="{Binding [Action_Clear], Source={x:Static loc:LocalizationManager.Instance}}"
+                                      Command="{Binding ClearLogsCommand}" />
+                        </ContextMenu>
+                    </SelectableTextBlock.ContextMenu>
+                </SelectableTextBlock>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</Window>
