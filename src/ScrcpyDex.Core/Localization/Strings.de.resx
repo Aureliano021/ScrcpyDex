@@ -733,4 +733,223 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
   <data name="DeviceSelector_Header" xml:space="preserve">
     <value>VERBUNDENES GERÄT</value>
   </data>
+  <data name="Window_Tooltip_Settings" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="Window_Tooltip_Minimize" xml:space="preserve">
+    <value>Minimieren</value>
+  </data>
+  <data name="Window_Tooltip_Close" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
+  <data name="Telemetry_UsbLink" xml:space="preserve">
+    <value>USB-LINK</value>
+  </data>
+  <data name="Ui_TargetDevice" xml:space="preserve">
+    <value>ZIELGERÄT</value>
+  </data>
+  <data name="Ui_Mirror" xml:space="preserve">
+    <value>SPIEGEL</value>
+  </data>
+  <data name="Ui_Back" xml:space="preserve">
+    <value>ZURÜCK</value>
+  </data>
+  <data name="Ui_Configuration" xml:space="preserve">
+    <value>KONFIGURATION</value>
+  </data>
+  <data name="Ui_Console" xml:space="preserve">
+    <value>KONSOLE  ↗</value>
+  </data>
+  <data name="Ui_ConsoleTooltip" xml:space="preserve">
+    <value>Dediziertes Ausführungskonsolenfenster öffnen</value>
+  </data>
+  <data name="Ui_FaqDoctor" xml:space="preserve">
+    <value>FAQ &amp; DIAGNOSE</value>
+  </data>
+  <data name="Ui_DisplayEncoder" xml:space="preserve">
+    <value>ANZEIGE &amp; ENCODER</value>
+  </data>
+  <data name="Ui_CustomDimensions" xml:space="preserve">
+    <value>Benutzerdefinierte Maße (px)</value>
+  </data>
+  <data name="Ui_DisplayDensityDpi" xml:space="preserve">
+    <value>Anzeigedichte (DPI)</value>
+  </data>
+  <data name="Ui_SessionInput" xml:space="preserve">
+    <value>SITZUNG &amp; EINGABE</value>
+  </data>
+  <data name="Ui_MouseInputDriver" xml:space="preserve">
+    <value>Maus- / Eingabetreiber</value>
+  </data>
+  <data name="Ui_LaunchFullscreen" xml:space="preserve">
+    <value>Im Vollbild starten</value>
+  </data>
+  <data name="Ui_SystemBinaries" xml:space="preserve">
+    <value>SYSTEM &amp; BINÄRDATEIEN</value>
+  </data>
+  <data name="Ui_ScrcpyExecutable" xml:space="preserve">
+    <value>scrcpy-Programmdatei</value>
+  </data>
+  <data name="Ui_AdbExecutable" xml:space="preserve">
+    <value>adb-Programmdatei</value>
+  </data>
+  <data name="Ui_AutoDetectPath" xml:space="preserve">
+    <value>Automatisch im PATH erkennen</value>
+  </data>
+  <data name="Ui_Browse" xml:space="preserve">
+    <value>DURCHSUCHEN</value>
+  </data>
+  <data name="Ui_Settings" xml:space="preserve">
+    <value>EINSTELLUNGEN</value>
+  </data>
+  <data name="Ui_FaqDiagnostics" xml:space="preserve">
+    <value>FAQ &amp; DIAGNOSE</value>
+  </data>
+  <data name="Ui_CheckEnv" xml:space="preserve">
+    <value>UMGEBUNG PRÜFEN</value>
+  </data>
+  <data name="Ui_Copy" xml:space="preserve">
+    <value>KOPIEREN</value>
+  </data>
+  <data name="Ui_CriticalAlert" xml:space="preserve">
+    <value>KRITISCHE WARNUNG</value>
+  </data>
+  <data name="Ui_LocateScrcpy" xml:space="preserve">
+    <value>SCRCPY SUCHEN</value>
+  </data>
+  <data name="Ui_LocateAdb" xml:space="preserve">
+    <value>ADB SUCHEN</value>
+  </data>
+  <data name="Ui_Retry" xml:space="preserve">
+    <value>WIEDERHOLEN</value>
+  </data>
+  <data name="Ui_Dismiss" xml:space="preserve">
+    <value>VERWERFEN</value>
+  </data>
+  <data name="Console_WindowTitle" xml:space="preserve">
+    <value>ScrcpyDeX · Konsole</value>
+  </data>
+  <data name="Console_Subtitle" xml:space="preserve">
+    <value>Echtzeit-Diagnosestream für scrcpy &amp; ADB</value>
+  </data>
+  <data name="Error_ScrcpyNotFoundTitle" xml:space="preserve">
+    <value>SCRCPY-PROGRAMM NICHT GEFUNDEN</value>
+  </data>
+  <data name="Error_AdbNotFoundTitle" xml:space="preserve">
+    <value>ADB-PROGRAMM NICHT GEFUNDEN</value>
+  </data>
+  <data name="Error_EnvironmentTitle" xml:space="preserve">
+    <value>KRITISCHER UMGEBUNGSFEHLER</value>
+  </data>
+  <data name="Error_SessionExecutionTitle" xml:space="preserve">
+    <value>SITZUNGSAUSFÜHRUNGSFEHLER</value>
+  </data>
+  <data name="Error_GenericTitle" xml:space="preserve">
+    <value>KRITISCHER FEHLER</value>
+  </data>
+  <data name="Error_ScrcpyNotFoundDesc" xml:space="preserve">
+    <value>Die scrcpy-Programmdatei (v2.4+) wird für die Bildschirmübertragung benötigt und wurde nicht im System-PATH oder konfigurierten Verzeichnis gefunden.</value>
+  </data>
+  <data name="Error_AdbNotFoundDesc" xml:space="preserve">
+    <value>Android Debug Bridge (adb) wird für die Kommunikation mit Ihrem Gerät benötigt und wurde nicht im System-PATH oder neben scrcpy gefunden.</value>
+  </data>
+  <data name="StatusPill_MirrorLive" xml:space="preserve">
+    <value>SPIEGEL AKTIV</value>
+  </data>
+  <data name="StatusPill_DexLive" xml:space="preserve">
+    <value>DEX AKTIV</value>
+  </data>
+  <data name="StatusPill_Starting" xml:space="preserve">
+    <value>STARTET</value>
+  </data>
+  <data name="StatusPill_Stopping" xml:space="preserve">
+    <value>STOPPT</value>
+  </data>
+  <data name="StatusPill_Error" xml:space="preserve">
+    <value>FEHLER</value>
+  </data>
+  <data name="StatusPill_DexReady" xml:space="preserve">
+    <value>DEX BEREIT</value>
+  </data>
+  <data name="StatusPill_Mirror" xml:space="preserve">
+    <value>SPIEGEL</value>
+  </data>
+  <data name="StatusPill_Offline" xml:space="preserve">
+    <value>OFFLINE</value>
+  </data>
+  <data name="Mode_NoTarget" xml:space="preserve">
+    <value>KEIN ZIEL</value>
+  </data>
+  <data name="Mode_SamsungDex" xml:space="preserve">
+    <value>SAMSUNG DEX</value>
+  </data>
+  <data name="Mode_ScreenMirror" xml:space="preserve">
+    <value>BILDSCHIRMSPIEGEL</value>
+  </data>
+  <data name="Device_NoDeviceConnected" xml:space="preserve">
+    <value>Kein Gerät verbunden</value>
+  </data>
+  <data name="Device_HardwareIdle" xml:space="preserve">
+    <value>Hardware-Erkennung inaktiv</value>
+  </data>
+  <data name="Status_FoundDevices" xml:space="preserve">
+    <value>{0} Gerät(e) gefunden</value>
+  </data>
+  <data name="Status_ScanningDevices" xml:space="preserve">
+    <value>Suche nach verbundenen ADB-Geräten...</value>
+  </data>
+  <data name="Status_NoDevicesDetected" xml:space="preserve">
+    <value>Keine ADB-Geräte erkannt. Telefon per USB mit aktiviertem USB-Debugging verbinden.</value>
+  </data>
+  <data name="Status_DeviceScanFailed" xml:space="preserve">
+    <value>Gerätesuche fehlgeschlagen: {0}</value>
+  </data>
+  <data name="Status_NoDeviceSelected" xml:space="preserve">
+    <value>Sitzung kann nicht gestartet werden: Kein Gerät ausgewählt.</value>
+  </data>
+  <data name="Status_IdleReady" xml:space="preserve">
+    <value>Inaktiv — Bereit zum Starten der Sitzung</value>
+  </data>
+  <data name="Status_ReadyToStart" xml:space="preserve">
+    <value>Bereit zum Starten der Sitzung</value>
+  </data>
+  <data name="Status_ConnectingTarget" xml:space="preserve">
+    <value>Verbindung zum ADB-Ziel wird hergestellt...</value>
+  </data>
+  <data name="Status_DeployingServerMsg" xml:space="preserve">
+    <value>Samsung DeX-Serverkomponente wird bereitgestellt...</value>
+  </data>
+  <data name="Status_AllocatingDisplay" xml:space="preserve">
+    <value>Virtuelles Display wird mit system_server zugewiesen...</value>
+  </data>
+  <data name="Status_StreamingActiveMsg" xml:space="preserve">
+    <value>DeX-Sitzung aktiv und überträgt</value>
+  </data>
+  <data name="Status_TearingDown" xml:space="preserve">
+    <value>DeX-Sitzung wird beendet...</value>
+  </data>
+  <data name="Status_SessionError" xml:space="preserve">
+    <value>Sitzungsfehler aufgetreten</value>
+  </data>
+  <data name="Status_ScrcpyNotDetected" xml:space="preserve">
+    <value>scrcpy-Programmdatei nicht im PATH oder benutzerdefinierten Verzeichnis gefunden.</value>
+  </data>
+  <data name="Status_AdbNotDetected" xml:space="preserve">
+    <value>adb-Programmdatei nicht im PATH oder scrcpy-Verzeichnis gefunden.</value>
+  </data>
+  <data name="Status_RendererUnsupported" xml:space="preserve">
+    <value>Renderer nicht unterstützt: Wechseln Sie den Render-Treiber auf Direct3D 9, OpenGL oder Software</value>
+  </data>
+  <data name="Doctor_NotRun" xml:space="preserve">
+    <value>Diagnose noch nicht ausgeführt</value>
+  </data>
+  <data name="Doctor_SummaryErrors" xml:space="preserve">
+    <value>{0} Fehler, {1} Warnung(en) • Umgebung erfordert Aufmerksamkeit</value>
+  </data>
+  <data name="Doctor_SummaryWarnings" xml:space="preserve">
+    <value>{0} Warnung(en) • Umgebung mit Hinweisen bereit</value>
+  </data>
+  <data name="Doctor_SummaryPassed" xml:space="preserve">
+    <value>{0} Prüfung(en) bestanden • Umgebung bereit</value>
+  </data>
 </root>

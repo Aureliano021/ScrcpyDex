@@ -5,7 +5,7 @@
         x:Class="ScrcpyDex.App.Views.ConsoleWindow"
         x:DataType="vm:MainWindowViewModel"
         Width="700" Height="460" MinWidth="540" MinHeight="340"
-        Title="ScrcpyDeX · Console"
+        Title="{Binding [Console_WindowTitle], Source={x:Static loc:LocalizationManager.Instance}}"
         Icon="avares://ScrcpyDex.App/Assets/app_icon.ico"
         Background="#0E0E12"
         WindowStartupLocation="CenterScreen">
@@ -23,7 +23,7 @@
                            FontSize="20"
                            FontWeight="SemiBold"
                            Foreground="#F5F5F7" />
-                <TextBlock Text="Real-time scrcpy &amp; ADB diagnostic stream"
+                <TextBlock Text="{Binding [Console_Subtitle], Source={x:Static loc:LocalizationManager.Instance}}"
                            FontSize="11.5"
                            Foreground="#86868B" />
             </StackPanel>

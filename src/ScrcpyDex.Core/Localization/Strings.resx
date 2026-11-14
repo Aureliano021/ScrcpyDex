@@ -733,4 +733,223 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
   <data name="DeviceSelector_Header" xml:space="preserve">
     <value>CONNECTED DEVICE</value>
   </data>
+  <data name="Window_Tooltip_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Window_Tooltip_Minimize" xml:space="preserve">
+    <value>Minimize</value>
+  </data>
+  <data name="Window_Tooltip_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Telemetry_UsbLink" xml:space="preserve">
+    <value>USB LINK</value>
+  </data>
+  <data name="Ui_TargetDevice" xml:space="preserve">
+    <value>TARGET DEVICE</value>
+  </data>
+  <data name="Ui_Mirror" xml:space="preserve">
+    <value>MIRROR</value>
+  </data>
+  <data name="Ui_Back" xml:space="preserve">
+    <value>BACK</value>
+  </data>
+  <data name="Ui_Configuration" xml:space="preserve">
+    <value>CONFIGURATION</value>
+  </data>
+  <data name="Ui_Console" xml:space="preserve">
+    <value>CONSOLE  ↗</value>
+  </data>
+  <data name="Ui_ConsoleTooltip" xml:space="preserve">
+    <value>Open dedicated execution console window</value>
+  </data>
+  <data name="Ui_FaqDoctor" xml:space="preserve">
+    <value>FAQ &amp; DOCTOR</value>
+  </data>
+  <data name="Ui_DisplayEncoder" xml:space="preserve">
+    <value>DISPLAY &amp; ENCODER</value>
+  </data>
+  <data name="Ui_CustomDimensions" xml:space="preserve">
+    <value>Custom Dimensions (px)</value>
+  </data>
+  <data name="Ui_DisplayDensityDpi" xml:space="preserve">
+    <value>Display Density (DPI)</value>
+  </data>
+  <data name="Ui_SessionInput" xml:space="preserve">
+    <value>SESSION &amp; INPUT</value>
+  </data>
+  <data name="Ui_MouseInputDriver" xml:space="preserve">
+    <value>Mouse / Input Driver</value>
+  </data>
+  <data name="Ui_LaunchFullscreen" xml:space="preserve">
+    <value>Launch in Fullscreen</value>
+  </data>
+  <data name="Ui_SystemBinaries" xml:space="preserve">
+    <value>SYSTEM &amp; BINARIES</value>
+  </data>
+  <data name="Ui_ScrcpyExecutable" xml:space="preserve">
+    <value>scrcpy Executable</value>
+  </data>
+  <data name="Ui_AdbExecutable" xml:space="preserve">
+    <value>adb Executable</value>
+  </data>
+  <data name="Ui_AutoDetectPath" xml:space="preserve">
+    <value>Auto-detect from PATH</value>
+  </data>
+  <data name="Ui_Browse" xml:space="preserve">
+    <value>BROWSE</value>
+  </data>
+  <data name="Ui_Settings" xml:space="preserve">
+    <value>SETTINGS</value>
+  </data>
+  <data name="Ui_FaqDiagnostics" xml:space="preserve">
+    <value>FAQ &amp; DIAGNOSTICS</value>
+  </data>
+  <data name="Ui_CheckEnv" xml:space="preserve">
+    <value>CHECK ENV</value>
+  </data>
+  <data name="Ui_Copy" xml:space="preserve">
+    <value>COPY</value>
+  </data>
+  <data name="Ui_CriticalAlert" xml:space="preserve">
+    <value>CRITICAL ALERT</value>
+  </data>
+  <data name="Ui_LocateScrcpy" xml:space="preserve">
+    <value>LOCATE SCRCPY</value>
+  </data>
+  <data name="Ui_LocateAdb" xml:space="preserve">
+    <value>LOCATE ADB</value>
+  </data>
+  <data name="Ui_Retry" xml:space="preserve">
+    <value>RETRY</value>
+  </data>
+  <data name="Ui_Dismiss" xml:space="preserve">
+    <value>DISMISS</value>
+  </data>
+  <data name="Console_WindowTitle" xml:space="preserve">
+    <value>ScrcpyDeX · Console</value>
+  </data>
+  <data name="Console_Subtitle" xml:space="preserve">
+    <value>Real-time scrcpy &amp; ADB diagnostic stream</value>
+  </data>
+  <data name="Error_ScrcpyNotFoundTitle" xml:space="preserve">
+    <value>SCRCPY EXECUTABLE NOT FOUND</value>
+  </data>
+  <data name="Error_AdbNotFoundTitle" xml:space="preserve">
+    <value>ADB EXECUTABLE NOT FOUND</value>
+  </data>
+  <data name="Error_EnvironmentTitle" xml:space="preserve">
+    <value>CRITICAL ENVIRONMENT ERROR</value>
+  </data>
+  <data name="Error_SessionExecutionTitle" xml:space="preserve">
+    <value>SESSION EXECUTION ERROR</value>
+  </data>
+  <data name="Error_GenericTitle" xml:space="preserve">
+    <value>CRITICAL ERROR</value>
+  </data>
+  <data name="Error_ScrcpyNotFoundDesc" xml:space="preserve">
+    <value>The scrcpy binary (v2.4+) is required to stream the display and was not detected in your system PATH or configured directory.</value>
+  </data>
+  <data name="Error_AdbNotFoundDesc" xml:space="preserve">
+    <value>Android Debug Bridge (adb) is required to communicate with your device and was not found in your system PATH or alongside scrcpy.</value>
+  </data>
+  <data name="StatusPill_MirrorLive" xml:space="preserve">
+    <value>MIRROR LIVE</value>
+  </data>
+  <data name="StatusPill_DexLive" xml:space="preserve">
+    <value>DEX LIVE</value>
+  </data>
+  <data name="StatusPill_Starting" xml:space="preserve">
+    <value>STARTING</value>
+  </data>
+  <data name="StatusPill_Stopping" xml:space="preserve">
+    <value>STOPPING</value>
+  </data>
+  <data name="StatusPill_Error" xml:space="preserve">
+    <value>ERROR</value>
+  </data>
+  <data name="StatusPill_DexReady" xml:space="preserve">
+    <value>DEX READY</value>
+  </data>
+  <data name="StatusPill_Mirror" xml:space="preserve">
+    <value>MIRROR</value>
+  </data>
+  <data name="StatusPill_Offline" xml:space="preserve">
+    <value>OFFLINE</value>
+  </data>
+  <data name="Mode_NoTarget" xml:space="preserve">
+    <value>NO TARGET</value>
+  </data>
+  <data name="Mode_SamsungDex" xml:space="preserve">
+    <value>SAMSUNG DEX</value>
+  </data>
+  <data name="Mode_ScreenMirror" xml:space="preserve">
+    <value>SCREEN MIRROR</value>
+  </data>
+  <data name="Device_NoDeviceConnected" xml:space="preserve">
+    <value>No Device Connected</value>
+  </data>
+  <data name="Device_HardwareIdle" xml:space="preserve">
+    <value>Hardware detection idle</value>
+  </data>
+  <data name="Status_FoundDevices" xml:space="preserve">
+    <value>Found {0} device(s)</value>
+  </data>
+  <data name="Status_ScanningDevices" xml:space="preserve">
+    <value>Scanning for connected ADB devices...</value>
+  </data>
+  <data name="Status_NoDevicesDetected" xml:space="preserve">
+    <value>No ADB devices detected. Connect phone via USB with USB debugging enabled.</value>
+  </data>
+  <data name="Status_DeviceScanFailed" xml:space="preserve">
+    <value>Device scan failed: {0}</value>
+  </data>
+  <data name="Status_NoDeviceSelected" xml:space="preserve">
+    <value>Cannot start session: No device selected.</value>
+  </data>
+  <data name="Status_IdleReady" xml:space="preserve">
+    <value>Idle — Ready to start session</value>
+  </data>
+  <data name="Status_ReadyToStart" xml:space="preserve">
+    <value>Ready to start session</value>
+  </data>
+  <data name="Status_ConnectingTarget" xml:space="preserve">
+    <value>Connecting to ADB target...</value>
+  </data>
+  <data name="Status_DeployingServerMsg" xml:space="preserve">
+    <value>Deploying Samsung DeX server component...</value>
+  </data>
+  <data name="Status_AllocatingDisplay" xml:space="preserve">
+    <value>Allocating virtual display with system_server...</value>
+  </data>
+  <data name="Status_StreamingActiveMsg" xml:space="preserve">
+    <value>DeX session active and streaming</value>
+  </data>
+  <data name="Status_TearingDown" xml:space="preserve">
+    <value>Tearing down DeX session...</value>
+  </data>
+  <data name="Status_SessionError" xml:space="preserve">
+    <value>Session error encountered</value>
+  </data>
+  <data name="Status_ScrcpyNotDetected" xml:space="preserve">
+    <value>scrcpy executable not detected in PATH or custom directory.</value>
+  </data>
+  <data name="Status_AdbNotDetected" xml:space="preserve">
+    <value>adb executable not detected in PATH or scrcpy directory.</value>
+  </data>
+  <data name="Status_RendererUnsupported" xml:space="preserve">
+    <value>Renderer unsupported: Switch Render Driver to Direct3D 9, OpenGL, or Software</value>
+  </data>
+  <data name="Doctor_NotRun" xml:space="preserve">
+    <value>Diagnostics not run yet</value>
+  </data>
+  <data name="Doctor_SummaryErrors" xml:space="preserve">
+    <value>{0} error(s), {1} warning(s) • Environment needs attention</value>
+  </data>
+  <data name="Doctor_SummaryWarnings" xml:space="preserve">
+    <value>{0} warning(s) • Environment ready with notices</value>
+  </data>
+  <data name="Doctor_SummaryPassed" xml:space="preserve">
+    <value>{0} check(s) passed • Environment ready</value>
+  </data>
 </root>

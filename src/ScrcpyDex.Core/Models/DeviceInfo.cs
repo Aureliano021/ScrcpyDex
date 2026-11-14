@@ -12,23 +12,51 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ScrcpyDex.Models
 {
-    public class DeviceInfo
+    public partial class DeviceInfo : ObservableObject
     {
-        public string Serial { get; set; } = string.Empty;
-        public string Model { get; set; } = "Unknown";
-        public string Manufacturer { get; set; } = string.Empty;
-        public string State { get; set; } = "device";
-        public string AndroidVersion { get; set; } = "";
-        public string OneUiVersion { get; set; } = "";
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ModelCode))]
+        private string _serial = string.Empty;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(Capability))]
+        [NotifyPropertyChangedFor(nameof(IsDexSupported))]
+        [NotifyPropertyChangedFor(nameof(IsSamsung))]
+        [NotifyPropertyChangedFor(nameof(MarketingName))]
+        [NotifyPropertyChangedFor(nameof(ModelCode))]
+        [NotifyPropertyChangedFor(nameof(FrameLabel))]
+        private string _model = "Unknown";
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(Capability))]
+        [NotifyPropertyChangedFor(nameof(IsDexSupported))]
+        [NotifyPropertyChangedFor(nameof(IsSamsung))]
+        [NotifyPropertyChangedFor(nameof(MarketingName))]
+        [NotifyPropertyChangedFor(nameof(FrameLabel))]
+        private string _manufacturer = string.Empty;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsConnected))]
+        private string _state = "device";
+
+        [ObservableProperty]
+        private string _androidVersion = "";
+
+        [ObservableProperty]
+        private string _oneUiVersion = "";
+
         public bool IsConnected
         {
             get => State == "device";
             set => State = value ? "device" : "offline";
         }
-        public int DeXDisplayId { get; set; } = -1;
+
+        [ObservableProperty]
+        private int _deXDisplayId = -1;
 
         public DeviceCapability Capability => SamsungDeviceModelResolver.ResolveCapability(Model, Manufacturer);
         public bool IsDexSupported => Capability == DeviceCapability.SamsungDeX;

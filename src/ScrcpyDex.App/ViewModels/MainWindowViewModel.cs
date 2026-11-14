@@ -123,13 +123,23 @@ namespace ScrcpyDex.App.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CriticalErrorDescription))]
-        private string _sessionStatusText = "Idle — Ready to start session";
+        private string _sessionStatusText = LocalizationManager.Instance.GetString("Status_IdleReady");
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ScrcpyPathDisplay))]
         private string? _scrcpyPath;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(AdbPathDisplay))]
         private string? _adbPath;
+
+        public string ScrcpyPathDisplay => string.IsNullOrWhiteSpace(ScrcpyPath)
+            ? LocalizationManager.Instance.GetString("Ui_AutoDetectPath")
+            : ScrcpyPath;
+
+        public string AdbPathDisplay => string.IsNullOrWhiteSpace(AdbPath)
+            ? LocalizationManager.Instance.GetString("Ui_AutoDetectPath")
+            : AdbPath;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CanStart))]
@@ -172,7 +182,7 @@ namespace ScrcpyDex.App.ViewModels
         public bool HasDoctorIssues => HasDoctorErrors || HasDoctorWarnings;
 
         [ObservableProperty]
-        private string _doctorSummaryText = "Diagnostics not run yet";
+        private string _doctorSummaryText = LocalizationManager.Instance.GetString("Doctor_NotRun");
 
         public ObservableCollection<DiagnosticItem> DoctorItems { get; } = new ObservableCollection<DiagnosticItem>();
 
@@ -440,7 +450,7 @@ namespace ScrcpyDex.App.ViewModels
         }
 
         [ObservableProperty]
-        private bool _forwardShortcuts = true;
+        private bool _forwardShortcuts = false;
 
         [ObservableProperty]
         private bool _stayAwake = false;
@@ -503,11 +513,11 @@ namespace ScrcpyDex.App.ViewModels
         {
             get
             {
-                if (!IsScrcpyDetected) return "SCRCPY EXECUTABLE NOT FOUND";
-                if (!IsAdbDetected) return "ADB EXECUTABLE NOT FOUND";
-                if (HasDoctorErrors) return "CRITICAL ENVIRONMENT ERROR";
-                if (ConnectionState == SessionState.Error) return "SESSION EXECUTION ERROR";
-                return "CRITICAL ERROR";
+                if (!IsScrcpyDetected) return LocalizationManager.Instance.GetString("Error_ScrcpyNotFoundTitle");
+                if (!IsAdbDetected) return LocalizationManager.Instance.GetString("Error_AdbNotFoundTitle");
+                if (HasDoctorErrors) return LocalizationManager.Instance.GetString("Error_EnvironmentTitle");
+                if (ConnectionState == SessionState.Error) return LocalizationManager.Instance.GetString("Error_SessionExecutionTitle");
+                return LocalizationManager.Instance.GetString("Error_GenericTitle");
             }
         }
 
@@ -517,11 +527,11 @@ namespace ScrcpyDex.App.ViewModels
             {
                 if (!IsScrcpyDetected)
                 {
-                    return "The scrcpy binary (v2.4+) is required to stream the display and was not detected in your system PATH or configured directory.";
+                    return LocalizationManager.Instance.GetString("Error_ScrcpyNotFoundDesc");
                 }
                 if (!IsAdbDetected)
                 {
-                    return "Android Debug Bridge (adb) is required to communicate with your device and was not found in your system PATH or alongside scrcpy.";
+                    return LocalizationManager.Instance.GetString("Error_AdbNotFoundDesc");
                 }
                 if (HasDoctorErrors)
                 {
@@ -544,14 +554,18 @@ namespace ScrcpyDex.App.ViewModels
 
         public string StatusPillText => ConnectionState switch
         {
-            SessionState.StreamingActive => IsMirroringMode ? "MIRROR LIVE" : "DEX LIVE",
+            SessionState.StreamingActive => IsMirroringMode
+                ? LocalizationManager.Instance.GetString("StatusPill_MirrorLive")
+                : LocalizationManager.Instance.GetString("StatusPill_DexLive"),
             SessionState.DeviceConnecting or
             SessionState.ServerDeploying or
-            SessionState.DisplayNegotiating => "STARTING",
-            SessionState.Teardown => "STOPPING",
-            SessionState.Error => "ERROR",
-            SessionState.Idle => HasSelectedDevice ? (IsDexMode ? "DEX READY" : "MIRROR") : "OFFLINE",
-            _ => "OFFLINE"
+            SessionState.DisplayNegotiating => LocalizationManager.Instance.GetString("StatusPill_Starting"),
+            SessionState.Teardown => LocalizationManager.Instance.GetString("StatusPill_Stopping"),
+            SessionState.Error => LocalizationManager.Instance.GetString("StatusPill_Error"),
+            SessionState.Idle => HasSelectedDevice
+                ? (IsDexMode ? LocalizationManager.Instance.GetString("StatusPill_DexReady") : LocalizationManager.Instance.GetString("StatusPill_Mirror"))
+                : LocalizationManager.Instance.GetString("StatusPill_Offline"),
+            _ => LocalizationManager.Instance.GetString("StatusPill_Offline")
         };
 
         public string StatusBadgeColor => ConnectionState switch
@@ -570,26 +584,34 @@ namespace ScrcpyDex.App.ViewModels
         {
             get
             {
-                if (!HasSelectedDevice) return "NO TARGET";
-                return IsDexMode ? "SAMSUNG DEX" : "SCREEN MIRROR";
+                if (!HasSelectedDevice) return LocalizationManager.Instance.GetString("Mode_NoTarget");
+                return IsDexMode
+                    ? LocalizationManager.Instance.GetString("Mode_SamsungDex")
+                    : LocalizationManager.Instance.GetString("Mode_ScreenMirror");
             }
         }
 
         public string SelectedDeviceSummary => SelectedDevice != null
             ? $"{SelectedDevice.MarketingName} ({SelectedDevice.Serial}) — {SelectedDevice.State}"
-            : "No device selected";
+            : LocalizationManager.Instance.GetString("DeviceSelector_NoDevicesPlaceholder");
 
         public bool HasSelectedDevice => SelectedDevice != null && SelectedDevice.IsConnected;
 
-        public string DeviceDisplayName => SelectedDevice != null ? SelectedDevice.MarketingName : "No Device Connected";
+        public string DeviceDisplayName => SelectedDevice != null
+            ? SelectedDevice.MarketingName
+            : LocalizationManager.Instance.GetString("Device_NoDeviceConnected");
 
         public string DeviceModelCode => SelectedDevice != null ? SelectedDevice.ModelCode : "--";
 
-        public string DeviceFrameLabel => SelectedDevice != null ? SelectedDevice.FrameLabel : "OFFLINE";
+        public string DeviceFrameLabel => SelectedDevice != null
+            ? SelectedDevice.FrameLabel
+            : LocalizationManager.Instance.GetString("StatusPill_Offline");
 
         public string DeviceSerialDisplay => SelectedDevice?.Serial ?? string.Empty;
 
-        public string ConnectionStatusText => HasSelectedDevice ? "Connected" : "Disconnected";
+        public string ConnectionStatusText => HasSelectedDevice
+            ? LocalizationManager.Instance.GetString("Status_Connected")
+            : LocalizationManager.Instance.GetString("DeviceSelector_Disconnected");
 
         public string ConnectionStatusColor => HasSelectedDevice ? "#FF7A00" : "#777780";
 
@@ -619,7 +641,7 @@ namespace ScrcpyDex.App.ViewModels
 
         public string HardwareModelDisplay => HasSelectedDevice && !string.IsNullOrWhiteSpace(HardwareModel) && HardwareModel != "--"
             ? HardwareModel
-            : "Hardware detection idle";
+            : LocalizationManager.Instance.GetString("Device_HardwareIdle");
 
         public bool HasDeviceImage => DeviceImage != null;
 
@@ -792,6 +814,7 @@ namespace ScrcpyDex.App.ViewModels
             ForwardShortcuts = settings.Input.ForwardShortcuts;
             StayAwake = settings.Device.StayAwake;
             TurnScreenOff = settings.Device.TurnScreenOff;
+            LowLatencyAudio = settings.Audio.Enabled;
             Fullscreen = settings.Display.WindowMode.Equals("fullscreen", StringComparison.OrdinalIgnoreCase);
 
             if (!string.IsNullOrWhiteSpace(settings.Display.RenderDriver))
@@ -865,6 +888,7 @@ namespace ScrcpyDex.App.ViewModels
                 settings.Display = BuildDisplaySection();
                 settings.Input.MouseDriver = ResolveEffectiveMouseDriver();
                 settings.Input.ForwardShortcuts = ForwardShortcuts;
+                settings.Audio.Enabled = LowLatencyAudio;
                 settings.Device.StayAwake = StayAwake;
                 settings.Device.TurnScreenOff = TurnScreenOff;
                 settings.Paths.ScrcpyPath = ScrcpyPath;
@@ -909,7 +933,7 @@ namespace ScrcpyDex.App.ViewModels
 
                 if (!scrcpyFound)
                 {
-                    StatusWarning = "scrcpy executable not detected in PATH or custom directory.";
+                    StatusWarning = LocalizationManager.Instance.GetString("Status_ScrcpyNotDetected");
                     if (ConnectionState == SessionState.Idle)
                     {
                         SessionStatusText = StatusWarning;
@@ -918,7 +942,7 @@ namespace ScrcpyDex.App.ViewModels
                 }
                 else if (!adbFound)
                 {
-                    StatusWarning = "adb executable not detected in PATH or scrcpy directory.";
+                    StatusWarning = LocalizationManager.Instance.GetString("Status_AdbNotDetected");
                     if (ConnectionState == SessionState.Idle)
                     {
                         SessionStatusText = StatusWarning;
@@ -943,10 +967,10 @@ namespace ScrcpyDex.App.ViewModels
             HasDoctorErrors = report.HasErrors;
             HasDoctorWarnings = report.HasWarnings;
             DoctorSummaryText = report.HasErrors
-                ? $"{report.ErrorCount} error(s), {report.WarningCount} warning(s) • Environment needs attention"
+                ? string.Format(LocalizationManager.Instance.GetString("Doctor_SummaryErrors"), report.ErrorCount, report.WarningCount)
                 : report.HasWarnings
-                    ? $"{report.WarningCount} warning(s) • Environment ready with notices"
-                    : $"{report.PassCount} check(s) passed • Environment ready";
+                    ? string.Format(LocalizationManager.Instance.GetString("Doctor_SummaryWarnings"), report.WarningCount)
+                    : string.Format(LocalizationManager.Instance.GetString("Doctor_SummaryPassed"), report.PassCount);
         }
 
         partial void OnSelectedDeviceChanged(DeviceInfo? value)
@@ -1201,13 +1225,13 @@ namespace ScrcpyDex.App.ViewModels
 
         private string GetDefaultStateMessage(SessionState state) => state switch
         {
-            SessionState.Idle => "Ready to start session",
-            SessionState.DeviceConnecting => "Connecting to ADB target...",
-            SessionState.ServerDeploying => "Deploying Samsung DeX server component...",
-            SessionState.DisplayNegotiating => "Allocating virtual display with system_server...",
-            SessionState.StreamingActive => "DeX session active and streaming",
-            SessionState.Teardown => "Tearing down DeX session...",
-            SessionState.Error => "Session error encountered",
+            SessionState.Idle => LocalizationManager.Instance.GetString("Status_ReadyToStart"),
+            SessionState.DeviceConnecting => LocalizationManager.Instance.GetString("Status_ConnectingTarget"),
+            SessionState.ServerDeploying => LocalizationManager.Instance.GetString("Status_DeployingServerMsg"),
+            SessionState.DisplayNegotiating => LocalizationManager.Instance.GetString("Status_AllocatingDisplay"),
+            SessionState.StreamingActive => LocalizationManager.Instance.GetString("Status_StreamingActiveMsg"),
+            SessionState.Teardown => LocalizationManager.Instance.GetString("Status_TearingDown"),
+            SessionState.Error => LocalizationManager.Instance.GetString("Status_SessionError"),
             _ => state.ToString()
         };
 
@@ -1237,7 +1261,7 @@ namespace ScrcpyDex.App.ViewModels
                     error.Contains("glBlendFuncSeparate", StringComparison.OrdinalIgnoreCase) ||
                     error.Contains("Could not create renderer", StringComparison.OrdinalIgnoreCase))
                 {
-                    StatusWarning = "Renderer unsupported: Switch Render Driver to Direct3D 9, OpenGL, or Software";
+                    StatusWarning = LocalizationManager.Instance.GetString("Status_RendererUnsupported");
                 }
                 LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Execution error: {error}", true));
             });
@@ -1273,7 +1297,7 @@ namespace ScrcpyDex.App.ViewModels
                 HardwareModel = "--";
                 SessionStatusText = !string.IsNullOrWhiteSpace(StatusWarning)
                     ? StatusWarning
-                    : "No ADB devices detected. Connect phone via USB with USB debugging enabled.";
+                    : LocalizationManager.Instance.GetString("Status_NoDevicesDetected");
                 return;
             }
 
@@ -1311,6 +1335,11 @@ namespace ScrcpyDex.App.ViewModels
             SelectedDevice = matched ?? DeviceList.FirstOrDefault();
             UpdateDeviceImage(SelectedDevice);
 
+            if (ConnectionState == SessionState.Idle && string.IsNullOrWhiteSpace(StatusWarning))
+            {
+                SessionStatusText = string.Format(LocalizationManager.Instance.GetString("Status_FoundDevices"), DeviceList.Count);
+            }
+
             _ = Task.Run(async () =>
             {
                 await EnrichUnknownDevicesAsync().ConfigureAwait(false);
@@ -1329,13 +1358,13 @@ namespace ScrcpyDex.App.ViewModels
                         var enriched = await _adbService.QueryDeviceInfoAsync(dev.Serial).ConfigureAwait(false);
                         if (enriched != null && enriched.Model != "Unknown" && !string.IsNullOrWhiteSpace(enriched.Model))
                         {
-                            dev.Model = enriched.Model;
-                            dev.AndroidVersion = enriched.AndroidVersion;
-                            dev.OneUiVersion = enriched.OneUiVersion;
-                            dev.Manufacturer = enriched.Manufacturer;
-
                             await Dispatcher.UIThread.InvokeAsync(() =>
                             {
+                                dev.Model = enriched.Model;
+                                dev.AndroidVersion = enriched.AndroidVersion;
+                                dev.OneUiVersion = enriched.OneUiVersion;
+                                dev.Manufacturer = enriched.Manufacturer;
+
                                 UpdateDeviceImage(SelectedDevice);
                                 OnPropertyChanged(nameof(SelectedDevice));
                                 OnPropertyChanged(nameof(DeviceDisplayName));
@@ -1346,6 +1375,17 @@ namespace ScrcpyDex.App.ViewModels
                                 OnPropertyChanged(nameof(IsDexMode));
                                 OnPropertyChanged(nameof(IsMirroringMode));
                                 OnPropertyChanged(nameof(StartSessionButtonText));
+            OnPropertyChanged(nameof(CriticalErrorTitle));
+            OnPropertyChanged(nameof(CriticalErrorDescription));
+            OnPropertyChanged(nameof(StatusPillText));
+            OnPropertyChanged(nameof(ModeIndicatorText));
+            OnPropertyChanged(nameof(SelectedDeviceSummary));
+            OnPropertyChanged(nameof(DeviceDisplayName));
+            OnPropertyChanged(nameof(DeviceFrameLabel));
+            OnPropertyChanged(nameof(ConnectionStatusText));
+            OnPropertyChanged(nameof(HardwareModelDisplay));
+            OnPropertyChanged(nameof(ScrcpyPathDisplay));
+            OnPropertyChanged(nameof(AdbPathDisplay));
                                 OnPropertyChanged(nameof(DeviceFrameFallbackText));
                                 OnPropertyChanged(nameof(ConnectionDetailsText));
                             });
@@ -1420,24 +1460,24 @@ namespace ScrcpyDex.App.ViewModels
             {
                 if (IsAdbDetected)
                 {
-                    SessionStatusText = "Scanning for connected ADB devices...";
+                    SessionStatusText = LocalizationManager.Instance.GetString("Status_ScanningDevices");
                 }
                 var devices = await _adbService.GetConnectedDevicesAsync().ConfigureAwait(false);
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     UpdateDevicesList(devices);
                     SessionStatusText = devices.Count > 0
-                        ? $"Found {devices.Count} device(s)"
+                        ? string.Format(LocalizationManager.Instance.GetString("Status_FoundDevices"), devices.Count)
                         : (!string.IsNullOrWhiteSpace(StatusWarning)
                             ? StatusWarning
-                            : "No ADB devices detected. Connect phone via USB with USB debugging enabled.");
+                            : LocalizationManager.Instance.GetString("Status_NoDevicesDetected"));
                 });
             }
             catch (Exception ex)
             {
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    SessionStatusText = $"Device scan failed: {ex.Message}";
+                    SessionStatusText = string.Format(LocalizationManager.Instance.GetString("Status_DeviceScanFailed"), ex.Message);
                     LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Error during device refresh: {ex.Message}", true));
                 });
             }
@@ -1448,7 +1488,7 @@ namespace ScrcpyDex.App.ViewModels
         {
             if (SelectedDevice == null)
             {
-                SessionStatusText = "Cannot start session: No device selected.";
+                SessionStatusText = LocalizationManager.Instance.GetString("Status_NoDeviceSelected");
                 return;
             }
 
@@ -1821,6 +1861,17 @@ namespace ScrcpyDex.App.ViewModels
             }
 
             OnPropertyChanged(nameof(StartSessionButtonText));
+            OnPropertyChanged(nameof(CriticalErrorTitle));
+            OnPropertyChanged(nameof(CriticalErrorDescription));
+            OnPropertyChanged(nameof(StatusPillText));
+            OnPropertyChanged(nameof(ModeIndicatorText));
+            OnPropertyChanged(nameof(SelectedDeviceSummary));
+            OnPropertyChanged(nameof(DeviceDisplayName));
+            OnPropertyChanged(nameof(DeviceFrameLabel));
+            OnPropertyChanged(nameof(ConnectionStatusText));
+            OnPropertyChanged(nameof(HardwareModelDisplay));
+            OnPropertyChanged(nameof(ScrcpyPathDisplay));
+            OnPropertyChanged(nameof(AdbPathDisplay));
 
             foreach (var cat in FaqCategories)
             {

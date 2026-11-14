@@ -17,11 +17,12 @@
   },
   "input": {
     "mouseDriver": "uhid",
-    "releaseKey": "LeftAlt"
+    "releaseKey": "LeftAlt",
+    "forwardShortcuts": false
   },
   "device": {
     "turnScreenOff": false,
-    "stayAwake": true,
+    "stayAwake": false,
     "autoConnect": false
   },
   "ui": {

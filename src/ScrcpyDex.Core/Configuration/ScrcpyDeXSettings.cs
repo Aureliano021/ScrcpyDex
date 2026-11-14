@@ -273,7 +273,7 @@ namespace ScrcpyDex.Core.Configuration
         private string _mouseDriver = "uhid";
         private string _releaseKey = "LeftAlt";
         private bool _forwardGamepad = false;
-        private bool _forwardShortcuts = true;
+        private bool _forwardShortcuts = false;
 
         [JsonPropertyName("mouseDriver")]
         public string MouseDriver { get => _mouseDriver; set => SetProperty(ref _mouseDriver, value); }

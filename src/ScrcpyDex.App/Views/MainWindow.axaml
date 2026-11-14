@@ -81,7 +81,7 @@
                         <!-- Settings Toggle Button -->
                         <Button Classes="circle-icon"
                                 Command="{Binding ToggleSettingsCommand}"
-                                ToolTip.Tip="Settings">
+                                ToolTip.Tip="{Binding [Window_Tooltip_Settings], Source={x:Static loc:LocalizationManager.Instance}}">
                             <PathIcon Data="{StaticResource Icon_Gear}"
                                       Width="12" Height="12"
                                       Foreground="#D0D0D7" />
@@ -93,7 +93,7 @@
                                 Content="—"
                                 FontSize="11"
                                 Foreground="#D0D0D7"
-                                ToolTip.Tip="Minimize" />
+                                ToolTip.Tip="{Binding [Window_Tooltip_Minimize], Source={x:Static loc:LocalizationManager.Instance}}" />
 
                         <!-- Close Window Button -->
                         <Button Classes="circle-icon"
@@ -101,7 +101,7 @@
                                 Content="×"
                                 FontSize="15"
                                 Foreground="#D0D0D7"
-                                ToolTip.Tip="Close" />
+                                ToolTip.Tip="{Binding [Window_Tooltip_Close], Source={x:Static loc:LocalizationManager.Instance}}" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -194,7 +194,7 @@
                                                 CornerRadius="6"
                                                 Padding="7,3"
                                                 IsVisible="{Binding IsMirroringMode}">
-                                            <TextBlock Text="MIRROR"
+                                            <TextBlock Text="{Binding [Ui_Mirror], Source={x:Static loc:LocalizationManager.Instance}}"
                                                        FontSize="9"
                                                        FontWeight="SemiBold"
                                                        LetterSpacing="0.4"
@@ -211,7 +211,7 @@
 
                             <!-- Target Device Dropdown (Expands on Click) -->
                             <StackPanel Spacing="5">
-                                <TextBlock Text="TARGET DEVICE"
+                                <TextBlock Text="{Binding [Ui_TargetDevice], Source={x:Static loc:LocalizationManager.Instance}}"
                                            FontSize="9.5"
                                            FontWeight="SemiBold"
                                            LetterSpacing="0.8"
@@ -305,7 +305,7 @@
                                 <!-- Card Header: TELEMETRY on Left, Active Mode on Right -->
                                 <Grid ColumnDefinitions="*, Auto">
                                     <TextBlock Grid.Column="0"
-                                               Text="TELEMETRY"
+                                               Text="{Binding [Telemetry_Header], Source={x:Static loc:LocalizationManager.Instance}}"
                                                FontSize="9.5"
                                                FontWeight="SemiBold"
                                                LetterSpacing="0.8"
@@ -320,10 +320,10 @@
                                                VerticalAlignment="Center" />
                                 </Grid>
 
-                                <!-- 4 Tabular Telemetry Columns -->
-                                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
+                                <!-- 4 Tabular Telemetry Columns (Edge-aligned with even flexible spacers) -->
+                                <Grid ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto">
                                     <StackPanel Grid.Column="0" Spacing="3">
-                                        <TextBlock Text="BATTERY"
+                                        <TextBlock Text="{Binding [Telemetry_Battery], Source={x:Static loc:LocalizationManager.Instance}}"
                                                    FontSize="8.5"
                                                    FontWeight="SemiBold"
                                                    LetterSpacing="0.5"
@@ -335,8 +335,8 @@
                                                    Foreground="#F5F5F7" />
                                     </StackPanel>
 
-                                    <StackPanel Grid.Column="1" Spacing="3">
-                                        <TextBlock Text="TEMP"
+                                    <StackPanel Grid.Column="2" Spacing="3">
+                                        <TextBlock Text="{Binding [Telemetry_Temperature], Source={x:Static loc:LocalizationManager.Instance}}"
                                                    FontSize="8.5"
                                                    FontWeight="SemiBold"
                                                    LetterSpacing="0.5"
@@ -348,30 +348,32 @@
                                                    Foreground="#F5F5F7" />
                                     </StackPanel>
 
-                                    <StackPanel Grid.Column="2" Spacing="3">
-                                        <TextBlock Text="USB LINK"
+                                    <StackPanel Grid.Column="4" Spacing="3">
+                                        <TextBlock Text="{Binding [Telemetry_UsbLink], Source={x:Static loc:LocalizationManager.Instance}}"
                                                    FontSize="8.5"
                                                    FontWeight="SemiBold"
                                                    LetterSpacing="0.5"
                                                    Foreground="#86868B" />
                                         <TextBlock Text="{Binding UsbLinkSpeed}"
-                                                   FontSize="13"
+                                                   FontSize="13.5"
                                                    FontWeight="SemiBold"
                                                    FontFeatures="+tnum"
                                                    TextTrimming="CharacterEllipsis"
                                                    Foreground="#F5F5F7" />
                                     </StackPanel>
 
-                                    <StackPanel Grid.Column="3" Spacing="3">
-                                        <TextBlock Text="LATENCY"
+                                    <StackPanel Grid.Column="6" Spacing="3" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding [Telemetry_Latency], Source={x:Static loc:LocalizationManager.Instance}}"
                                                    FontSize="8.5"
                                                    FontWeight="SemiBold"
                                                    LetterSpacing="0.5"
+                                                   HorizontalAlignment="Right"
                                                    Foreground="#86868B" />
                                         <TextBlock Text="{Binding EstimatedLatencyMs}"
                                                    FontSize="13.5"
                                                    FontWeight="SemiBold"
                                                    FontFeatures="+tnum"
+                                                   HorizontalAlignment="Right"
                                                    Foreground="#F5F5F7" />
                                     </StackPanel>
                                 </Grid>
@@ -395,10 +397,10 @@
                                     Command="{Binding CloseSettingsCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
                                     <PathIcon Data="{StaticResource Icon_Back}" Width="10" Height="10" Foreground="#D0D0D7" />
-                                    <TextBlock Text="BACK" FontSize="9.5" FontWeight="SemiBold" LetterSpacing="0.5" Foreground="#D0D0D7" />
+                                    <TextBlock Text="{Binding [Ui_Back], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" FontWeight="SemiBold" LetterSpacing="0.5" Foreground="#D0D0D7" />
                                 </StackPanel>
                             </Button>
-                            <TextBlock Text="CONFIGURATION"
+                            <TextBlock Text="{Binding [Ui_Configuration], Source={x:Static loc:LocalizationManager.Instance}}"
                                        FontSize="10"
                                        FontWeight="SemiBold"
                                        LetterSpacing="0.8"
@@ -410,10 +412,10 @@
                             <!-- Dedicated Console Window Trigger -->
                             <Button Classes="pill-button"
                                     Command="{Binding OpenConsoleWindowCommand}"
-                                    ToolTip.Tip="Open dedicated execution console window">
+                                    ToolTip.Tip="{Binding [Ui_ConsoleTooltip], Source={x:Static loc:LocalizationManager.Instance}}">
                                 <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
                                     <PathIcon Data="{StaticResource Icon_Terminal}" Width="10" Height="10" Foreground="#FF7A00" />
-                                    <TextBlock Text="CONSOLE  ↗"
+                                    <TextBlock Text="{Binding [Ui_Console], Source={x:Static loc:LocalizationManager.Instance}}"
                                                FontSize="9.5"
                                                FontWeight="SemiBold"
                                                LetterSpacing="0.4"
@@ -427,7 +429,7 @@
                                     ToolTip.Tip="{Binding [Faq_Title], Source={x:Static loc:LocalizationManager.Instance}}">
                                 <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
                                     <PathIcon Data="{StaticResource Icon_Help}" Width="10" Height="10" Foreground="#D0D0D7" />
-                                    <TextBlock Text="FAQ &amp; DOCTOR"
+                                    <TextBlock Text="{Binding [Ui_FaqDoctor], Source={x:Static loc:LocalizationManager.Instance}}"
                                                FontSize="9.5"
                                                FontWeight="SemiBold"
                                                LetterSpacing="0.4"
@@ -447,7 +449,7 @@
                             <!-- CARD 1: DISPLAY & HARDWARE ENCODER -->
                             <Border Classes="glass-card">
                                 <StackPanel Spacing="8">
-                                    <TextBlock Text="DISPLAY &amp; ENCODER"
+                                    <TextBlock Text="{Binding [Ui_DisplayEncoder], Source={x:Static loc:LocalizationManager.Instance}}"
                                                FontSize="9"
                                                FontWeight="SemiBold"
                                                LetterSpacing="0.8"
@@ -467,7 +469,7 @@
                                     <Grid ColumnDefinitions="*, 84, 12, 84"
                                           Height="28"
                                           IsVisible="{Binding IsCustomResolution}">
-                                        <TextBlock Text="Custom Dimensions (px)"
+                                        <TextBlock Text="{Binding [Ui_CustomDimensions], Source={x:Static loc:LocalizationManager.Instance}}"
                                                    FontSize="10.5" Foreground="#86868B" VerticalAlignment="Center" />
                                         <TextBox Grid.Column="1" Text="{Binding CustomWidth}" VerticalAlignment="Center" HorizontalContentAlignment="Center" />
                                         <TextBlock Grid.Column="2" Text="×" FontSize="11" Foreground="#86868B" HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -476,7 +478,7 @@
 
                                     <!-- Display Density (DPI) -->
                                     <Grid ColumnDefinitions="*, 180" Height="28">
-                                        <TextBlock Text="Display Density (DPI)"
+                                        <TextBlock Text="{Binding [Ui_DisplayDensityDpi], Source={x:Static loc:LocalizationManager.Instance}}"
                                                    FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" VerticalAlignment="Center" />
                                         <ComboBox Grid.Column="1" Classes="dex-combobox"
                                                   ItemsSource="{Binding AvailableDpi}"
@@ -533,7 +535,7 @@
                             <!-- CARD 2: SESSION & INPUT OPTIONS -->
                             <Border Classes="glass-card">
                                 <StackPanel Spacing="8">
-                                    <TextBlock Text="SESSION &amp; INPUT"
+                                    <TextBlock Text="{Binding [Ui_SessionInput], Source={x:Static loc:LocalizationManager.Instance}}"
                                                FontSize="9"
                                                FontWeight="SemiBold"
                                                LetterSpacing="0.8"
@@ -541,7 +543,7 @@
 
                                     <!-- Mouse / Input Mode Dropdown -->
                                     <Grid ColumnDefinitions="*, 180" Height="28">
-                                        <TextBlock Text="Mouse / Input Driver"
+                                        <TextBlock Text="{Binding [Ui_MouseInputDriver], Source={x:Static loc:LocalizationManager.Instance}}"
                                                    FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" VerticalAlignment="Center" />
                                         <ComboBox Grid.Column="1" Classes="dex-combobox"
                                                   ItemsSource="{Binding AvailableInputModes}"
@@ -579,7 +581,7 @@
 
                                     <!-- Fullscreen Window -->
                                     <Grid ColumnDefinitions="*, Auto" Height="26">
-                                        <TextBlock Text="Launch in Fullscreen"
+                                        <TextBlock Text="{Binding [Ui_LaunchFullscreen], Source={x:Static loc:LocalizationManager.Instance}}"
                                                    FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" VerticalAlignment="Center" />
                                         <ToggleSwitch Grid.Column="1" Classes="dex-switch" IsChecked="{Binding Fullscreen}" />
                                     </Grid>
@@ -589,7 +591,7 @@
                             <!-- CARD 3: SYSTEM, LANGUAGE & BINARY PATHS -->
                             <Border Classes="glass-card">
                                 <StackPanel Spacing="8">
-                                    <TextBlock Text="SYSTEM &amp; BINARIES"
+                                    <TextBlock Text="{Binding [Ui_SystemBinaries], Source={x:Static loc:LocalizationManager.Instance}}"
                                                FontSize="9"
                                                FontWeight="SemiBold"
                                                LetterSpacing="0.8"
@@ -608,8 +610,8 @@
                                     <!-- scrcpy Binary Path -->
                                     <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
                                         <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
-                                            <TextBlock Text="scrcpy Executable" FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" />
-                                            <TextBlock Text="{Binding ScrcpyPath, TargetNullValue='Auto-detect from PATH'}"
+                                            <TextBlock Text="{Binding [Ui_ScrcpyExecutable], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" />
+                                            <TextBlock Text="{Binding ScrcpyPathDisplay}"
                                                        FontSize="9"
                                                        FontFamily="Cascadia Code, Consolas, monospace"
                                                        Foreground="#86868B"
@@ -621,7 +623,7 @@
                                                 VerticalAlignment="Center">
                                             <StackPanel Orientation="Horizontal" Spacing="5">
                                                 <PathIcon Data="{StaticResource Icon_Folder}" Width="10" Height="10" Foreground="#D0D0D7" />
-                                                <TextBlock Text="BROWSE" FontSize="9.5" FontWeight="SemiBold" Foreground="#D0D0D7" />
+                                                <TextBlock Text="{Binding [Ui_Browse], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" FontWeight="SemiBold" Foreground="#D0D0D7" />
                                             </StackPanel>
                                         </Button>
                                     </Grid>
@@ -629,8 +631,8 @@
                                     <!-- adb Binary Path -->
                                     <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
                                         <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
-                                            <TextBlock Text="adb Executable" FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" />
-                                            <TextBlock Text="{Binding AdbPath, TargetNullValue='Auto-detect from PATH'}"
+                                            <TextBlock Text="{Binding [Ui_AdbExecutable], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="11" FontWeight="Medium" Foreground="#D0D0D7" />
+                                            <TextBlock Text="{Binding AdbPathDisplay}"
                                                        FontSize="9"
                                                        FontFamily="Cascadia Code, Consolas, monospace"
                                                        Foreground="#86868B"
@@ -642,7 +644,7 @@
                                                 VerticalAlignment="Center">
                                             <StackPanel Orientation="Horizontal" Spacing="5">
                                                 <PathIcon Data="{StaticResource Icon_Folder}" Width="10" Height="10" Foreground="#D0D0D7" />
-                                                <TextBlock Text="BROWSE" FontSize="9.5" FontWeight="SemiBold" Foreground="#D0D0D7" />
+                                                <TextBlock Text="{Binding [Ui_Browse], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" FontWeight="SemiBold" Foreground="#D0D0D7" />
                                             </StackPanel>
                                         </Button>
                                     </Grid>
@@ -667,10 +669,10 @@
                                     Command="{Binding OpenSettingsCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
                                     <PathIcon Data="{StaticResource Icon_Back}" Width="10" Height="10" Foreground="#D0D0D7" />
-                                    <TextBlock Text="SETTINGS" FontSize="9.5" FontWeight="SemiBold" LetterSpacing="0.5" Foreground="#D0D0D7" />
+                                    <TextBlock Text="{Binding [Ui_Settings], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" FontWeight="SemiBold" LetterSpacing="0.5" Foreground="#D0D0D7" />
                                 </StackPanel>
                             </Button>
-                            <TextBlock Text="FAQ &amp; DIAGNOSTICS"
+                            <TextBlock Text="{Binding [Ui_FaqDiagnostics], Source={x:Static loc:LocalizationManager.Instance}}"
                                        FontSize="10"
                                        FontWeight="SemiBold"
                                        LetterSpacing="0.8"
@@ -683,7 +685,7 @@
                                 Command="{Binding RunDoctorCommand}">
                             <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
                                 <PathIcon Data="{StaticResource Icon_Refresh}" Width="10" Height="10" Foreground="#FF7A00" />
-                                <TextBlock Text="CHECK ENV" FontSize="9.5" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                                <TextBlock Text="{Binding [Ui_CheckEnv], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" FontWeight="SemiBold" Foreground="#F5F5F7" />
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -813,7 +815,7 @@
                                                                     Height="22"
                                                                     Padding="8,0"
                                                                     Margin="8,0,0,0">
-                                                                <TextBlock Text="COPY" FontSize="8.5" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                                                                <TextBlock Text="{Binding [Ui_Copy], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="8.5" FontWeight="SemiBold" Foreground="#F5F5F7" />
                                                             </Button>
                                                         </Grid>
                                                     </Border>
@@ -859,7 +861,7 @@
                                     VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
                                     <PathIcon Data="{StaticResource Icon_Alert}" Width="10" Height="10" Foreground="#FF453A" />
-                                    <TextBlock Text="CRITICAL ALERT"
+                                    <TextBlock Text="{Binding [Ui_CriticalAlert], Source={x:Static loc:LocalizationManager.Instance}}"
                                                FontSize="8.5"
                                                FontWeight="SemiBold"
                                                LetterSpacing="0.8"
@@ -873,7 +875,7 @@
                                     Content="×"
                                     FontSize="15"
                                     Foreground="#D0D0D7"
-                                    ToolTip.Tip="Close window" />
+                                    ToolTip.Tip="{Binding [Window_Tooltip_Close], Source={x:Static loc:LocalizationManager.Instance}}" />
                         </Grid>
 
                         <!-- Error Title & Detailed Description -->
@@ -898,7 +900,7 @@
                                     Height="32"
                                     Padding="12,0"
                                     Margin="0,0,6,6">
-                                <TextBlock Text="LOCATE SCRCPY" FontSize="10" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                                <TextBlock Text="{Binding [Ui_LocateScrcpy], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10" FontWeight="SemiBold" Foreground="#F5F5F7" />
                             </Button>
 
                             <Button Classes="btn-primary"
@@ -907,7 +909,7 @@
                                     Height="32"
                                     Padding="12,0"
                                     Margin="0,0,6,6">
-                                <TextBlock Text="LOCATE ADB" FontSize="10" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                                <TextBlock Text="{Binding [Ui_LocateAdb], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10" FontWeight="SemiBold" Foreground="#F5F5F7" />
                             </Button>
 
                             <Button Classes="btn-secondary"
@@ -915,7 +917,7 @@
                                     Height="32"
                                     Padding="12,0"
                                     Margin="0,0,6,6">
-                                <TextBlock Text="RETRY" FontSize="10" FontWeight="SemiBold" Foreground="#D0D0D7" />
+                                <TextBlock Text="{Binding [Ui_Retry], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10" FontWeight="SemiBold" Foreground="#D0D0D7" />
                             </Button>
 
                             <Button Classes="btn-secondary"
@@ -923,7 +925,7 @@
                                     Height="32"
                                     Padding="12,0"
                                     Margin="0,0,6,6">
-                                <TextBlock Text="SETTINGS" FontSize="10" FontWeight="SemiBold" Foreground="#D0D0D7" />
+                                <TextBlock Text="{Binding [Ui_Settings], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10" FontWeight="SemiBold" Foreground="#D0D0D7" />
                             </Button>
 
                             <Button Classes="btn-secondary"
@@ -931,7 +933,7 @@
                                     Height="32"
                                     Padding="12,0"
                                     Margin="0,0,6,6">
-                                <TextBlock Text="CONSOLE  ↗" FontSize="10" FontWeight="SemiBold" Foreground="#D0D0D7" />
+                                <TextBlock Text="{Binding [Ui_Console], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10" FontWeight="SemiBold" Foreground="#D0D0D7" />
                             </Button>
 
                             <Button Classes="btn-secondary"
@@ -939,7 +941,7 @@
                                     Height="32"
                                     Padding="12,0"
                                     Margin="0,0,0,6">
-                                <TextBlock Text="DISMISS" FontSize="10" FontWeight="SemiBold" Foreground="#86868B" />
+                                <TextBlock Text="{Binding [Ui_Dismiss], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="10" FontWeight="SemiBold" Foreground="#86868B" />
                             </Button>
                         </WrapPanel>
                     </StackPanel>

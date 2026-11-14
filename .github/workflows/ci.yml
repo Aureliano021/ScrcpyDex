@@ -118,7 +118,7 @@ jobs:
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
             VERSION="${GITHUB_REF#refs/tags/v}"
           else
-            VERSION="1.1.0"
+            VERSION="2.0.0"
           fi
           echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
 
@@ -166,7 +166,7 @@ jobs:
           if ($ref -like "refs/tags/v*") {
             $ver = $ref.Substring(11)
           } else {
-            $ver = "1.1.0"
+            $ver = "2.0.0"
           }
           "VERSION=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
