@@ -9,9 +9,13 @@
 - Prefer plain, technical wording over marketing-style superlatives.
 
 ## Language
-- All code, comments, documentation, logs, and the default user interface text (labels, buttons, tooltips, dialogs, notifications, etc.) must be written in English.
+- All repository code, comments, in-repo documentation (`ScrcpyDex/docs/`), logs, and the default user interface text (labels, buttons, tooltips, dialogs, notifications, etc.) must be written in English.
 - Localized user interface strings are permitted only inside dedicated translation resource files (e.g., `.resx`). English is the default and fallback language, and every string must exist in English first.
-- Portuguese is permitted only in chat interactions with the user and in translation resource files.
+- Portuguese is permitted in chat interactions with the user, in translation resource files, and in the external Obsidian knowledge base (`C:\obsidian\Projetos\ScrcpyDex\DOCS`).
+
+## Obsidian Knowledge Base Synchronization
+- **Pre-Task Context Acquisition**: Whenever starting to analyze, debug, or implement any feature or change, first consult the external Obsidian documentation at `C:\obsidian\Projetos\ScrcpyDex\DOCS` (starting at `00 - Índice e Mapa de Conteúdo (MOC).md`) to rapidly acquire system context before scanning the repository.
+- **Post-Task Documentation Maintenance**: Whenever concluding an implementation, architectural change, or technical analysis, verify and update the affected topic notes in `C:\obsidian\Projetos\ScrcpyDex\DOCS` to correct outdated details and keep the knowledge base synchronized with the current state of the project.
 
 ## Privacy & Data Minimization
 - Never commit or document real personal, machine, network, or hardware identifiers.
