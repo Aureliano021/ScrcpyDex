@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
+// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ using ScrcpyDex.App.Services;
 using ScrcpyDex.Core.Adb;
 using ScrcpyDex.Core.Collections;
 using ScrcpyDex.Core.Configuration;
+using ScrcpyDex.Core.Diagnostics;
 using ScrcpyDex.Core.IO;
 using ScrcpyDex.Core.Lifecycle;
 using ScrcpyDex.Core.Localization;
@@ -101,10 +102,42 @@ namespace ScrcpyDex.App.ViewModels
         private string? _scrcpyPath;
 
         [ObservableProperty]
+        private string? _adbPath;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanStart))]
+        [NotifyCanExecuteChangedFor(nameof(StartSessionCommand))]
         private bool _isScrcpyDetected = true;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanStart))]
+        [NotifyCanExecuteChangedFor(nameof(StartSessionCommand))]
+        private bool _isAdbDetected = true;
+
+        [ObservableProperty]
         private string? _statusWarning;
+
+        #endregion
+
+        #region Observable Properties - Environment Doctor
+
+        [ObservableProperty]
+        private bool _isDoctorOpen;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasDoctorIssues))]
+        private bool _hasDoctorErrors;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasDoctorIssues))]
+        private bool _hasDoctorWarnings;
+
+        public bool HasDoctorIssues => HasDoctorErrors || HasDoctorWarnings;
+
+        [ObservableProperty]
+        private string _doctorSummaryText = "Diagnostics not run yet";
+
+        public ObservableCollection<DiagnosticItem> DoctorItems { get; } = new ObservableCollection<DiagnosticItem>();
 
         #endregion
 
@@ -164,6 +197,7 @@ namespace ScrcpyDex.App.ViewModels
         #region Observable Properties - Display & Stream Settings
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsCustomResolution))]
         private string _selectedResolution = "1920x1080 (FHD)";
 
         public IReadOnlyList<string> AvailableResolutions { get; } = new[]
@@ -174,8 +208,33 @@ namespace ScrcpyDex.App.ViewModels
             "2560x1440 (QHD)",
             "3440x1440 (UWQHD 34\")",
             "3840x2160 (4K UHD)",
-            "Native Screen Resolution"
+            "Native Screen Resolution",
+            "Custom"
         };
+
+        [ObservableProperty]
+        private int _customWidth = 1920;
+
+        [ObservableProperty]
+        private int _customHeight = 1080;
+
+        public bool IsCustomResolution => string.Equals(SelectedResolution, "Custom", StringComparison.OrdinalIgnoreCase);
+
+        partial void OnSelectedResolutionChanged(string value)
+        {
+            if (!string.IsNullOrWhiteSpace(value) &&
+                !value.Equals("Custom", StringComparison.OrdinalIgnoreCase) &&
+                DisplaySection.TryParseResolutionDimensions(value, out int w, out int h))
+            {
+                CustomWidth = w;
+                CustomHeight = h;
+            }
+        }
+
+        [ObservableProperty]
+        private int _selectedDpi = 160;
+
+        public IReadOnlyList<int> AvailableDpi { get; } = new[] { 120, 140, 160, 180, 200, 240, 320 };
 
         [ObservableProperty]
         private int _selectedFps = 30;
@@ -241,15 +300,75 @@ namespace ScrcpyDex.App.ViewModels
         {
             "Auto (Direct3D 11 / OpenGL)",
             "Direct3D 11",
-            "OpenGL"
+            "Direct3D 9",
+            "OpenGL",
+            "Software"
         };
 
         #endregion
 
         #region Observable Properties - Input & Session Flags
 
+        private bool _isSyncingInputMode;
+
+        public IReadOnlyList<string> AvailableInputModes { get; } = new[]
+        {
+            "UHID (Relative Mouse)",
+            "SDK (Touchscreen / Absolute)",
+            "AOA (Physical USB)",
+            "Disabled"
+        };
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(TouchscreenModeEnabled))]
+        private string _selectedInputMode = "UHID (Relative Mouse)";
+
+        public bool TouchscreenModeEnabled
+        {
+            get => ScrcpyExecutionService.NormalizeMouseDriver(SelectedInputMode) == "sdk";
+            set => SelectedInputMode = value ? "SDK (Touchscreen / Absolute)" : "UHID (Relative Mouse)";
+        }
+
+        partial void OnSelectedInputModeChanged(string value)
+        {
+            OnPropertyChanged(nameof(TouchscreenModeEnabled));
+            if (_isSyncingInputMode) return;
+
+            _isSyncingInputMode = true;
+            try
+            {
+                MouseUhidEnabled = ScrcpyExecutionService.NormalizeMouseDriver(value) == "uhid";
+            }
+            finally
+            {
+                _isSyncingInputMode = false;
+            }
+        }
+
         [ObservableProperty]
         private bool _mouseUhidEnabled = true;
+
+        partial void OnMouseUhidEnabledChanged(bool value)
+        {
+            if (_isSyncingInputMode) return;
+
+            _isSyncingInputMode = true;
+            try
+            {
+                if (value)
+                {
+                    SelectedInputMode = AvailableInputModes[0];
+                }
+                else if (ScrcpyExecutionService.NormalizeMouseDriver(SelectedInputMode) == "uhid")
+                {
+                    SelectedInputMode = AvailableInputModes[2];
+                }
+            }
+            finally
+            {
+                _isSyncingInputMode = false;
+            }
+        }
 
         [ObservableProperty]
         private bool _forwardShortcuts = true;
@@ -288,7 +407,7 @@ namespace ScrcpyDex.App.ViewModels
 
         #region Computed Properties
 
-        public bool CanStart => ConnectionState == SessionState.Idle && SelectedDevice != null && IsScrcpyDetected;
+        public bool CanStart => (ConnectionState == SessionState.Idle || ConnectionState == SessionState.Error) && SelectedDevice != null && IsScrcpyDetected && IsAdbDetected;
 
         public bool CanStop => ConnectionState == SessionState.StreamingActive ||
                                ConnectionState == SessionState.DeviceConnecting ||
@@ -473,6 +592,30 @@ namespace ScrcpyDex.App.ViewModels
                 {
                     SelectedResolution = matchedRes;
                 }
+                else if (DisplaySection.TryParseResolutionDimensions(settings.Display.Resolution, out int parsedW, out int parsedH))
+                {
+                    SelectedResolution = "Custom";
+                    CustomWidth = Math.Clamp(parsedW, 640, 7680);
+                    CustomHeight = Math.Clamp(parsedH, 480, 4320);
+                }
+            }
+
+            if (IsCustomResolution &&
+                settings.Display.Width.HasValue && settings.Display.Width.Value > 0 &&
+                settings.Display.Height.HasValue && settings.Display.Height.Value > 0)
+            {
+                CustomWidth = Math.Clamp(settings.Display.Width.Value, 640, 7680);
+                CustomHeight = Math.Clamp(settings.Display.Height.Value, 480, 4320);
+            }
+
+            if (settings.Display.Dpi.HasValue && settings.Display.Dpi.Value >= 72 && settings.Display.Dpi.Value <= 640)
+            {
+                bool isLegacyUnconfiguredDefault =
+                    (string.Equals(settings.Version, "1.1", StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(settings.Version, "1.0", StringComparison.OrdinalIgnoreCase)) &&
+                    settings.Display.Dpi.Value == 320;
+
+                SelectedDpi = isLegacyUnconfiguredDefault ? 160 : settings.Display.Dpi.Value;
             }
 
             if (AvailableFps.Contains(settings.Display.Fps))
@@ -491,7 +634,14 @@ namespace ScrcpyDex.App.ViewModels
                 SelectedCodec = settings.Display.Codec;
             }
 
-            MouseUhidEnabled = settings.Input.MouseDriver.Equals("uhid", StringComparison.OrdinalIgnoreCase);
+            string normalizedMouse = ScrcpyExecutionService.NormalizeMouseDriver(settings.Input.MouseDriver);
+            SelectedInputMode = normalizedMouse switch
+            {
+                "sdk" => AvailableInputModes[1],
+                "aoa" => AvailableInputModes[2],
+                "disabled" => AvailableInputModes[3],
+                _ => AvailableInputModes[0]
+            };
             ForwardShortcuts = settings.Input.ForwardShortcuts;
             StayAwake = settings.Device.StayAwake;
             TurnScreenOff = settings.Device.TurnScreenOff;
@@ -499,19 +649,15 @@ namespace ScrcpyDex.App.ViewModels
 
             if (!string.IsNullOrWhiteSpace(settings.Display.RenderDriver))
             {
-                string driver = settings.Display.RenderDriver.Trim();
-                if (driver.Equals("direct3d11", StringComparison.OrdinalIgnoreCase))
+                string? normalized = ScrcpyExecutionService.NormalizeRenderDriver(settings.Display.RenderDriver);
+                SelectedRenderDriver = normalized switch
                 {
-                    SelectedRenderDriver = AvailableRenderDrivers.FirstOrDefault(d => d.Contains("Direct3D")) ?? AvailableRenderDrivers[0];
-                }
-                else if (driver.Equals("opengl", StringComparison.OrdinalIgnoreCase))
-                {
-                    SelectedRenderDriver = AvailableRenderDrivers.FirstOrDefault(d => d.Contains("OpenGL")) ?? AvailableRenderDrivers[0];
-                }
-                else
-                {
-                    SelectedRenderDriver = AvailableRenderDrivers[0];
-                }
+                    "direct3d11" => AvailableRenderDrivers.FirstOrDefault(d => d.Equals("Direct3D 11", StringComparison.OrdinalIgnoreCase)) ?? AvailableRenderDrivers[0],
+                    "direct3d" => AvailableRenderDrivers.FirstOrDefault(d => d.Equals("Direct3D 9", StringComparison.OrdinalIgnoreCase)) ?? AvailableRenderDrivers[0],
+                    "opengl" => AvailableRenderDrivers.FirstOrDefault(d => d.Equals("OpenGL", StringComparison.OrdinalIgnoreCase)) ?? AvailableRenderDrivers[0],
+                    "software" => AvailableRenderDrivers.FirstOrDefault(d => d.Equals("Software", StringComparison.OrdinalIgnoreCase)) ?? AvailableRenderDrivers[0],
+                    _ => AvailableRenderDrivers[0]
+                };
             }
 
             if (!string.IsNullOrWhiteSpace(settings.Language))
@@ -523,25 +669,59 @@ namespace ScrcpyDex.App.ViewModels
             {
                 ScrcpyPath = settings.Paths.ScrcpyPath;
             }
+
+            if (!string.IsNullOrWhiteSpace(settings.Paths.AdbPath))
+            {
+                AdbPath = settings.Paths.AdbPath;
+            }
         }
+
+        private DisplaySection BuildDisplaySection()
+        {
+            int? width = null;
+            int? height = null;
+
+            if (IsCustomResolution)
+            {
+                width = Math.Clamp(CustomWidth, 640, 7680);
+                height = Math.Clamp(CustomHeight, 480, 4320);
+            }
+            else if (DisplaySection.TryParseResolutionDimensions(SelectedResolution, out int parsedW, out int parsedH))
+            {
+                width = parsedW;
+                height = parsedH;
+            }
+
+            return new DisplaySection
+            {
+                Resolution = SelectedResolution,
+                Width = width,
+                Height = height,
+                Dpi = SelectedDpi,
+                Fps = SelectedFps,
+                Bitrate = BitrateMbps * 1_000_000,
+                Codec = SelectedCodec,
+                RenderDriver = ResolveEffectiveRenderDriver(),
+                WindowMode = Fullscreen ? "fullscreen" : "normal"
+            };
+        }
+
+        private string ResolveEffectiveMouseDriver() => ScrcpyExecutionService.NormalizeMouseDriver(SelectedInputMode);
 
         private async Task SaveCurrentSettingsAsync()
         {
             try
             {
                 var settings = new ScrcpyDeXSettings();
+                settings.Version = "2.0";
                 settings.Language = CurrentLanguage;
-                settings.Display.Resolution = SelectedResolution;
-                settings.Display.Fps = SelectedFps;
-                settings.Display.Bitrate = BitrateMbps * 1_000_000;
-                settings.Display.Codec = SelectedCodec;
-                settings.Display.RenderDriver = ResolveEffectiveRenderDriver();
-                settings.Display.WindowMode = Fullscreen ? "fullscreen" : "normal";
-                settings.Input.MouseDriver = MouseUhidEnabled ? "uhid" : "aoa";
+                settings.Display = BuildDisplaySection();
+                settings.Input.MouseDriver = ResolveEffectiveMouseDriver();
                 settings.Input.ForwardShortcuts = ForwardShortcuts;
                 settings.Device.StayAwake = StayAwake;
                 settings.Device.TurnScreenOff = TurnScreenOff;
                 settings.Paths.ScrcpyPath = ScrcpyPath;
+                settings.Paths.AdbPath = AdbPath;
 
                 await _configRepo.SaveAsync(settings).ConfigureAwait(false);
             }
@@ -553,22 +733,73 @@ namespace ScrcpyDex.App.ViewModels
 
         private async Task VerifyScrcpyExecutableAsync()
         {
-            string? resolved = ScrcpyPathResolver.ResolveScrcpyExecutable(ScrcpyPath);
+            bool scrcpyFound = ScrcpyPathResolver.TryResolveScrcpyExecutable(out string resolvedScrcpy, ScrcpyPath);
+            string? effectiveScrcpy = scrcpyFound ? resolvedScrcpy : ScrcpyPath;
+            bool adbFound = ScrcpyPathResolver.TryResolveAdbExecutable(out string resolvedAdb, AdbPath, effectiveScrcpy);
+
+            _adbService.ConfigurePaths(adbFound ? resolvedAdb : AdbPath, effectiveScrcpy);
+            _deviceTracker.ConfigurePaths(adbFound ? resolvedAdb : AdbPath, effectiveScrcpy);
+
+            var doctorReport = EnvironmentDoctorService.Instance.RunCrossPlatformChecks(
+                effectiveScrcpy,
+                adbFound ? resolvedAdb : AdbPath);
+
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                if (resolved != null)
+                IsScrcpyDetected = scrcpyFound;
+                IsAdbDetected = adbFound;
+
+                if (scrcpyFound)
                 {
-                    ScrcpyPath = resolved;
-                    IsScrcpyDetected = true;
-                    StatusWarning = null;
+                    ScrcpyPath = resolvedScrcpy;
+                }
+                if (adbFound)
+                {
+                    AdbPath = resolvedAdb;
+                }
+
+                ApplyDiagnosticReport(doctorReport);
+
+                if (!scrcpyFound)
+                {
+                    StatusWarning = "scrcpy executable not detected in PATH or custom directory.";
+                    if (ConnectionState == SessionState.Idle)
+                    {
+                        SessionStatusText = StatusWarning;
+                    }
+                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, "Warning: scrcpy binary was not found. Please configure its location using the 'Scrcpy' button in the title bar.", ProcessLogLevel.Warning));
+                }
+                else if (!adbFound)
+                {
+                    StatusWarning = "adb executable not detected in PATH or scrcpy directory.";
+                    if (ConnectionState == SessionState.Idle)
+                    {
+                        SessionStatusText = StatusWarning;
+                    }
+                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, "Warning: adb binary was not found in PATH or alongside scrcpy. Please ensure Android platform-tools (adb) are installed.", ProcessLogLevel.Warning));
                 }
                 else
                 {
-                    IsScrcpyDetected = false;
-                    StatusWarning = "scrcpy executable not detected in PATH or custom directory.";
-                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, "Warning: scrcpy binary was not found. Please configure its location.", ProcessLogLevel.Warning));
+                    StatusWarning = null;
                 }
             });
+        }
+
+        private void ApplyDiagnosticReport(DiagnosticReport report)
+        {
+            DoctorItems.Clear();
+            foreach (var item in report.Items)
+            {
+                DoctorItems.Add(item);
+            }
+
+            HasDoctorErrors = report.HasErrors;
+            HasDoctorWarnings = report.HasWarnings;
+            DoctorSummaryText = report.HasErrors
+                ? $"{report.ErrorCount} error(s), {report.WarningCount} warning(s) • Environment needs attention"
+                : report.HasWarnings
+                    ? $"{report.WarningCount} warning(s) • Environment ready with notices"
+                    : $"{report.PassCount} check(s) passed • Environment ready";
         }
 
         partial void OnSelectedDeviceChanged(DeviceInfo? value)
@@ -770,18 +1001,16 @@ namespace ScrcpyDex.App.ViewModels
 
         public string BuildCliCommandPreview()
         {
-            string display = SelectedResolution;
-            int parenIdx = display.IndexOf('(');
-            if (parenIdx > 0) display = display.Substring(0, parenIdx).Trim();
-            string resParam = display.Contains('x', StringComparison.OrdinalIgnoreCase)
-                ? $"--max-size={display.Split(new[] { 'x', 'X' })[0].Trim()} "
-                : "";
+            var display = BuildDisplaySection();
+            int maxSize = ScrcpyExecutionService.ResolveMaxSize(display);
+            string resParam = maxSize > 0 ? $"--max-size={maxSize} " : "";
 
             string targetSerial = SelectedDevice != null ? $"-s {SelectedDevice.Serial} " : "";
             string recParam = IsRecording ? $"--record=\"DeX_Recording_{DateTime.Now:yyyyMMdd_HHmmss}.mp4\" " : "";
             string screenOffParam = TurnScreenOff ? "--turn-screen-off " : "";
             string stayAwakeParam = StayAwake ? "--stay-awake " : "";
-            string uhidParam = MouseUhidEnabled ? "--mouse=uhid " : "";
+            string mouseDriver = ResolveEffectiveMouseDriver();
+            string mouseParam = mouseDriver == "disabled" ? "--no-mouse " : $"--mouse={mouseDriver} ";
             string kbdParam = ForwardShortcuts ? "--keyboard=uhid " : "";
             string fsParam = Fullscreen ? "--fullscreen " : "";
 
@@ -790,24 +1019,21 @@ namespace ScrcpyDex.App.ViewModels
                 ? ""
                 : $"--render-driver={(effectiveDriver == "auto" ? "opengl" : effectiveDriver)} ";
 
-            return $"scrcpy {targetSerial}--video-codec={SelectedCodec} {resParam}-b {BitrateMbps}M --max-fps={SelectedFps} {driverParam}{uhidParam}{kbdParam}{screenOffParam}{stayAwakeParam}{fsParam}{recParam}--window-title=\"ScrcpyDeX\"".Replace("  ", " ").Trim();
+            return $"scrcpy {targetSerial}--video-codec={SelectedCodec} {resParam}-b {BitrateMbps}M --max-fps={SelectedFps} {driverParam}{mouseParam}{kbdParam}{screenOffParam}{stayAwakeParam}{fsParam}{recParam}--window-title=\"ScrcpyDeX\"".Replace("  ", " ").Trim();
         }
 
         private string ResolveEffectiveRenderDriver()
         {
-            if (SelectedRenderDriver.StartsWith("Auto", StringComparison.OrdinalIgnoreCase))
+            string? normalized = ScrcpyExecutionService.NormalizeRenderDriver(SelectedRenderDriver);
+            if (string.IsNullOrWhiteSpace(normalized) || normalized == "auto")
             {
                 return "auto";
             }
-            if (SelectedRenderDriver.Contains("Direct3D", StringComparison.OrdinalIgnoreCase))
-            {
-                return OperatingSystem.IsWindows() ? "direct3d11" : "opengl";
-            }
-            if (SelectedRenderDriver.Contains("OpenGL", StringComparison.OrdinalIgnoreCase))
+            if (!OperatingSystem.IsWindows() && (normalized == "direct3d11" || normalized == "direct3d"))
             {
                 return "opengl";
             }
-            return "auto";
+            return normalized;
         }
 
         #region Event Handlers
@@ -857,9 +1083,10 @@ namespace ScrcpyDex.App.ViewModels
             Dispatcher.UIThread.Post(() =>
             {
                 if (error.Contains("D3D11CreateDevice", StringComparison.OrdinalIgnoreCase) ||
-                    (error.Contains("Could not create renderer", StringComparison.OrdinalIgnoreCase) && error.Contains("direct3d", StringComparison.OrdinalIgnoreCase)))
+                    error.Contains("glBlendFuncSeparate", StringComparison.OrdinalIgnoreCase) ||
+                    error.Contains("Could not create renderer", StringComparison.OrdinalIgnoreCase))
                 {
-                    StatusWarning = "D3D11 unsupported: Switch Render Driver to OpenGL";
+                    StatusWarning = "Renderer unsupported: Switch Render Driver to Direct3D 9, OpenGL, or Software";
                 }
                 LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Execution error: {error}", true));
             });
@@ -893,7 +1120,9 @@ namespace ScrcpyDex.App.ViewModels
                 EstimatedLatencyMs = "--";
                 UsbLinkSpeed = "--";
                 HardwareModel = "--";
-                SessionStatusText = "No ADB devices detected. Connect phone via USB with USB debugging enabled.";
+                SessionStatusText = !string.IsNullOrWhiteSpace(StatusWarning)
+                    ? StatusWarning
+                    : "No ADB devices detected. Connect phone via USB with USB debugging enabled.";
                 return;
             }
 
@@ -1038,14 +1267,19 @@ namespace ScrcpyDex.App.ViewModels
         {
             try
             {
-                SessionStatusText = "Scanning for connected ADB devices...";
+                if (IsAdbDetected)
+                {
+                    SessionStatusText = "Scanning for connected ADB devices...";
+                }
                 var devices = await _adbService.GetConnectedDevicesAsync().ConfigureAwait(false);
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     UpdateDevicesList(devices);
                     SessionStatusText = devices.Count > 0
                         ? $"Found {devices.Count} device(s)"
-                        : "No ADB devices detected. Connect phone via USB with USB debugging enabled.";
+                        : (!string.IsNullOrWhiteSpace(StatusWarning)
+                            ? StatusWarning
+                            : "No ADB devices detected. Connect phone via USB with USB debugging enabled.");
                 });
             }
             catch (Exception ex)
@@ -1076,12 +1310,19 @@ namespace ScrcpyDex.App.ViewModels
             {
                 await SaveCurrentSettingsAsync().ConfigureAwait(false);
 
+                if (_stateMachine.CurrentState == SessionState.Error || _stateMachine.CurrentState == SessionState.Teardown)
+                {
+                    await _stateMachine.FireAsync(SessionTrigger.Reset, "Resetting previous session state").ConfigureAwait(false);
+                }
+
                 bool started = await _stateMachine.FireAsync(SessionTrigger.TriggerStart, "Initiating DeX session").ConfigureAwait(false);
                 if (!started)
                 {
                     LogEntries.Push(new ProcessLogEntry(DateTime.Now, "State machine rejected start trigger.", true));
                     return;
                 }
+
+                var displaySection = BuildDisplaySection();
 
                 int effectiveDisplayId = 0;
 
@@ -1104,6 +1345,26 @@ namespace ScrcpyDex.App.ViewModels
                     effectiveDisplayId = displayId.Value;
                     SelectedDevice.DeXDisplayId = effectiveDisplayId;
                     LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"DeX virtual display allocated successfully (Display ID: {effectiveDisplayId})", false));
+
+                    if (effectiveDisplayId > 0 &&
+                        ScrcpyExecutionService.TryResolveDisplayDimensions(displaySection, out int targetWidth, out int targetHeight))
+                    {
+                        bool sizeApplied = await _adbService.SetDisplaySizeAsync(SelectedDevice.Serial, effectiveDisplayId, targetWidth, targetHeight).ConfigureAwait(false);
+                        if (sizeApplied)
+                        {
+                            LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Applied virtual display resolution: {targetWidth}x{targetHeight} (Display ID: {effectiveDisplayId})", false));
+                        }
+                    }
+
+                    if (SelectedDpi >= 72 && SelectedDpi <= 640 && effectiveDisplayId > 0)
+                    {
+                        bool dpiApplied = await _adbService.SetDisplayDpiAsync(SelectedDevice.Serial, effectiveDisplayId, SelectedDpi).ConfigureAwait(false);
+                        if (dpiApplied)
+                        {
+                            LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Applied virtual display density: {SelectedDpi} DPI (Display ID: {effectiveDisplayId})", false));
+                        }
+                    }
+
                     await _stateMachine.FireAsync(SessionTrigger.ServerDeployed, $"Display ID: {effectiveDisplayId} allocated").ConfigureAwait(false);
                 }
                 else
@@ -1137,11 +1398,14 @@ namespace ScrcpyDex.App.ViewModels
                 var displayConfig = new DisplayConfig
                 {
                     Resolution = SelectedResolution,
+                    Width = displaySection.Width ?? 0,
+                    Height = displaySection.Height ?? 0,
+                    Dpi = SelectedDpi,
                     Fps = SelectedFps,
                     Bitrate = BitrateMbps * 1_000_000,
                     Codec = SelectedCodec,
                     WindowMode = Fullscreen ? "fullscreen" : "normal",
-                    MouseDriver = MouseUhidEnabled ? "uhid" : "aoa",
+                    MouseDriver = ResolveEffectiveMouseDriver(),
                     StayAwake = StayAwake,
                     TurnScreenOff = TurnScreenOff,
                     RecordFile = recordFile,
@@ -1214,7 +1478,28 @@ namespace ScrcpyDex.App.ViewModels
         }
 
         [RelayCommand]
-        public async Task BrowseScrcpyPathAsync()
+        public Task BrowseScrcpyPathAsync() =>
+            BrowseExecutablePathAsync(
+                title: "Select scrcpy Executable",
+                windowsPatterns: new[] { "*.exe" },
+                applyPath: path =>
+                {
+                    ScrcpyPath = path;
+                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Custom scrcpy path set to: {path}", false));
+                });
+
+        [RelayCommand]
+        public Task BrowseAdbPathAsync() =>
+            BrowseExecutablePathAsync(
+                title: "Select adb Executable",
+                windowsPatterns: new[] { "adb.exe", "*.exe" },
+                applyPath: path =>
+                {
+                    AdbPath = path;
+                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Custom adb path set to: {path}", false));
+                });
+
+        private async Task BrowseExecutablePathAsync(string title, string[] windowsPatterns, Action<string> applyPath)
         {
             var storageProvider = GetStorageProvider();
             if (storageProvider == null)
@@ -1227,7 +1512,7 @@ namespace ScrcpyDex.App.ViewModels
             {
                 var options = new FilePickerOpenOptions
                 {
-                    Title = "Select scrcpy Executable",
+                    Title = title,
                     AllowMultiple = false
                 };
 
@@ -1235,7 +1520,7 @@ namespace ScrcpyDex.App.ViewModels
                 {
                     options.FileTypeFilter = new[]
                     {
-                        new FilePickerFileType("Executable Files (*.exe)") { Patterns = new[] { "*.exe" } },
+                        new FilePickerFileType("Executable Files (*.exe)") { Patterns = windowsPatterns },
                         FilePickerFileTypes.All
                     };
                 }
@@ -1248,18 +1533,51 @@ namespace ScrcpyDex.App.ViewModels
                     {
                         await Dispatcher.UIThread.InvokeAsync(async () =>
                         {
-                            ScrcpyPath = localPath;
+                            applyPath(localPath);
                             await VerifyScrcpyExecutableAsync().ConfigureAwait(false);
                             await SaveCurrentSettingsAsync().ConfigureAwait(false);
-                            LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Custom scrcpy path set to: {localPath}", false));
                         });
                     }
                 }
             }
             catch (Exception ex)
             {
-                LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Error selecting scrcpy path: {ex.Message}", true));
+                LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Error selecting executable path: {ex.Message}", true));
             }
+        }
+
+        [RelayCommand]
+        public async Task RunDoctorAsync()
+        {
+            var report = await Task.Run(() =>
+                EnvironmentDoctorService.Instance.RunCrossPlatformChecks(ScrcpyPath, AdbPath)).ConfigureAwait(false);
+
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                ApplyDiagnosticReport(report);
+                LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Environment Doctor: {DoctorSummaryText}", report.HasErrors));
+                foreach (var item in report.Items.Where(i => i.Status != DiagnosticStatus.Pass))
+                {
+                    var level = item.Status == DiagnosticStatus.Error ? ProcessLogLevel.Error : ProcessLogLevel.Warning;
+                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Doctor [{item.Name}]: {item.Summary}", level));
+                }
+            });
+        }
+
+        [RelayCommand]
+        public void ToggleDoctor()
+        {
+            IsDoctorOpen = !IsDoctorOpen;
+            if (IsDoctorOpen)
+            {
+                _ = RunDoctorAsync();
+            }
+        }
+
+        [RelayCommand]
+        public void CloseDoctor()
+        {
+            IsDoctorOpen = false;
         }
 
         [RelayCommand]

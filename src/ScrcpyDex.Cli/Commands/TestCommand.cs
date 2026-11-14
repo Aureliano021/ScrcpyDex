@@ -17,6 +17,7 @@ using System.IO;
 using System.Threading.Tasks;
 using ScrcpyDex.Cli.Utils;
 using ScrcpyDex.Core.Configuration;
+using ScrcpyDex.Core.Diagnostics;
 using ScrcpyDex.Platform.Linux;
 
 namespace ScrcpyDex.Cli.Commands

@@ -43,7 +43,7 @@ namespace ScrcpyDex.Core.Adb
     /// </summary>
     public sealed class AdbResilienceService
     {
-        private readonly string _adbPath;
+        private string _adbPath;
         private readonly IProcessLifetimeManager _jobTracker;
         private int _consecutiveFailures;
         private DateTime _circuitBreakerUntilUtc = DateTime.MinValue;
@@ -51,6 +51,12 @@ namespace ScrcpyDex.Core.Adb
 
         private const int MaxConsecutiveFailures = 3;
         private static readonly TimeSpan CircuitBreakDuration = TimeSpan.FromSeconds(5);
+
+        public string AdbPath
+        {
+            get => _adbPath;
+            set => _adbPath = string.IsNullOrWhiteSpace(value) ? "adb" : value;
+        }
 
         public AdbResilienceService(string adbPath, IProcessLifetimeManager? jobTracker = null)
         {
@@ -176,6 +182,11 @@ namespace ScrcpyDex.Core.Adb
 
         private async Task<AdbExecutionResult> ExecuteCoreAsync(string arguments, CancellationToken ct)
         {
+            if (!File.Exists(_adbPath) && ScrcpyPathResolver.TryResolveAdbExecutable(out string resolvedAdb))
+            {
+                _adbPath = resolvedAdb;
+            }
+
             var psi = new ProcessStartInfo
             {
                 FileName = _adbPath,

@@ -18,40 +18,11 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using ScrcpyDex.Core.Diagnostics;
 using ScrcpyDex.Core.IO;
 
 namespace ScrcpyDex.Platform.Linux
 {
-    public enum DiagnosticStatus
-    {
-        Pass,
-        Warning,
-        Error,
-        Info
-    }
-
-    public sealed class DiagnosticItem
-    {
-        public string Name { get; set; } = string.Empty;
-        public DiagnosticStatus Status { get; set; }
-        public string Summary { get; set; } = string.Empty;
-        public string? Details { get; set; }
-        public string? Remediation { get; set; }
-    }
-
-    public sealed class DiagnosticReport
-    {
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-        public string OsDescription { get; set; } = RuntimeInformation.OSDescription;
-        public List<DiagnosticItem> Items { get; set; } = new();
-
-        public bool HasErrors => Items.Any(i => i.Status == DiagnosticStatus.Error);
-        public bool HasWarnings => Items.Any(i => i.Status == DiagnosticStatus.Warning);
-        public int PassCount => Items.Count(i => i.Status == DiagnosticStatus.Pass);
-        public int WarningCount => Items.Count(i => i.Status == DiagnosticStatus.Warning);
-        public int ErrorCount => Items.Count(i => i.Status == DiagnosticStatus.Error);
-    }
-
     /// <summary>
     /// Performs Linux system environment diagnostics and hardware acceleration audits.
     /// Evaluates udev rules, group memberships, display server configuration, VA-API drivers, and tool versions.
@@ -378,108 +349,17 @@ namespace ScrcpyDex.Platform.Linux
         /// <summary>
         /// Audits scrcpy binary and validates version >= 2.4.0.
         /// </summary>
-        public DiagnosticItem CheckScrcpyVersion()
-        {
-            if (!ScrcpyPathResolver.TryResolveScrcpyExecutable(out string path))
-            {
-                return new DiagnosticItem
-                {
-                    Name = "scrcpy Executable",
-                    Status = DiagnosticStatus.Error,
-                    Summary = "scrcpy binary could not be located in system PATH or standard directories.",
-                    Details = "ScrcpyDeX depends on the scrcpy streaming engine.",
-                    Remediation = "Install official scrcpy (version >= 2.4):\n" +
-                                  "  Download official release or deploy to /usr/local/bin/scrcpy."
-                };
-            }
-
-            var ver = ScrcpyPathResolver.QueryScrcpyVersion(path);
-            if (ver == null)
-            {
-                return new DiagnosticItem
-                {
-                    Name = "scrcpy Executable",
-                    Status = DiagnosticStatus.Warning,
-                    Summary = $"scrcpy located at '{path}', but version output could not be parsed.",
-                    Details = "Could not confirm whether scrcpy satisfies >= 2.4.0 version requirement."
-                };
-            }
-
-            if (ver >= new Version(2, 4))
-            {
-                return new DiagnosticItem
-                {
-                    Name = "scrcpy Executable",
-                    Status = DiagnosticStatus.Pass,
-                    Summary = $"scrcpy version {ver} satisfies requirement (>= 2.4.0).",
-                    Details = $"Resolved path: {path}"
-                };
-            }
-
-            return new DiagnosticItem
-            {
-                Name = "scrcpy Executable",
-                Status = DiagnosticStatus.Error,
-                Summary = $"scrcpy version {ver} is incompatible (required: >= 2.4.0).",
-                Details = $"Binary located at '{path}'. Upstream version < 2.4 lacks --mouse=uhid and --display-id flags.",
-                Remediation = "The default Ubuntu package (scrcpy 1.25) is incompatible.\n" +
-                              "Install official upstream scrcpy >= 2.4 or deploy official binary to /usr/local/bin/scrcpy."
-            };
-        }
+        public DiagnosticItem CheckScrcpyVersion() => EnvironmentDoctorService.Instance.CheckScrcpyVersion();
 
         /// <summary>
         /// Audits Android Debug Bridge (ADB) installation.
         /// </summary>
-        public DiagnosticItem CheckAdbInstallation()
-        {
-            if (ScrcpyPathResolver.TryResolveAdbExecutable(out string path))
-            {
-                return new DiagnosticItem
-                {
-                    Name = "Android Debug Bridge (ADB)",
-                    Status = DiagnosticStatus.Pass,
-                    Summary = $"adb located at '{path}'.",
-                    Details = "Host-device communication channel ready."
-                };
-            }
-
-            return new DiagnosticItem
-            {
-                Name = "Android Debug Bridge (ADB)",
-                Status = DiagnosticStatus.Error,
-                Summary = "adb binary could not be resolved.",
-                Details = "Required for device enumeration and DeX server deployment.",
-                Remediation = "Install ADB:\n" +
-                              "  sudo apt install adb (or install Android platform-tools)."
-            };
-        }
+        public DiagnosticItem CheckAdbInstallation() => EnvironmentDoctorService.Instance.CheckAdbInstallation();
 
         /// <summary>
         /// Audits scrcpydex-server.jar availability.
         /// </summary>
-        public DiagnosticItem CheckServerJarInstallation()
-        {
-            if (ScrcpyPathResolver.TryResolveServerJar(out string path) && File.Exists(path))
-            {
-                var fi = new FileInfo(path);
-                return new DiagnosticItem
-                {
-                    Name = "ScrcpyDeX Server JAR",
-                    Status = DiagnosticStatus.Pass,
-                    Summary = $"Server JAR located at '{path}'.",
-                    Details = $"Artifact size: {fi.Length} bytes."
-                };
-            }
-
-            return new DiagnosticItem
-            {
-                Name = "ScrcpyDeX Server JAR",
-                Status = DiagnosticStatus.Error,
-                Summary = "scrcpydex-server.jar could not be located or extracted.",
-                Details = "Required for on-device DeX reflection activation.",
-                Remediation = "Verify that scrcpydex-server.jar is present in the server directory or /opt/scrcpydex/server/."
-            };
-        }
+        public DiagnosticItem CheckServerJarInstallation() => EnvironmentDoctorService.Instance.CheckServerJarInstallation();
 
         /// <summary>
         /// Executes all diagnostic audits and compiles a consolidated report.

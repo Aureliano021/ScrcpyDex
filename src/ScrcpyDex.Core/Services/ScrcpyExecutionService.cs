@@ -344,10 +344,11 @@ namespace ScrcpyDex.Services
             }
 
             // Rendering driver negotiation
-            string? renderDriver = settings.Display?.RenderDriver;
-            if (string.Equals(renderDriver, "auto", StringComparison.OrdinalIgnoreCase))
+            string? renderDriver = NormalizeRenderDriver(settings.Display?.RenderDriver);
+            if (string.IsNullOrWhiteSpace(renderDriver) ||
+                string.Equals(renderDriver, "auto", StringComparison.OrdinalIgnoreCase))
             {
-                // When "auto" is explicitly chosen:
+                // When "auto" or unset:
                 // On Windows: omit --render-driver entirely so SDL2 chooses the best driver and automatically falls back if D3D11 is unsupported
                 // On Linux/POSIX: enforce opengl to prevent invalid driver selections
                 if (!OperatingSystem.IsWindows())
@@ -355,26 +356,27 @@ namespace ScrcpyDex.Services
                     args.Add("--render-driver=opengl");
                 }
             }
-            else if (!string.IsNullOrWhiteSpace(renderDriver))
+            else
             {
-                if (!OperatingSystem.IsWindows() && string.Equals(renderDriver, "direct3d11", StringComparison.OrdinalIgnoreCase))
+                if (!OperatingSystem.IsWindows() &&
+                    (string.Equals(renderDriver, "direct3d11", StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(renderDriver, "direct3d", StringComparison.OrdinalIgnoreCase)))
                 {
                     renderDriver = "opengl";
                 }
                 args.Add($"--render-driver={renderDriver}");
             }
+
+            // Hardware UHID / SDK touchscreen / AOA mouse injection
+            string mouseDriver = NormalizeMouseDriver(settings.Input?.MouseDriver);
+            if (mouseDriver == "disabled")
+            {
+                args.Add("--no-mouse");
+            }
             else
             {
-                // Legacy default if RenderDriver is null/empty
-                string defaultDriver = OperatingSystem.IsWindows() ? "direct3d11" : "opengl";
-                args.Add($"--render-driver={defaultDriver}");
+                args.Add($"--mouse={mouseDriver}");
             }
-
-            // Hardware UHID mouse injection
-            string mouseDriver = !string.IsNullOrWhiteSpace(settings.Input?.MouseDriver)
-                ? settings.Input.MouseDriver
-                : "uhid";
-            args.Add($"--mouse={mouseDriver}");
 
             // Video Bitrate
             int bitrate = settings.Display?.Bitrate ?? 8000000;
@@ -459,13 +461,145 @@ namespace ScrcpyDex.Services
             return args;
         }
 
-        private static int ResolveMaxSize(DisplaySection? display)
+        public static string? NormalizeRenderDriver(string? renderDriver)
         {
-            if (display == null) return 1920;
+            if (string.IsNullOrWhiteSpace(renderDriver)) return "auto";
+
+            string trimmed = renderDriver.Trim();
+            if (trimmed.StartsWith("Auto", StringComparison.OrdinalIgnoreCase))
+            {
+                return "auto";
+            }
+            if (trimmed.Equals("Direct3D 11", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.Equals("d3d11", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.Equals("direct3d11", StringComparison.OrdinalIgnoreCase))
+            {
+                return "direct3d11";
+            }
+            if (trimmed.Equals("Direct3D 9", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.Equals("direct3d9", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.Equals("d3d9", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.Equals("direct3d", StringComparison.OrdinalIgnoreCase))
+            {
+                return "direct3d";
+            }
+            if (trimmed.Equals("OpenGL", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.Equals("opengl", StringComparison.OrdinalIgnoreCase))
+            {
+                return "opengl";
+            }
+            if (trimmed.Equals("Software", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.Equals("software", StringComparison.OrdinalIgnoreCase))
+            {
+                return "software";
+            }
+            if (trimmed.Equals("Vulkan", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.Equals("vulkan", StringComparison.OrdinalIgnoreCase))
+            {
+                return "vulkan";
+            }
+
+            return trimmed.ToLowerInvariant();
+        }
+
+        public static string NormalizeMouseDriver(string? mouseDriver)
+        {
+            if (string.IsNullOrWhiteSpace(mouseDriver))
+            {
+                return "uhid";
+            }
+
+            string trimmed = mouseDriver.Trim();
+            if (trimmed.Equals("uhid", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.StartsWith("UHID", StringComparison.OrdinalIgnoreCase))
+            {
+                return "uhid";
+            }
+            if (trimmed.Equals("sdk", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.Equals("touch", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.Equals("touchscreen", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.StartsWith("SDK", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.StartsWith("Touchscreen", StringComparison.OrdinalIgnoreCase))
+            {
+                return "sdk";
+            }
+            if (trimmed.Equals("aoa", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.StartsWith("AOA", StringComparison.OrdinalIgnoreCase))
+            {
+                return "aoa";
+            }
+            if (trimmed.Equals("disabled", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.Equals("none", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.Equals("off", StringComparison.OrdinalIgnoreCase))
+            {
+                return "disabled";
+            }
+
+            return trimmed.ToLowerInvariant();
+        }
+
+        public static bool TryResolveDisplayDimensions(DisplaySection? display, out int width, out int height)
+        {
+            width = 0;
+            height = 0;
+            if (display == null || DisplaySection.IsNativeResolution(display.Resolution))
+            {
+                return false;
+            }
+
+            bool hasParsedResolution = DisplaySection.TryParseResolutionDimensions(display.Resolution, out int resW, out int resH);
 
             if (display.Width.HasValue && display.Height.HasValue && display.Width.Value > 0 && display.Height.Value > 0)
             {
-                return Math.Max(display.Width.Value, display.Height.Value);
+                bool isDefaultWidthHeight = display.Width.Value == 1920 && display.Height.Value == 1080;
+                if (!hasParsedResolution || (!isDefaultWidthHeight && resW == 1920 && resH == 1080))
+                {
+                    width = display.Width.Value;
+                    height = display.Height.Value;
+                    return true;
+                }
+            }
+
+            if (hasParsedResolution)
+            {
+                width = resW;
+                height = resH;
+                return true;
+            }
+
+            if (display.Width.HasValue && display.Height.HasValue && display.Width.Value > 0 && display.Height.Value > 0)
+            {
+                width = display.Width.Value;
+                height = display.Height.Value;
+                return true;
+            }
+
+            return false;
+        }
+
+        public static int ResolveMaxSize(DisplaySection? display)
+        {
+            if (display == null) return 1920;
+
+            if (DisplaySection.IsNativeResolution(display.Resolution))
+            {
+                return 0;
+            }
+
+            bool hasParsedResolution = DisplaySection.TryParseResolutionDimensions(display.Resolution, out int resW, out int resH);
+
+            if (display.Width.HasValue && display.Height.HasValue && display.Width.Value > 0 && display.Height.Value > 0)
+            {
+                bool isDefaultWidthHeight = display.Width.Value == 1920 && display.Height.Value == 1080;
+                if (!hasParsedResolution || (!isDefaultWidthHeight && resW == 1920 && resH == 1080))
+                {
+                    return Math.Max(display.Width.Value, display.Height.Value);
+                }
+            }
+
+            if (hasParsedResolution)
+            {
+                return Math.Max(resW, resH);
             }
 
             if (!string.IsNullOrWhiteSpace(display.Resolution))
@@ -477,20 +611,15 @@ namespace ScrcpyDex.Services
                     res = res.Substring(0, parenIdx).Trim();
                 }
 
-                if (res.Contains('x', StringComparison.OrdinalIgnoreCase))
-                {
-                    var parts = res.Split(new[] { 'x', 'X' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 2 &&
-                        int.TryParse(parts[0].Trim(), out int w) &&
-                        int.TryParse(parts[1].Trim(), out int h))
-                    {
-                        return Math.Max(w, h);
-                    }
-                }
-                else if (int.TryParse(res, out int singleVal) && singleVal > 0)
+                if (int.TryParse(res, out int singleVal) && singleVal > 0)
                 {
                     return singleVal;
                 }
+            }
+
+            if (display.Width.HasValue && display.Height.HasValue && display.Width.Value > 0 && display.Height.Value > 0)
+            {
+                return Math.Max(display.Width.Value, display.Height.Value);
             }
 
             return 1920;
@@ -547,11 +676,12 @@ namespace ScrcpyDex.Services
             if (IsFatalErrorIndicator(entry.Text))
             {
                 if (entry.Text.Contains("D3D11CreateDevice", StringComparison.OrdinalIgnoreCase) ||
-                    (entry.Text.Contains("Could not create renderer", StringComparison.OrdinalIgnoreCase) && entry.Text.Contains("direct3d", StringComparison.OrdinalIgnoreCase)))
+                    entry.Text.Contains("glBlendFuncSeparate", StringComparison.OrdinalIgnoreCase) ||
+                    entry.Text.Contains("Could not create renderer", StringComparison.OrdinalIgnoreCase))
                 {
                     LogReceived?.Invoke(this, new ProcessLogEntry(
                         DateTime.Now,
-                        "Direct3D 11 renderer is not supported on this host graphics configuration. Try selecting 'OpenGL' as the Render Driver in settings.",
+                        "Graphics renderer initialization failed on this host configuration. Try selecting 'Direct3D 9', 'OpenGL', or 'Software' as the Render Driver in settings.",
                         true));
                 }
                 ErrorOccurred?.Invoke(this, entry.Text);

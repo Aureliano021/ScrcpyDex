@@ -63,8 +63,44 @@ namespace ScrcpyDex.Core.Tests
 
             List<string> args = ScrcpyExecutionService.BuildArgumentsList(settings);
 
-            string expectedDriver = OperatingSystem.IsWindows() ? "direct3d11" : "opengl";
-            Assert.Contains($"--render-driver={expectedDriver}", args);
+            if (OperatingSystem.IsWindows())
+            {
+                Assert.DoesNotContain(args, a => a.StartsWith("--render-driver"));
+            }
+            else
+            {
+                Assert.Contains("--render-driver=opengl", args);
+            }
+        }
+
+        [Theory]
+        [InlineData("Direct3D 9", "direct3d")]
+        [InlineData("direct3d9", "direct3d")]
+        [InlineData("d3d9", "direct3d")]
+        [InlineData("direct3d", "direct3d")]
+        [InlineData("Direct3D 11", "direct3d11")]
+        [InlineData("d3d11", "direct3d11")]
+        [InlineData("direct3d11", "direct3d11")]
+        [InlineData("OpenGL", "opengl")]
+        [InlineData("Software", "software")]
+        public void BuildArgumentsList_RenderDriver_Aliases_NormalizeCorrectly(string configuredDriver, string expectedWindowsDriver)
+        {
+            var settings = new ScrcpyDeXSettings();
+            settings.Display.RenderDriver = configuredDriver;
+
+            List<string> args = ScrcpyExecutionService.BuildArgumentsList(settings);
+
+            if (OperatingSystem.IsWindows())
+            {
+                Assert.Contains($"--render-driver={expectedWindowsDriver}", args);
+            }
+            else
+            {
+                string expectedPosix = (expectedWindowsDriver == "direct3d" || expectedWindowsDriver == "direct3d11")
+                    ? "opengl"
+                    : expectedWindowsDriver;
+                Assert.Contains($"--render-driver={expectedPosix}", args);
+            }
         }
 
         [Fact]
@@ -274,6 +310,127 @@ namespace ScrcpyDex.Core.Tests
             List<string> args = ScrcpyExecutionService.BuildArgumentsList(settings);
 
             Assert.Contains("--max-size=2560", args);
+        }
+
+        [Theory]
+        [InlineData("1600x900 (HD+)", 1600)]
+        [InlineData("1920x1080 (FHD)", 1920)]
+        [InlineData("2560x1080 (Ultrawide DeX)", 2560)]
+        [InlineData("2560x1440 (QHD)", 2560)]
+        [InlineData("3440x1440 (UWQHD 34\")", 3440)]
+        [InlineData("3840x2160 (4K UHD)", 3840)]
+        public void BuildArgumentsList_ResolutionPreset_OverridesDefault1920x1080Dimensions(string preset, int expectedMaxSize)
+        {
+            var settings = new ScrcpyDeXSettings();
+            // Simulate legacy settings.json where Width=1920 and Height=1080 were persisted alongside a non-1080p preset
+            settings.Display.Resolution = preset;
+            settings.Display.Width = 1920;
+            settings.Display.Height = 1080;
+
+            List<string> args = ScrcpyExecutionService.BuildArgumentsList(settings);
+
+            Assert.Contains($"--max-size={expectedMaxSize}", args);
+        }
+
+        [Theory]
+        [InlineData("Native Screen Resolution")]
+        [InlineData("native")]
+        public void BuildArgumentsList_NativeResolution_OmitsMaxSizeArgument(string nativePreset)
+        {
+            var settings = new ScrcpyDeXSettings();
+            settings.Display.Resolution = nativePreset;
+
+            List<string> args = ScrcpyExecutionService.BuildArgumentsList(settings);
+
+            Assert.DoesNotContain(args, a => a.StartsWith("--max-size"));
+        }
+
+        [Fact]
+        public void DisplayConfig_SettingResolutionPreset_UpdatesWidthAndHeight()
+        {
+            var config = new DisplayConfig
+            {
+                Resolution = "2560x1440 (QHD)"
+            };
+
+            Assert.Equal(2560, config.Width);
+            Assert.Equal(1440, config.Height);
+
+            var mapped = ScrcpyExecutionService.MapConfigToSettings(config);
+            List<string> args = ScrcpyExecutionService.BuildArgumentsList(mapped);
+            Assert.Contains("--max-size=2560", args);
+        }
+
+        [Theory]
+        [InlineData("UHID (Relative Mouse)", "uhid")]
+        [InlineData("uhid", "uhid")]
+        [InlineData("SDK (Touchscreen / Absolute)", "sdk")]
+        [InlineData("touch", "sdk")]
+        [InlineData("touchscreen", "sdk")]
+        [InlineData("AOA (Physical USB)", "aoa")]
+        [InlineData("Disabled", "disabled")]
+        [InlineData("none", "disabled")]
+        public void NormalizeMouseDriver_MapsLabelsAndAliasesCorrectly(string rawDriver, string expected)
+        {
+            string normalized = ScrcpyExecutionService.NormalizeMouseDriver(rawDriver);
+
+            Assert.Equal(expected, normalized);
+        }
+
+        [Fact]
+        public void BuildArgumentsList_TouchscreenMouseDriver_IncludesSdkMouseFlag()
+        {
+            var settings = new ScrcpyDeXSettings();
+            settings.Input.MouseDriver = "SDK (Touchscreen / Absolute)";
+
+            List<string> args = ScrcpyExecutionService.BuildArgumentsList(settings);
+
+            Assert.Contains("--mouse=sdk", args);
+        }
+
+        [Fact]
+        public void BuildArgumentsList_DisabledMouseDriver_IncludesNoMouseFlag()
+        {
+            var settings = new ScrcpyDeXSettings();
+            settings.Input.MouseDriver = "Disabled";
+
+            List<string> args = ScrcpyExecutionService.BuildArgumentsList(settings);
+
+            Assert.Contains("--no-mouse", args);
+            Assert.DoesNotContain(args, a => a.StartsWith("--mouse="));
+        }
+
+        [Fact]
+        public void TryResolveDisplayDimensions_CustomResolution_UsesExplicitDimensions()
+        {
+            var display = new DisplaySection
+            {
+                Resolution = "Custom",
+                Width = 2560,
+                Height = 1080
+            };
+
+            bool resolved = ScrcpyExecutionService.TryResolveDisplayDimensions(display, out int width, out int height);
+
+            Assert.True(resolved);
+            Assert.Equal(2560, width);
+            Assert.Equal(1080, height);
+            Assert.Equal(2560, ScrcpyExecutionService.ResolveMaxSize(display));
+        }
+
+        [Fact]
+        public void TryResolveDisplayDimensions_NativeResolution_ReturnsFalse()
+        {
+            var display = new DisplaySection
+            {
+                Resolution = "Native Screen Resolution"
+            };
+
+            bool resolved = ScrcpyExecutionService.TryResolveDisplayDimensions(display, out int width, out int height);
+
+            Assert.False(resolved);
+            Assert.Equal(0, width);
+            Assert.Equal(0, height);
         }
     }
 }

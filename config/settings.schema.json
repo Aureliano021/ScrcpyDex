@@ -7,21 +7,53 @@
     "version": { "type": "string" },
     "language": {
       "type": "string",
-      "enum": ["en", "pt-BR", "es", "de", "fr", "zh"],
+      "enum": ["en", "pt-BR", "es", "de", "fr", "zh-Hans", "zh"],
       "default": "en",
       "description": "User interface language preference"
     },
     "display": {
       "type": "object",
       "properties": {
-        "resolution": { "type": "string", "enum": ["1920x1080", "2560x1440", "3840x2160", "native"] },
-        "width": { "type": "integer", "minimum": 640 },
-        "height": { "type": "integer", "minimum": 480 },
-        "dpi": { "type": "integer", "minimum": 120, "maximum": 480 },
+        "resolution": {
+          "type": "string",
+          "anyOf": [
+            {
+              "enum": [
+                "1600x900 (HD+)",
+                "1920x1080 (FHD)",
+                "2560x1080 (Ultrawide DeX)",
+                "2560x1440 (QHD)",
+                "3440x1440 (UWQHD 34\")",
+                "3840x2160 (4K UHD)",
+                "Native Screen Resolution",
+                "Custom",
+                "1600x900",
+                "1920x1080",
+                "2560x1080",
+                "2560x1440",
+                "3440x1440",
+                "3840x2160",
+                "native"
+              ]
+            },
+            {
+              "pattern": "^[0-9]{3,4}x[0-9]{3,4}$"
+            }
+          ]
+        },
+        "width": { "type": ["integer", "null"], "minimum": 640, "maximum": 7680 },
+        "height": { "type": ["integer", "null"], "minimum": 480, "maximum": 4320 },
+        "dpi": { "type": ["integer", "null"], "minimum": 72, "maximum": 640, "default": 160 },
         "fps": { "type": "integer", "enum": [30, 60, 90, 120] },
         "bitrate": { "type": "integer", "minimum": 2000000, "maximum": 50000000 },
-        "codec": { "type": "string", "enum": ["h264", "h265"] },
-        "windowMode": { "type": "string", "enum": ["normal", "borderless", "fullscreen"] }
+        "codec": { "type": "string", "enum": ["h264", "h265", "av1"] },
+        "windowMode": { "type": "string", "enum": ["normal", "borderless", "fullscreen"] },
+        "renderDriver": {
+          "type": ["string", "null"],
+          "enum": ["auto", "direct3d11", "direct3d", "opengl", "vulkan", "software", null],
+          "default": "auto"
+        },
+        "recordFile": { "type": ["string", "null"] }
       },
       "required": ["resolution", "fps", "bitrate", "codec"]
     },
@@ -36,7 +68,7 @@
     "input": {
       "type": "object",
       "properties": {
-        "mouseDriver": { "type": "string", "enum": ["uhid", "sdk"] },
+        "mouseDriver": { "type": "string", "enum": ["uhid", "sdk", "aoa", "disabled"] },
         "releaseKey": { "type": "string", "enum": ["LeftAlt", "WindowsKey", "RightCtrl"] },
         "forwardGamepad": { "type": "boolean" }
       },

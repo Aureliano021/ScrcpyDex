@@ -1,4 +1,4 @@
-﻿// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
+// Copyright 2026 Aureliano Peixoto and ScrcpyDeX Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,18 +32,31 @@ namespace ScrcpyDex.Cli.Commands
         {
             AnsiConsole.Header("=== Starting ScrcpyDeX Streaming Session ===");
 
-            // 1. Check prerequisites
-            if (!ScrcpyPathResolver.TryResolveAdbExecutable(out string adbPath))
-            {
-                AnsiConsole.Error("adb executable not found. Ensure Android SDK platform-tools are installed and in PATH.");
-                return 1;
-            }
+            // 1. Load configuration & apply CLI overrides
+            string configDir = DefaultPlatformPaths.Instance.GetConfigDirectory();
+            string configPath = !string.IsNullOrWhiteSpace(options.CustomConfigPath)
+                ? options.CustomConfigPath
+                : Path.Combine(configDir, "settings.json");
 
-            if (!ScrcpyPathResolver.TryResolveScrcpyExecutable(out string scrcpyPath))
+            var repo = new AtomicJsonConfigRepository<ScrcpyDeXSettings>(configPath);
+            var settings = await repo.LoadAsync(parentCt).ConfigureAwait(false);
+
+            ApplyCliOverrides(settings, options);
+
+            // 2. Check prerequisites
+            if (!ScrcpyPathResolver.TryResolveScrcpyExecutable(out string scrcpyPath, settings.Paths?.ScrcpyPath))
             {
                 AnsiConsole.Error("scrcpy executable not found. Ensure scrcpy >= 2.4.0 is installed.");
                 return 1;
             }
+
+            if (!ScrcpyPathResolver.TryResolveAdbExecutable(out string adbPath, settings.Paths?.AdbPath, scrcpyPath))
+            {
+                AnsiConsole.Error("adb executable not found. Ensure Android SDK platform-tools are installed or bundled with scrcpy.");
+                return 1;
+            }
+
+            AdbService.Instance.ConfigurePaths(adbPath, scrcpyPath);
 
             var scrcpyVersion = ScrcpyPathResolver.QueryScrcpyVersion(scrcpyPath);
             if (scrcpyVersion != null && scrcpyVersion < new Version(2, 4))
@@ -108,41 +121,65 @@ namespace ScrcpyDex.Cli.Commands
             var devInfo = await AdbService.Instance.QueryDeviceInfoAsync(serial, parentCt).ConfigureAwait(false);
             AnsiConsole.Info($"Target: {devInfo.Model} ({devInfo.Manufacturer}), Android {devInfo.AndroidVersion}, One UI {devInfo.OneUiVersion}");
 
-            // 4. Load configuration & apply CLI overrides
-            string configDir = DefaultPlatformPaths.Instance.GetConfigDirectory();
-            string configPath = !string.IsNullOrWhiteSpace(options.CustomConfigPath)
-                ? options.CustomConfigPath
-                : Path.Combine(configDir, "settings.json");
-
-            var repo = new AtomicJsonConfigRepository<ScrcpyDeXSettings>(configPath);
-            var settings = await repo.LoadAsync(parentCt).ConfigureAwait(false);
-
-            ApplyCliOverrides(settings, options);
-
-            // 5. Deploy & activate on-device Samsung DeX server
-            AnsiConsole.Info("Deploying and activating Samsung DeX session on device...");
+            // 4. Deploy & activate on-device Samsung DeX server (or use Display 0 for non-DeX devices)
             int? displayId = null;
-            try
+            if (devInfo.IsDexSupported)
             {
-                displayId = await AdbService.Instance.DeployAndActivateDeXAsync(serial, null, parentCt).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                AnsiConsole.Warning($"DeX activation notice: {ex.Message}");
-            }
+                AnsiConsole.Info("Deploying and activating Samsung DeX session on device...");
+                try
+                {
+                    displayId = await AdbService.Instance.DeployAndActivateDeXAsync(serial, null, parentCt).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    AnsiConsole.Warning($"DeX activation notice: {ex.Message}");
+                }
 
-            if (!displayId.HasValue)
-            {
-                displayId = await AdbService.Instance.FindDeXDisplayIdAsync(serial, parentCt).ConfigureAwait(false);
-            }
+                if (!displayId.HasValue)
+                {
+                    displayId = await AdbService.Instance.FindDeXDisplayIdAsync(serial, parentCt).ConfigureAwait(false);
+                }
 
-            if (displayId.HasValue)
-            {
-                AnsiConsole.Success($"Samsung DeX virtual display allocated (Display ID: {displayId.Value}).");
+                if (displayId.HasValue)
+                {
+                    AnsiConsole.Success($"Samsung DeX virtual display allocated (Display ID: {displayId.Value}).");
+
+                    if (displayId.Value > 0 &&
+                        ScrcpyExecutionService.TryResolveDisplayDimensions(settings.Display, out int targetWidth, out int targetHeight))
+                    {
+                        bool sizeApplied = await AdbService.Instance.SetDisplaySizeAsync(serial, displayId.Value, targetWidth, targetHeight, parentCt).ConfigureAwait(false);
+                        if (sizeApplied)
+                        {
+                            AnsiConsole.Info($"Applied virtual display resolution: {targetWidth}x{targetHeight}.");
+                        }
+                    }
+
+                    int? targetDpi = settings.Display?.Dpi;
+                    if (targetDpi.HasValue && targetDpi.Value >= 72 && targetDpi.Value <= 640 && displayId.Value > 0)
+                    {
+                        bool isLegacyDefault =
+                            !options.Dpi.HasValue &&
+                            (string.Equals(settings.Version, "1.1", StringComparison.OrdinalIgnoreCase) ||
+                             string.Equals(settings.Version, "1.0", StringComparison.OrdinalIgnoreCase)) &&
+                            targetDpi.Value == 320;
+
+                        int effectiveDpi = isLegacyDefault ? 160 : targetDpi.Value;
+                        bool dpiApplied = await AdbService.Instance.SetDisplayDpiAsync(serial, displayId.Value, effectiveDpi, parentCt).ConfigureAwait(false);
+                        if (dpiApplied)
+                        {
+                            AnsiConsole.Info($"Applied virtual display density: {effectiveDpi} DPI.");
+                        }
+                    }
+                }
+                else
+                {
+                    AnsiConsole.Warning("Could not determine specific virtual display ID. Launching scrcpy with auto-detected display.");
+                }
             }
             else
             {
-                AnsiConsole.Warning("Could not determine specific virtual display ID. Launching scrcpy with auto-detected display.");
+                AnsiConsole.Info($"Notice: Device '{devInfo.MarketingName}' does not support Samsung DeX. Starting standard screen mirroring on Display 0...");
+                displayId = 0;
             }
 
             // 6. Setup cancellation & process lifetime management
@@ -168,7 +205,7 @@ namespace ScrcpyDex.Cli.Commands
 
             // 7. Launch scrcpy streaming client
             AnsiConsole.Info("Launching scrcpy desktop client...");
-            var executionService = new ScrcpyExecutionService();
+            var executionService = new ScrcpyExecutionService(PlatformLifetimeManager.Default, AdbService.Instance, scrcpyPath);
             executionService.LogReceived += (s, entry) =>
             {
                 Console.WriteLine($"{AnsiConsole.Colorize("[scrcpy]", AnsiConsole.Gray)} {entry.Text}");
@@ -230,6 +267,24 @@ namespace ScrcpyDex.Cli.Commands
             if (!string.IsNullOrWhiteSpace(options.Resolution))
             {
                 settings.Display.Resolution = options.Resolution;
+            }
+            if (options.Width.HasValue && options.Width.Value > 0)
+            {
+                settings.Display.Width = options.Width.Value;
+            }
+            if (options.Height.HasValue && options.Height.Value > 0)
+            {
+                settings.Display.Height = options.Height.Value;
+            }
+            if (string.IsNullOrWhiteSpace(options.Resolution) &&
+                options.Width.HasValue && options.Width.Value > 0 &&
+                options.Height.HasValue && options.Height.Value > 0)
+            {
+                settings.Display.Resolution = $"{options.Width.Value}x{options.Height.Value}";
+            }
+            if (options.Dpi.HasValue && options.Dpi.Value > 0)
+            {
+                settings.Display.Dpi = options.Dpi.Value;
             }
             if (options.Fps.HasValue && options.Fps.Value > 0)
             {

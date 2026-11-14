@@ -35,6 +35,9 @@ namespace ScrcpyDex.Cli.Utils
         public CliCommandType Command { get; set; } = CliCommandType.None;
         public string? Serial { get; set; }
         public string? Resolution { get; set; }
+        public int? Width { get; set; }
+        public int? Height { get; set; }
+        public int? Dpi { get; set; }
         public int? Fps { get; set; }
         public int? Bitrate { get; set; }
         public string? Codec { get; set; }
@@ -191,6 +194,18 @@ namespace ScrcpyDex.Cli.Utils
                     case "--max-size":
                         options.Resolution = GetVal();
                         break;
+                    case "--width":
+                        if (int.TryParse(GetVal(), out int width) && width > 0)
+                            options.Width = width;
+                        break;
+                    case "--height":
+                        if (int.TryParse(GetVal(), out int height) && height > 0)
+                            options.Height = height;
+                        break;
+                    case "--dpi":
+                        if (int.TryParse(GetVal(), out int dpi) && dpi > 0)
+                            options.Dpi = dpi;
+                        break;
                     case "--fps":
                     case "--max-fps":
                         if (int.TryParse(GetVal(), out int fps))
@@ -213,6 +228,10 @@ namespace ScrcpyDex.Cli.Utils
                         break;
                     case "--mouse":
                         options.MouseDriver = GetVal();
+                        break;
+                    case "--touch":
+                    case "--touchscreen":
+                        options.MouseDriver = "sdk";
                         break;
                     case "--render-driver":
                         options.RenderDriver = GetVal();

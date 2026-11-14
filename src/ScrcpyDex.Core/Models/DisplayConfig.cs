@@ -13,13 +13,33 @@
 // limitations under the License.
 using System;
 using System.Text.Json.Serialization;
+using ScrcpyDex.Core.Configuration;
 
 namespace ScrcpyDex.Models
 {
     public class DisplayConfig
     {
+        private string _resolution = "1920x1080";
+
         [JsonPropertyName("resolution")]
-        public string Resolution { get; set; } = "1920x1080";
+        public string Resolution
+        {
+            get => _resolution;
+            set
+            {
+                _resolution = value;
+                if (DisplaySection.TryParseResolutionDimensions(value, out int w, out int h))
+                {
+                    Width = w;
+                    Height = h;
+                }
+                else if (DisplaySection.IsNativeResolution(value))
+                {
+                    Width = 0;
+                    Height = 0;
+                }
+            }
+        }
 
         [JsonPropertyName("width")]
         public int Width { get; set; } = 1920;
@@ -58,7 +78,7 @@ namespace ScrcpyDex.Models
         public string ReleaseKey { get; set; } = "LeftAlt";
 
         [JsonPropertyName("renderDriver")]
-        public string? RenderDriver { get; set; }
+        public string? RenderDriver { get; set; } = "auto";
 
         [JsonPropertyName("recordFile")]
         public string? RecordFile { get; set; }

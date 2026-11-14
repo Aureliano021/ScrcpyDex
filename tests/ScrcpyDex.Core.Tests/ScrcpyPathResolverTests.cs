@@ -70,5 +70,53 @@ namespace ScrcpyDex.Core.Tests
 
             Assert.False(isSupported);
         }
+
+        [Fact]
+        public void TryResolveAdbExecutable_WithSiblingAdbNextToScrcpy_ResolvesSiblingAdb()
+        {
+            string tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "ScrcpyDeX_Test_" + Guid.NewGuid().ToString("N"));
+            System.IO.Directory.CreateDirectory(tempDir);
+            try
+            {
+                string scrcpyBin = OperatingSystem.IsWindows() ? "scrcpy.exe" : "scrcpy";
+                string adbBin = OperatingSystem.IsWindows() ? "adb.exe" : "adb";
+                string fakeScrcpy = System.IO.Path.Combine(tempDir, scrcpyBin);
+                string fakeAdb = System.IO.Path.Combine(tempDir, adbBin);
+
+                System.IO.File.WriteAllText(fakeScrcpy, "dummy");
+                System.IO.File.WriteAllText(fakeAdb, "dummy");
+
+                bool found = ScrcpyPathResolver.TryResolveAdbExecutable(out string resolvedAdb, customPath: null, scrcpyPath: fakeScrcpy);
+
+                Assert.True(found);
+                Assert.Equal(System.IO.Path.GetFullPath(fakeAdb), resolvedAdb);
+            }
+            finally
+            {
+                try { System.IO.Directory.Delete(tempDir, true); } catch { }
+            }
+        }
+
+        [Fact]
+        public void TryResolveScrcpyExecutable_WithCustomDirectoryPath_ResolvesScrcpyInsideDirectory()
+        {
+            string tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "ScrcpyDeX_Test_" + Guid.NewGuid().ToString("N"));
+            System.IO.Directory.CreateDirectory(tempDir);
+            try
+            {
+                string scrcpyBin = OperatingSystem.IsWindows() ? "scrcpy.exe" : "scrcpy";
+                string fakeScrcpy = System.IO.Path.Combine(tempDir, scrcpyBin);
+                System.IO.File.WriteAllText(fakeScrcpy, "dummy");
+
+                bool found = ScrcpyPathResolver.TryResolveScrcpyExecutable(out string resolvedScrcpy, customPath: tempDir);
+
+                Assert.True(found);
+                Assert.Equal(System.IO.Path.GetFullPath(fakeScrcpy), resolvedScrcpy);
+            }
+            finally
+            {
+                try { System.IO.Directory.Delete(tempDir, true); } catch { }
+            }
+        }
     }
 }

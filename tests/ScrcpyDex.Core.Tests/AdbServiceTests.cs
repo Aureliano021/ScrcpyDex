@@ -72,5 +72,67 @@ namespace ScrcpyDex.Core.Tests
 
             Assert.Null(displayId);
         }
+
+        [Theory]
+        [InlineData("", 2, 160)]
+        [InlineData("   ", 2, 160)]
+        [InlineData("R5CW123456", 0, 160)]
+        [InlineData("R5CW123456", -1, 160)]
+        [InlineData("R5CW123456", 2, 50)]
+        [InlineData("R5CW123456", 2, 800)]
+        public async System.Threading.Tasks.Task SetDisplayDpiAsync_WithInvalidArguments_ReturnsFalseWithoutExecutingAdb(
+            string serial, int displayId, int dpi)
+        {
+            var service = new AdbService();
+
+            bool applied = await service.SetDisplayDpiAsync(serial, displayId, dpi);
+
+            Assert.False(applied);
+        }
+
+        [Theory]
+        [InlineData("", 2, 1920, 1080)]
+        [InlineData("   ", 2, 1920, 1080)]
+        [InlineData("R5CW123456", 0, 1920, 1080)]
+        [InlineData("R5CW123456", -1, 1920, 1080)]
+        [InlineData("R5CW123456", 2, 320, 1080)]
+        [InlineData("R5CW123456", 2, 9000, 1080)]
+        [InlineData("R5CW123456", 2, 1920, 240)]
+        [InlineData("R5CW123456", 2, 1920, 5000)]
+        public async System.Threading.Tasks.Task SetDisplaySizeAsync_WithInvalidArguments_ReturnsFalseWithoutExecutingAdb(
+            string serial, int displayId, int width, int height)
+        {
+            var service = new AdbService();
+
+            bool applied = await service.SetDisplaySizeAsync(serial, displayId, width, height);
+
+            Assert.False(applied);
+        }
+
+        [Fact]
+        public void ConfigurePaths_ResolvesSiblingAdbFromScrcpyPath()
+        {
+            string tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "ScrcpyDeX_AdbTest_" + System.Guid.NewGuid().ToString("N"));
+            System.IO.Directory.CreateDirectory(tempDir);
+            try
+            {
+                string scrcpyBin = System.OperatingSystem.IsWindows() ? "scrcpy.exe" : "scrcpy";
+                string adbBin = System.OperatingSystem.IsWindows() ? "adb.exe" : "adb";
+                string fakeScrcpy = System.IO.Path.Combine(tempDir, scrcpyBin);
+                string fakeAdb = System.IO.Path.Combine(tempDir, adbBin);
+
+                System.IO.File.WriteAllText(fakeScrcpy, "dummy");
+                System.IO.File.WriteAllText(fakeAdb, "dummy");
+
+                var service = new AdbService();
+                service.ConfigurePaths(customAdbPath: null, scrcpyPath: fakeScrcpy);
+
+                Assert.Equal(System.IO.Path.GetFullPath(fakeAdb), service.AdbPath);
+            }
+            finally
+            {
+                try { System.IO.Directory.Delete(tempDir, true); } catch { }
+            }
+        }
     }
 }

@@ -20,7 +20,7 @@ namespace ScrcpyDex.Core.Configuration
     public sealed class ScrcpyDeXSettings : ObservableObject
     {
         [JsonPropertyName("version")]
-        public string Version { get; set; } = "1.1";
+        public string Version { get; set; } = "2.0";
 
         private string _language = "en";
 
@@ -155,14 +155,33 @@ namespace ScrcpyDex.Core.Configuration
         private string _resolution = "1920x1080 (FHD)";
         private int? _width = 1920;
         private int? _height = 1080;
-        private int? _dpi = 320;
+        private int? _dpi = 160;
         private int _fps = 30;
         private int _bitrate = 8000000;
         private string _codec = "h264";
         private string _windowMode = "normal";
 
         [JsonPropertyName("resolution")]
-        public string Resolution { get => _resolution; set => SetProperty(ref _resolution, value); }
+        public string Resolution
+        {
+            get => _resolution;
+            set
+            {
+                if (SetProperty(ref _resolution, value))
+                {
+                    if (TryParseResolutionDimensions(value, out int w, out int h))
+                    {
+                        Width = w;
+                        Height = h;
+                    }
+                    else if (IsNativeResolution(value))
+                    {
+                        Width = null;
+                        Height = null;
+                    }
+                }
+            }
+        }
 
         [JsonPropertyName("width")]
         public int? Width { get => _width; set => SetProperty(ref _width, value); }
@@ -185,7 +204,7 @@ namespace ScrcpyDex.Core.Configuration
         [JsonPropertyName("windowMode")]
         public string WindowMode { get => _windowMode; set => SetProperty(ref _windowMode, value); }
 
-        private string? _renderDriver;
+        private string? _renderDriver = "auto";
 
         [JsonPropertyName("renderDriver")]
         public string? RenderDriver { get => _renderDriver; set => SetProperty(ref _renderDriver, value); }
@@ -194,6 +213,47 @@ namespace ScrcpyDex.Core.Configuration
 
         [JsonPropertyName("recordFile")]
         public string? RecordFile { get => _recordFile; set => SetProperty(ref _recordFile, value); }
+
+        public static bool IsNativeResolution(string? resolution)
+        {
+            if (string.IsNullOrWhiteSpace(resolution)) return false;
+            string trimmed = resolution.Trim();
+            return trimmed.Equals("native", System.StringComparison.OrdinalIgnoreCase) ||
+                   trimmed.StartsWith("Native", System.StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool TryParseResolutionDimensions(string? resolution, out int width, out int height)
+        {
+            width = 0;
+            height = 0;
+            if (string.IsNullOrWhiteSpace(resolution) || IsNativeResolution(resolution))
+            {
+                return false;
+            }
+
+            string res = resolution.Trim();
+            int parenIdx = res.IndexOf('(');
+            if (parenIdx > 0)
+            {
+                res = res.Substring(0, parenIdx).Trim();
+            }
+
+            if (res.Contains('x', System.StringComparison.OrdinalIgnoreCase))
+            {
+                var parts = res.Split(new[] { 'x', 'X' }, System.StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 2 &&
+                    int.TryParse(parts[0].Trim(), out int w) &&
+                    int.TryParse(parts[1].Trim(), out int h) &&
+                    w > 0 && h > 0)
+                {
+                    width = w;
+                    height = h;
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     public sealed class AudioSection : ObservableObject

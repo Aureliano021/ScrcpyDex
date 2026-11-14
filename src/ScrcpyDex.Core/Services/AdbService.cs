@@ -28,12 +28,16 @@ namespace ScrcpyDex.Services
 {
     public interface IAdbService
     {
+        string AdbPath { get; }
+        void ConfigurePaths(string? customAdbPath = null, string? scrcpyPath = null);
         Task<DeviceInfo> DetectDeviceAsync(CancellationToken ct = default);
         Task<IReadOnlyList<DeviceInfo>> GetConnectedDevicesAsync(CancellationToken ct = default);
         Task<DeviceInfo> QueryDeviceInfoAsync(string serial, CancellationToken ct = default);
         Task<int?> FindDeXDisplayIdAsync(string serial, CancellationToken ct = default);
         Task<int?> WaitForDeXDisplayIdAsync(string serial, TimeSpan timeout, CancellationToken ct = default);
         Task<int?> DeployAndActivateDeXAsync(string serial, string? serverJarPath = null, CancellationToken ct = default);
+        Task<bool> SetDisplaySizeAsync(string serial, int displayId, int width, int height, CancellationToken ct = default);
+        Task<bool> SetDisplayDpiAsync(string serial, int displayId, int dpi, CancellationToken ct = default);
         Task StopDeXSessionAsync(string? serial = null, CancellationToken ct = default);
         Task<AdbExecutionResult> RunCommandAsync(string arguments, CancellationToken ct = default);
         void ResetResilienceState();
@@ -44,7 +48,7 @@ namespace ScrcpyDex.Services
     /// </summary>
     public class AdbService : IAdbService
     {
-        private readonly string _adbPath;
+        private string _adbPath;
         private readonly IProcessLifetimeManager _jobTracker;
         private readonly AdbResilienceService _resilience;
         private Process? _activatorProcess;
@@ -57,14 +61,24 @@ namespace ScrcpyDex.Services
 
         public void ResetResilienceState() => _resilience.ResetCircuitBreaker();
 
-        public AdbService(string? adbPath = null, IProcessLifetimeManager? jobTracker = null)
+        public AdbService(string? adbPath = null, IProcessLifetimeManager? jobTracker = null, string? scrcpyPath = null)
         {
             _jobTracker = jobTracker ?? PlatformLifetimeManager.Default;
-            _adbPath = !string.IsNullOrWhiteSpace(adbPath)
-                ? adbPath
-                : ScrcpyPathResolver.ResolveAdbExecutable();
+            _adbPath = !string.IsNullOrWhiteSpace(adbPath) && File.Exists(adbPath)
+                ? Path.GetFullPath(adbPath)
+                : ScrcpyPathResolver.ResolveAdbExecutable(adbPath, scrcpyPath);
 
             _resilience = new AdbResilienceService(_adbPath, _jobTracker);
+        }
+
+        public void ConfigurePaths(string? customAdbPath = null, string? scrcpyPath = null)
+        {
+            string resolved = !string.IsNullOrWhiteSpace(customAdbPath) && File.Exists(customAdbPath)
+                ? Path.GetFullPath(customAdbPath)
+                : ScrcpyPathResolver.ResolveAdbExecutable(customAdbPath, scrcpyPath);
+
+            _adbPath = resolved;
+            _resilience.AdbPath = resolved;
         }
 
         #region Device Detection & Properties
@@ -403,6 +417,60 @@ namespace ScrcpyDex.Services
             }
 
             return detectedId;
+        }
+
+        /// <summary>
+        /// Applies a custom logical resolution to a specific virtual display via 'wm size'.
+        /// Restricted to virtual displays (displayId > 0) to avoid altering the primary phone screen.
+        /// </summary>
+        public async Task<bool> SetDisplaySizeAsync(string serial, int displayId, int width, int height, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(serial) || displayId <= 0 || width < 640 || width > 7680 || height < 480 || height > 4320)
+            {
+                return false;
+            }
+
+            try
+            {
+                var result = await _resilience.ExecuteWithRetryAsync(
+                    $"-s {serial} shell wm size {width}x{height} -d {displayId}",
+                    maxRetries: 2,
+                    timeout: TimeSpan.FromSeconds(5),
+                    ct: ct).ConfigureAwait(false);
+
+                return result.Succeeded;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Applies a custom logical density (DPI) to a specific virtual display via 'wm density'.
+        /// Restricted to virtual displays (displayId > 0) to avoid altering the primary phone screen.
+        /// </summary>
+        public async Task<bool> SetDisplayDpiAsync(string serial, int displayId, int dpi, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(serial) || displayId <= 0 || dpi < 72 || dpi > 640)
+            {
+                return false;
+            }
+
+            try
+            {
+                var result = await _resilience.ExecuteWithRetryAsync(
+                    $"-s {serial} shell wm density {dpi} -d {displayId}",
+                    maxRetries: 2,
+                    timeout: TimeSpan.FromSeconds(5),
+                    ct: ct).ConfigureAwait(false);
+
+                return result.Succeeded;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>

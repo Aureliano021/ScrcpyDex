@@ -32,7 +32,8 @@ namespace ScrcpyDex.Core.Adb
     {
         private readonly string _host;
         private readonly int _port;
-        private readonly string? _customAdbPath;
+        private string? _customAdbPath;
+        private string? _customScrcpyPath;
         private TcpClient? _tcpClient;
         private NetworkStream? _stream;
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
@@ -42,11 +43,18 @@ namespace ScrcpyDex.Core.Adb
         public event EventHandler<IReadOnlyList<DeviceInfo>>? DevicesChanged;
         public event EventHandler<string>? RawDataReceived;
 
-        public AdbDeviceTracker(string host = "127.0.0.1", int port = 5037, string? adbPath = null)
+        public AdbDeviceTracker(string host = "127.0.0.1", int port = 5037, string? adbPath = null, string? scrcpyPath = null)
         {
             _host = host;
             _port = port;
             _customAdbPath = adbPath;
+            _customScrcpyPath = scrcpyPath;
+        }
+
+        public void ConfigurePaths(string? customAdbPath = null, string? scrcpyPath = null)
+        {
+            _customAdbPath = customAdbPath;
+            _customScrcpyPath = scrcpyPath;
         }
 
         public void Start()
@@ -222,7 +230,7 @@ namespace ScrcpyDex.Core.Adb
             {
                 string adbPath = !string.IsNullOrWhiteSpace(_customAdbPath) && File.Exists(_customAdbPath)
                     ? _customAdbPath
-                    : ScrcpyPathResolver.ResolveAdbExecutable();
+                    : ScrcpyPathResolver.ResolveAdbExecutable(_customAdbPath, _customScrcpyPath);
 
                 var psi = new ProcessStartInfo
                 {

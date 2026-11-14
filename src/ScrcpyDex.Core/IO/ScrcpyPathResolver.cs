@@ -36,14 +36,27 @@ namespace ScrcpyDex.Core.IO
         /// </summary>
         public static bool TryResolveScrcpyExecutable(out string resolvedPath, string? customPath = null)
         {
-            if (!string.IsNullOrWhiteSpace(customPath) && File.Exists(customPath))
+            string scrcpyBin = OperatingSystem.IsWindows() ? "scrcpy.exe" : "scrcpy";
+
+            if (!string.IsNullOrWhiteSpace(customPath))
             {
-                resolvedPath = Path.GetFullPath(customPath);
-                return true;
+                if (File.Exists(customPath))
+                {
+                    resolvedPath = Path.GetFullPath(customPath);
+                    return true;
+                }
+                if (Directory.Exists(customPath))
+                {
+                    string candidateInDir = Path.Combine(customPath, scrcpyBin);
+                    if (File.Exists(candidateInDir))
+                    {
+                        resolvedPath = Path.GetFullPath(candidateInDir);
+                        return true;
+                    }
+                }
             }
 
             string baseDir = AppContext.BaseDirectory;
-            string scrcpyBin = OperatingSystem.IsWindows() ? "scrcpy.exe" : "scrcpy";
 
             // 1. Check relative to base directory and upward directory hierarchy (up to 5 levels)
             var dir = new DirectoryInfo(baseDir);
@@ -137,6 +150,36 @@ namespace ScrcpyDex.Core.IO
                         return true;
                     }
                 }
+
+                // Scoop & Chocolatey
+                string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                if (!string.IsNullOrEmpty(userProfile))
+                {
+                    string[] scoopCandidates =
+                    {
+                        Path.Combine(userProfile, "scoop", "apps", "scrcpy", "current", "scrcpy.exe"),
+                        Path.Combine(userProfile, "scoop", "shims", "scrcpy.exe")
+                    };
+                    foreach (var scoopPath in scoopCandidates)
+                    {
+                        if (File.Exists(scoopPath))
+                        {
+                            resolvedPath = Path.GetFullPath(scoopPath);
+                            return true;
+                        }
+                    }
+                }
+
+                string commonAppData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                if (!string.IsNullOrEmpty(commonAppData))
+                {
+                    string chocoScrcpy = Path.Combine(commonAppData, "chocolatey", "bin", "scrcpy.exe");
+                    if (File.Exists(chocoScrcpy))
+                    {
+                        resolvedPath = Path.GetFullPath(chocoScrcpy);
+                        return true;
+                    }
+                }
             }
             else
             {
@@ -179,18 +222,49 @@ namespace ScrcpyDex.Core.IO
         /// </summary>
         public static bool TryResolveAdbExecutable(out string resolvedPath, string? customPath = null, string? scrcpyPath = null)
         {
-            if (!string.IsNullOrWhiteSpace(customPath) && File.Exists(customPath))
-            {
-                resolvedPath = Path.GetFullPath(customPath);
-                return true;
-            }
-
             string adbBin = OperatingSystem.IsWindows() ? "adb.exe" : "adb";
 
-            // 1. Sibling to resolved scrcpy executable (official releases bundle adb together)
-            if (!string.IsNullOrWhiteSpace(scrcpyPath) && File.Exists(scrcpyPath))
+            if (!string.IsNullOrWhiteSpace(customPath))
             {
-                string? scrcpyDir = Path.GetDirectoryName(scrcpyPath);
+                if (File.Exists(customPath))
+                {
+                    resolvedPath = Path.GetFullPath(customPath);
+                    return true;
+                }
+                if (Directory.Exists(customPath))
+                {
+                    string candidateInDir = Path.Combine(customPath, adbBin);
+                    if (File.Exists(candidateInDir))
+                    {
+                        resolvedPath = Path.GetFullPath(candidateInDir);
+                        return true;
+                    }
+                }
+            }
+
+            // 1. Sibling to resolved scrcpy executable (official releases bundle adb together)
+            string? effectiveScrcpyPath = scrcpyPath;
+            if (!string.IsNullOrWhiteSpace(effectiveScrcpyPath) && Directory.Exists(effectiveScrcpyPath))
+            {
+                string siblingInDir = Path.Combine(effectiveScrcpyPath, adbBin);
+                if (File.Exists(siblingInDir))
+                {
+                    resolvedPath = Path.GetFullPath(siblingInDir);
+                    return true;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(effectiveScrcpyPath) || !File.Exists(effectiveScrcpyPath))
+            {
+                if (TryResolveScrcpyExecutable(out string autoScrcpyPath, scrcpyPath))
+                {
+                    effectiveScrcpyPath = autoScrcpyPath;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(effectiveScrcpyPath) && File.Exists(effectiveScrcpyPath))
+            {
+                string? scrcpyDir = Path.GetDirectoryName(effectiveScrcpyPath);
                 if (!string.IsNullOrEmpty(scrcpyDir))
                 {
                     string siblingAdb = Path.Combine(scrcpyDir, adbBin);
@@ -236,7 +310,26 @@ namespace ScrcpyDex.Core.IO
                 return true;
             }
 
-            // 4. Platform-specific Android SDK Platform Tools
+            // 4. Check ANDROID_HOME and ANDROID_SDK_ROOT environment variables
+            string?[] sdkEnvVars =
+            {
+                Environment.GetEnvironmentVariable("ANDROID_HOME"),
+                Environment.GetEnvironmentVariable("ANDROID_SDK_ROOT")
+            };
+            foreach (var sdkEnv in sdkEnvVars)
+            {
+                if (!string.IsNullOrWhiteSpace(sdkEnv))
+                {
+                    string envSdkAdb = Path.Combine(sdkEnv.Trim(), "platform-tools", adbBin);
+                    if (File.Exists(envSdkAdb))
+                    {
+                        resolvedPath = Path.GetFullPath(envSdkAdb);
+                        return true;
+                    }
+                }
+            }
+
+            // 5. Platform-specific Android SDK Platform Tools & Package Managers
             if (OperatingSystem.IsWindows())
             {
                 string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -274,6 +367,58 @@ namespace ScrcpyDex.Core.IO
                     if (File.Exists(wingetLinks))
                     {
                         resolvedPath = Path.GetFullPath(wingetLinks);
+                        return true;
+                    }
+                }
+
+                string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+                if (!string.IsNullOrEmpty(programFiles))
+                {
+                    string pfAdb = Path.Combine(programFiles, "scrcpy", "adb.exe");
+                    if (File.Exists(pfAdb))
+                    {
+                        resolvedPath = Path.GetFullPath(pfAdb);
+                        return true;
+                    }
+                }
+
+                string programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+                if (!string.IsNullOrEmpty(programFilesX86))
+                {
+                    string pfAdb86 = Path.Combine(programFilesX86, "scrcpy", "adb.exe");
+                    if (File.Exists(pfAdb86))
+                    {
+                        resolvedPath = Path.GetFullPath(pfAdb86);
+                        return true;
+                    }
+                }
+
+                string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                if (!string.IsNullOrEmpty(userProfile))
+                {
+                    string[] scoopAdbCandidates =
+                    {
+                        Path.Combine(userProfile, "scoop", "apps", "adb", "current", "adb.exe"),
+                        Path.Combine(userProfile, "scoop", "apps", "scrcpy", "current", "adb.exe"),
+                        Path.Combine(userProfile, "scoop", "shims", "adb.exe")
+                    };
+                    foreach (var scoopAdb in scoopAdbCandidates)
+                    {
+                        if (File.Exists(scoopAdb))
+                        {
+                            resolvedPath = Path.GetFullPath(scoopAdb);
+                            return true;
+                        }
+                    }
+                }
+
+                string commonAppData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                if (!string.IsNullOrEmpty(commonAppData))
+                {
+                    string chocoAdb = Path.Combine(commonAppData, "chocolatey", "bin", "adb.exe");
+                    if (File.Exists(chocoAdb))
+                    {
+                        resolvedPath = Path.GetFullPath(chocoAdb);
                         return true;
                     }
                 }

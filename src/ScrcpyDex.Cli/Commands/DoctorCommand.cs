@@ -14,6 +14,7 @@
 using System;
 using System.Collections.Generic;
 using ScrcpyDex.Cli.Utils;
+using ScrcpyDex.Core.Diagnostics;
 using ScrcpyDex.Platform.Linux;
 
 namespace ScrcpyDex.Cli.Commands
