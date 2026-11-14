@@ -62,7 +62,7 @@ flowchart TD
   * Multiple independent Android SDK installations (e.g., Android Studio, standalone scrcpy, Samsung Smart Switch, Vysor) running conflicting background ADB daemons.
 * **Rapid Fix:**
   * Terminate competing daemons in task manager: `taskkill /F /IM adb.exe` (Windows) or `killall adb` (Linux).
-  * Configure ScrcpyDeX to use the system ADB path in `config/settings.json`:
+  * Configure ScrcpyDeX to use the system ADB path in `settings.json` (`%APPDATA%\ScrcpyDeX\settings.json` on Windows or `~/.config/scrcpydex/settings.json` on Linux):
     ```json
     "paths": {
       "adbPath": "C:\\platform-tools\\adb.exe"
@@ -121,7 +121,7 @@ flowchart TD
   * Microsoft Basic Display Adapter is in use instead of dedicated vendor graphics driver.
 * **Rapid Fix:**
   * Change **Render Driver** from `Auto` / `Direct3D 11` to `OpenGL` in **Display Parameters**.
-  * Or edit `config/settings.json`:
+  * Or edit `settings.json` (`%APPDATA%\ScrcpyDeX\settings.json` on Windows or `~/.config/scrcpydex/settings.json` on Linux):
     ```json
     "display": { "renderDriver": "opengl" }
     ```
