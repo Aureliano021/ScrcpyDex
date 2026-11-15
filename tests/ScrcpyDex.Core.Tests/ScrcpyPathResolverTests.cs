@@ -128,8 +128,11 @@ namespace ScrcpyDex.Core.Tests
                 Assert.True(ScrcpyPathResolver.IsSelfExecutable(processPath));
             }
 
-            Assert.True(ScrcpyPathResolver.IsSelfExecutable(@"C:\Tools\ScrcpyDex.App.exe"));
-            Assert.False(ScrcpyPathResolver.IsSelfExecutable(@"C:\Tools\adb.exe"));
+            string tempRoot = System.IO.Path.GetTempPath();
+            Assert.True(ScrcpyPathResolver.IsSelfExecutable(System.IO.Path.Combine(tempRoot, "ScrcpyDex.App.exe")));
+            Assert.True(ScrcpyPathResolver.IsSelfExecutable(System.IO.Path.Combine(tempRoot, "ScrcpyDex.App")));
+            Assert.False(ScrcpyPathResolver.IsSelfExecutable(System.IO.Path.Combine(tempRoot, "adb.exe")));
+            Assert.False(ScrcpyPathResolver.IsSelfExecutable(System.IO.Path.Combine(tempRoot, "adb")));
         }
 
         [Fact]

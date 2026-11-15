@@ -20,6 +20,7 @@
 
 * **USB Communication:** Connects directly over a standard USB cable via ADB without requiring Wi-Fi or wireless pairing.
 * **Multi-Language Support:** Interface localized across 6 languages with runtime switching (`English`, `Português (BR)`, `Español`, `Deutsch`, `Français`, `简体中文`).
+* **In-App Settings:** Built-in settings panel to configure display resolution (including custom dimensions), DPI, FPS, bitrate, video codec, render driver, audio/input options, language, and custom `scrcpy`/`adb` paths.
 
 ---
 
