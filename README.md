@@ -31,11 +31,12 @@
 
 ---
 
-## Prerequisites (Must Be Installed)
+## Prerequisites & System Requirements
 
-Before using ScrcpyDeX, make sure the following tools are installed on your PC and device:
+Before using ScrcpyDeX, make sure your PC and device meet these requirements:
 
-1. **Official `scrcpy` (>= 2.4) & `adb`:** Required for `--display-id` and `--mouse=uhid` support. On Windows, the official `scrcpy` package **already includes `adb.exe`** in the same directory—installing `scrcpy` provides both tools:
+1. **Operating System:** **Windows 10** (version 1607+) or **Windows 11** (64-bit). Windows 7 and 8.1 are not supported (`.NET 8` requirement).
+2. **Official `scrcpy` (>= 2.4) & `adb`:** Required for `--display-id` and `--mouse=uhid` support. On Windows, the official `scrcpy` package **already includes `adb.exe`** in the same directory—installing `scrcpy` provides both tools:
    ```powershell
    # Recommended (WinGet)
    winget install Genymobile.scrcpy
@@ -44,7 +45,7 @@ Before using ScrcpyDeX, make sure the following tools are installed on your PC a
    scoop install scrcpy
    ```
    *(Alternatively, extract the official Windows archive from [Genymobile/scrcpy Releases](https://github.com/Genymobile/scrcpy/releases) and add it to `PATH`, or select the executables manually in Settings.)*
-2. **USB Debugging Enabled:** On your phone, enable **Developer options** and turn on **USB debugging**.
+3. **USB Debugging Enabled:** On your phone, enable **Developer options** and turn on **USB debugging**.
 
 ---
 
