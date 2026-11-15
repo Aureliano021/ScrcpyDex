@@ -94,7 +94,7 @@ jobs:
     name: Package Linux (Debian & AppImage)
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout repository
@@ -185,19 +185,13 @@ jobs:
 
   release:
     name: Publish GitHub Release
-    needs: [package-linux, package-windows]
+    needs: [package-windows]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Download Linux artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: linux-packages
-          path: release-assets
 
       - name: Download Windows artifacts
         uses: actions/download-artifact@v4

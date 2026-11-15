@@ -138,8 +138,8 @@ elif [ -f "/tmp/appimagetool-x86_64.AppImage" ]; then
     APPIMAGETOOL="/tmp/appimagetool-x86_64.AppImage"
 else
     echo "[ScrcpyDeX AppImage] Downloading appimagetool..."
-    TOOL_URL="https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage"
-    curl -sSL -o /tmp/appimagetool-x86_64.AppImage "$TOOL_URL" || wget -qO /tmp/appimagetool-x86_64.AppImage "$TOOL_URL"
+    TOOL_URL="https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
+    curl -fsSL -o /tmp/appimagetool-x86_64.AppImage "$TOOL_URL" || wget -qO /tmp/appimagetool-x86_64.AppImage "$TOOL_URL"
     chmod +x /tmp/appimagetool-x86_64.AppImage
     APPIMAGETOOL="/tmp/appimagetool-x86_64.AppImage"
 fi

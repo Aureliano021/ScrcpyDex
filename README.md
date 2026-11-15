@@ -35,9 +35,16 @@
 
 Before using ScrcpyDeX, make sure the following tools are installed on your PC and device:
 
-1. **Android Debug Bridge (`adb`):** Installed on the host PC (in system `PATH`, or configured manually inside Settings).
-2. **Official `scrcpy` (>= 2.4):** Required for `--display-id` and `--mouse=uhid` support (in system `PATH`, or configured manually inside Settings).
-3. **USB Debugging Enabled:** On your phone, enable **Developer options** and turn on **USB debugging**.
+1. **Official `scrcpy` (>= 2.4) & `adb`:** Required for `--display-id` and `--mouse=uhid` support. On Windows, the official `scrcpy` package **already includes `adb.exe`** in the same directory—installing `scrcpy` provides both tools:
+   ```powershell
+   # Recommended (WinGet)
+   winget install Genymobile.scrcpy
+
+   # Or via Scoop
+   scoop install scrcpy
+   ```
+   *(Alternatively, extract the official Windows archive from [Genymobile/scrcpy Releases](https://github.com/Genymobile/scrcpy/releases) and add it to `PATH`, or select the executables manually in Settings.)*
+2. **USB Debugging Enabled:** On your phone, enable **Developer options** and turn on **USB debugging**.
 
 ---
 
