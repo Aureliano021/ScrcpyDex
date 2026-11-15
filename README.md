@@ -16,6 +16,17 @@
 
 ---
 
+## Preview
+
+<table>
+  <tr>
+    <td align="center"><img src="assets/preview_main.jpg" alt="ScrcpyDeX Main Window" width="420" /><br><sub><b>Main Device &amp; Telemetry View</b></sub></td>
+    <td align="center"><img src="assets/preview_settings.png" alt="ScrcpyDeX Settings" width="420" /><br><sub><b>Settings Window</b></sub></td>
+  </tr>
+</table>
+
+---
+
 ## Features
 
 * **USB Communication:** Connects directly over a standard USB cable via ADB without requiring Wi-Fi or wireless pairing.
