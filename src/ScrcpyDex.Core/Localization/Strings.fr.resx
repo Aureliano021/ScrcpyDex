@@ -952,4 +952,10 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
   <data name="Doctor_SummaryPassed" xml:space="preserve">
     <value>{0} vérification(s) réussie(s) • Environnement prêt</value>
   </data>
+  <data name="Status_InvalidScrcpyExecutable" xml:space="preserve">
+    <value>Exécutable invalide sélectionné pour scrcpy. Veuillez choisir un binaire scrcpy valide.</value>
+  </data>
+  <data name="Status_InvalidAdbExecutable" xml:space="preserve">
+    <value>Exécutable invalide sélectionné pour adb. Veuillez choisir un binaire Android Debug Bridge valide.</value>
+  </data>
 </root>

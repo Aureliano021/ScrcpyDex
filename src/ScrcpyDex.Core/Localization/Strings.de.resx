@@ -952,4 +952,10 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
   <data name="Doctor_SummaryPassed" xml:space="preserve">
     <value>{0} Prüfung(en) bestanden • Umgebung bereit</value>
   </data>
+  <data name="Status_InvalidScrcpyExecutable" xml:space="preserve">
+    <value>Ungültige ausführbare Datei für scrcpy ausgewählt. Bitte wählen Sie eine gültige scrcpy-Datei aus.</value>
+  </data>
+  <data name="Status_InvalidAdbExecutable" xml:space="preserve">
+    <value>Ungültige ausführbare Datei für adb ausgewählt. Bitte wählen Sie eine gültige ADB-Datei aus.</value>
+  </data>
 </root>

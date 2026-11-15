@@ -31,6 +31,113 @@ namespace ScrcpyDex.Core.IO
             : new[] { "", ".exe" };
 
         /// <summary>
+        /// Checks whether <paramref name="candidatePath"/> refers to the currently running application binary
+        /// or known ScrcpyDeX host executables, preventing recursive self-invocation loops.
+        /// </summary>
+        public static bool IsSelfExecutable(string? candidatePath)
+        {
+            if (string.IsNullOrWhiteSpace(candidatePath))
+            {
+                return false;
+            }
+
+            try
+            {
+                string fullCandidate = Path.GetFullPath(candidatePath);
+                string? processPath = Environment.ProcessPath;
+                StringComparison comparison = OperatingSystem.IsWindows()
+                    ? StringComparison.OrdinalIgnoreCase
+                    : StringComparison.Ordinal;
+
+                if (!string.IsNullOrWhiteSpace(processPath) &&
+                    string.Equals(fullCandidate, Path.GetFullPath(processPath), comparison))
+                {
+                    return true;
+                }
+
+                string fileName = Path.GetFileName(fullCandidate);
+                return fileName.Equals("ScrcpyDex.App.exe", StringComparison.OrdinalIgnoreCase) ||
+                       fileName.Equals("ScrcpyDex.App", StringComparison.OrdinalIgnoreCase) ||
+                       fileName.Equals("scrcpy-dex.exe", StringComparison.OrdinalIgnoreCase) ||
+                       fileName.Equals("scrcpy-dex", StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the file name matches the expected scrcpy binary name ('scrcpy' or 'scrcpy.exe').
+        /// </summary>
+        public static bool IsExpectedScrcpyExecutableName(string? candidatePath)
+        {
+            if (string.IsNullOrWhiteSpace(candidatePath))
+            {
+                return false;
+            }
+
+            string fileName = Path.GetFileName(candidatePath);
+            return fileName.Equals("scrcpy.exe", StringComparison.OrdinalIgnoreCase) ||
+                   fileName.Equals("scrcpy", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Returns true if the file name matches the expected adb binary name ('adb' or 'adb.exe').
+        /// </summary>
+        public static bool IsExpectedAdbExecutableName(string? candidatePath)
+        {
+            if (string.IsNullOrWhiteSpace(candidatePath))
+            {
+                return false;
+            }
+
+            string fileName = Path.GetFileName(candidatePath);
+            return fileName.Equals("adb.exe", StringComparison.OrdinalIgnoreCase) ||
+                   fileName.Equals("adb", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Validates that a user-configured scrcpy custom path is a directory or an expected scrcpy binary
+        /// (and never the ScrcpyDeX host process itself).
+        /// </summary>
+        public static bool IsValidCustomScrcpyPath(string? customPath)
+        {
+            if (string.IsNullOrWhiteSpace(customPath) || IsSelfExecutable(customPath))
+            {
+                return false;
+            }
+
+            if (Directory.Exists(customPath))
+            {
+                string scrcpyBin = OperatingSystem.IsWindows() ? "scrcpy.exe" : "scrcpy";
+                return File.Exists(Path.Combine(customPath, scrcpyBin));
+            }
+
+            return File.Exists(customPath) && IsExpectedScrcpyExecutableName(customPath);
+        }
+
+        /// <summary>
+        /// Validates that a user-configured adb custom path is a directory or an expected adb binary
+        /// (and never the ScrcpyDeX host process itself).
+        /// </summary>
+        public static bool IsValidCustomAdbPath(string? customPath)
+        {
+            if (string.IsNullOrWhiteSpace(customPath) || IsSelfExecutable(customPath))
+            {
+                return false;
+            }
+
+            if (Directory.Exists(customPath))
+            {
+                string adbBin = OperatingSystem.IsWindows() ? "adb.exe" : "adb";
+                return File.Exists(Path.Combine(customPath, adbBin));
+            }
+
+            return File.Exists(customPath) && IsExpectedAdbExecutableName(customPath);
+        }
+
+        /// <summary>
         /// Attempts to resolve the absolute path to scrcpy.exe.
         /// Returns true if an existing binary is located, otherwise false.
         /// </summary>
@@ -38,9 +145,9 @@ namespace ScrcpyDex.Core.IO
         {
             string scrcpyBin = OperatingSystem.IsWindows() ? "scrcpy.exe" : "scrcpy";
 
-            if (!string.IsNullOrWhiteSpace(customPath))
+            if (!string.IsNullOrWhiteSpace(customPath) && !IsSelfExecutable(customPath))
             {
-                if (File.Exists(customPath))
+                if (File.Exists(customPath) && IsExpectedScrcpyExecutableName(customPath))
                 {
                     resolvedPath = Path.GetFullPath(customPath);
                     return true;
@@ -224,9 +331,9 @@ namespace ScrcpyDex.Core.IO
         {
             string adbBin = OperatingSystem.IsWindows() ? "adb.exe" : "adb";
 
-            if (!string.IsNullOrWhiteSpace(customPath))
+            if (!string.IsNullOrWhiteSpace(customPath) && !IsSelfExecutable(customPath))
             {
-                if (File.Exists(customPath))
+                if (File.Exists(customPath) && IsExpectedAdbExecutableName(customPath))
                 {
                     resolvedPath = Path.GetFullPath(customPath);
                     return true;
@@ -594,33 +701,127 @@ namespace ScrcpyDex.Core.IO
         /// </summary>
         public static Version? QueryScrcpyVersion(string? scrcpyPath = null)
         {
+            string executable;
+            if (!string.IsNullOrWhiteSpace(scrcpyPath))
+            {
+                executable = scrcpyPath;
+            }
+            else if (!TryResolveScrcpyExecutable(out executable))
+            {
+                return null;
+            }
+
+            if (string.IsNullOrWhiteSpace(executable) ||
+                !File.Exists(executable) ||
+                IsSelfExecutable(executable) ||
+                !IsExpectedScrcpyExecutableName(executable))
+            {
+                return null;
+            }
+
+            if (!ExecuteProbeCommand(executable, "--version", timeoutMs: 3000, out _, out string stdout, out _))
+            {
+                return null;
+            }
+
+            return ParseScrcpyVersion(stdout);
+        }
+
+        /// <summary>
+        /// Validates that a selected executable is a genuine scrcpy binary without risking infinite spawns.
+        /// </summary>
+        public static bool TryValidateScrcpyExecutable(string? candidatePath, out Version? version)
+        {
+            version = null;
+            if (string.IsNullOrWhiteSpace(candidatePath) ||
+                !File.Exists(candidatePath) ||
+                IsSelfExecutable(candidatePath) ||
+                !IsExpectedScrcpyExecutableName(candidatePath))
+            {
+                return false;
+            }
+
+            version = QueryScrcpyVersion(candidatePath);
+            return version != null;
+        }
+
+        /// <summary>
+        /// Validates that a selected executable is a genuine Android Debug Bridge (adb) binary.
+        /// </summary>
+        public static bool TryValidateAdbExecutable(string? candidatePath)
+        {
+            if (string.IsNullOrWhiteSpace(candidatePath) ||
+                !File.Exists(candidatePath) ||
+                IsSelfExecutable(candidatePath) ||
+                !IsExpectedAdbExecutableName(candidatePath))
+            {
+                return false;
+            }
+
+            if (!ExecuteProbeCommand(candidatePath, "version", timeoutMs: 3000, out int exitCode, out string stdout, out _))
+            {
+                return false;
+            }
+
+            return exitCode == 0 && stdout.Contains("Android Debug Bridge", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool ExecuteProbeCommand(
+            string executablePath,
+            string arguments,
+            int timeoutMs,
+            out int exitCode,
+            out string stdout,
+            out string stderr)
+        {
+            exitCode = -1;
+            stdout = string.Empty;
+            stderr = string.Empty;
+
             try
             {
-                string executable = !string.IsNullOrWhiteSpace(scrcpyPath)
-                    ? scrcpyPath
-                    : ResolveScrcpyExecutable();
-
                 var psi = new ProcessStartInfo
                 {
-                    FileName = executable,
-                    Arguments = "--version",
+                    FileName = Path.GetFullPath(executablePath),
+                    Arguments = arguments,
                     UseShellExecute = false,
+                    RedirectStandardInput = true,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 };
 
                 using var proc = Process.Start(psi);
-                if (proc == null) return null;
+                if (proc == null)
+                {
+                    return false;
+                }
 
-                string stdout = proc.StandardOutput.ReadToEnd();
-                proc.WaitForExit(3000);
+                try { proc.StandardInput.Close(); } catch { }
 
-                return ParseScrcpyVersion(stdout);
+                var stdoutTask = proc.StandardOutput.ReadToEndAsync();
+                var stderrTask = proc.StandardError.ReadToEndAsync();
+
+                if (!proc.WaitForExit(timeoutMs))
+                {
+                    try { proc.Kill(entireProcessTree: true); } catch { }
+                    return false;
+                }
+
+                try
+                {
+                    System.Threading.Tasks.Task.WhenAll(stdoutTask, stderrTask).Wait(500);
+                }
+                catch { }
+
+                exitCode = proc.ExitCode;
+                stdout = stdoutTask.IsCompletedSuccessfully ? stdoutTask.Result : string.Empty;
+                stderr = stderrTask.IsCompletedSuccessfully ? stderrTask.Result : string.Empty;
+                return true;
             }
             catch
             {
-                return null;
+                return false;
             }
         }
 

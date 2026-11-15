@@ -382,6 +382,8 @@ namespace ScrcpyDex.Core.Localization
         public static string Status_SessionError => LocalizationManager.Instance.GetString(nameof(Status_SessionError));
         public static string Status_ScrcpyNotDetected => LocalizationManager.Instance.GetString(nameof(Status_ScrcpyNotDetected));
         public static string Status_AdbNotDetected => LocalizationManager.Instance.GetString(nameof(Status_AdbNotDetected));
+        public static string Status_InvalidScrcpyExecutable => LocalizationManager.Instance.GetString(nameof(Status_InvalidScrcpyExecutable));
+        public static string Status_InvalidAdbExecutable => LocalizationManager.Instance.GetString(nameof(Status_InvalidAdbExecutable));
         public static string Status_RendererUnsupported => LocalizationManager.Instance.GetString(nameof(Status_RendererUnsupported));
         public static string Doctor_NotRun => LocalizationManager.Instance.GetString(nameof(Doctor_NotRun));
         public static string Doctor_SummaryErrors => LocalizationManager.Instance.GetString(nameof(Doctor_SummaryErrors));

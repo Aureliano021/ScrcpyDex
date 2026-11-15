@@ -118,5 +118,49 @@ namespace ScrcpyDex.Core.Tests
                 try { System.IO.Directory.Delete(tempDir, true); } catch { }
             }
         }
+
+        [Fact]
+        public void IsSelfExecutable_WithCurrentProcessPath_ReturnsTrue()
+        {
+            string? processPath = Environment.ProcessPath;
+            if (!string.IsNullOrWhiteSpace(processPath))
+            {
+                Assert.True(ScrcpyPathResolver.IsSelfExecutable(processPath));
+            }
+
+            Assert.True(ScrcpyPathResolver.IsSelfExecutable(@"C:\Tools\ScrcpyDex.App.exe"));
+            Assert.False(ScrcpyPathResolver.IsSelfExecutable(@"C:\Tools\adb.exe"));
+        }
+
+        [Fact]
+        public void TryResolveExecutables_WithArbitraryExecutableName_IgnoresInvalidCustomPath()
+        {
+            string tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "ScrcpyDeX_TestInvalid_" + Guid.NewGuid().ToString("N"));
+            System.IO.Directory.CreateDirectory(tempDir);
+            try
+            {
+                string arbitraryExe = System.IO.Path.Combine(tempDir, "notepad.exe");
+                System.IO.File.WriteAllText(arbitraryExe, "dummy");
+
+                Assert.False(ScrcpyPathResolver.IsValidCustomScrcpyPath(arbitraryExe));
+                Assert.False(ScrcpyPathResolver.IsValidCustomAdbPath(arbitraryExe));
+                Assert.False(ScrcpyPathResolver.TryValidateScrcpyExecutable(arbitraryExe, out _));
+                Assert.False(ScrcpyPathResolver.TryValidateAdbExecutable(arbitraryExe));
+
+                if (ScrcpyPathResolver.TryResolveScrcpyExecutable(out string resolvedScrcpy, customPath: arbitraryExe))
+                {
+                    Assert.NotEqual(System.IO.Path.GetFullPath(arbitraryExe), resolvedScrcpy);
+                }
+
+                if (ScrcpyPathResolver.TryResolveAdbExecutable(out string resolvedAdb, customPath: arbitraryExe))
+                {
+                    Assert.NotEqual(System.IO.Path.GetFullPath(arbitraryExe), resolvedAdb);
+                }
+            }
+            finally
+            {
+                try { System.IO.Directory.Delete(tempDir, true); } catch { }
+            }
+        }
     }
 }

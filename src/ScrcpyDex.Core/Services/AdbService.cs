@@ -64,8 +64,8 @@ namespace ScrcpyDex.Services
         public AdbService(string? adbPath = null, IProcessLifetimeManager? jobTracker = null, string? scrcpyPath = null)
         {
             _jobTracker = jobTracker ?? PlatformLifetimeManager.Default;
-            _adbPath = !string.IsNullOrWhiteSpace(adbPath) && File.Exists(adbPath)
-                ? Path.GetFullPath(adbPath)
+            _adbPath = ScrcpyPathResolver.IsValidCustomAdbPath(adbPath) && File.Exists(adbPath)
+                ? Path.GetFullPath(adbPath!)
                 : ScrcpyPathResolver.ResolveAdbExecutable(adbPath, scrcpyPath);
 
             _resilience = new AdbResilienceService(_adbPath, _jobTracker);
@@ -73,8 +73,8 @@ namespace ScrcpyDex.Services
 
         public void ConfigurePaths(string? customAdbPath = null, string? scrcpyPath = null)
         {
-            string resolved = !string.IsNullOrWhiteSpace(customAdbPath) && File.Exists(customAdbPath)
-                ? Path.GetFullPath(customAdbPath)
+            string resolved = ScrcpyPathResolver.IsValidCustomAdbPath(customAdbPath) && File.Exists(customAdbPath)
+                ? Path.GetFullPath(customAdbPath!)
                 : ScrcpyPathResolver.ResolveAdbExecutable(customAdbPath, scrcpyPath);
 
             _adbPath = resolved;

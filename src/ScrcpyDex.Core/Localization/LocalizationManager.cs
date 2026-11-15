@@ -117,16 +117,17 @@ namespace ScrcpyDex.Core.Localization
 
             lock (_syncLock)
             {
+                CultureInfo.CurrentCulture = resolvedCulture;
+                CultureInfo.CurrentUICulture = resolvedCulture;
+                CultureInfo.DefaultThreadCurrentCulture = resolvedCulture;
+                CultureInfo.DefaultThreadCurrentUICulture = resolvedCulture;
+
                 if (Equals(_currentCulture, resolvedCulture))
                 {
                     return;
                 }
 
                 _currentCulture = resolvedCulture;
-                CultureInfo.CurrentCulture = resolvedCulture;
-                CultureInfo.CurrentUICulture = resolvedCulture;
-                CultureInfo.DefaultThreadCurrentCulture = resolvedCulture;
-                CultureInfo.DefaultThreadCurrentUICulture = resolvedCulture;
             }
 
             OnPropertyChanged(nameof(CurrentCulture));

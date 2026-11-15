@@ -951,4 +951,10 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
   <data name="Doctor_SummaryPassed" xml:space="preserve">
     <value>{0} 项检查通过 • 环境就绪</value>
   </data>
+  <data name="Status_InvalidScrcpyExecutable" xml:space="preserve">
+    <value>所选的 scrcpy 可执行文件无效。请选择有效的 scrcpy 二进制文件。</value>
+  </data>
+  <data name="Status_InvalidAdbExecutable" xml:space="preserve">
+    <value>所选的 adb 可执行文件无效。请选择有效的 Android Debug Bridge 二进制文件。</value>
+  </data>
 </root>

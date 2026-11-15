@@ -228,9 +228,17 @@ namespace ScrcpyDex.Core.Adb
         {
             try
             {
-                string adbPath = !string.IsNullOrWhiteSpace(_customAdbPath) && File.Exists(_customAdbPath)
-                    ? _customAdbPath
+                string adbPath = ScrcpyPathResolver.IsValidCustomAdbPath(_customAdbPath) && File.Exists(_customAdbPath)
+                    ? Path.GetFullPath(_customAdbPath!)
                     : ScrcpyPathResolver.ResolveAdbExecutable(_customAdbPath, _customScrcpyPath);
+
+                if (string.IsNullOrWhiteSpace(adbPath) ||
+                    !File.Exists(adbPath) ||
+                    ScrcpyPathResolver.IsSelfExecutable(adbPath) ||
+                    !ScrcpyPathResolver.IsExpectedAdbExecutableName(adbPath))
+                {
+                    return;
+                }
 
                 var psi = new ProcessStartInfo
                 {
@@ -238,6 +246,7 @@ namespace ScrcpyDex.Core.Adb
                     Arguments = "start-server",
                     UseShellExecute = false,
                     CreateNoWindow = true,
+                    RedirectStandardInput = true,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true
                 };
@@ -245,9 +254,24 @@ namespace ScrcpyDex.Core.Adb
                 using var proc = Process.Start(psi);
                 if (proc != null)
                 {
+                    try { proc.StandardInput.Close(); } catch { }
                     using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
                     using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct, timeoutCts.Token);
-                    await proc.WaitForExitAsync(linkedCts.Token).ConfigureAwait(false);
+                    try
+                    {
+                        await proc.WaitForExitAsync(linkedCts.Token).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        try
+                        {
+                            if (!proc.HasExited)
+                            {
+                                proc.Kill(entireProcessTree: true);
+                            }
+                        }
+                        catch { }
+                    }
                 }
             }
             catch

@@ -58,6 +58,7 @@ namespace ScrcpyDex.App.ViewModels
         private readonly SemaphoreSlim _sessionLock = new SemaphoreSlim(1, 1);
         private IStorageProvider? _storageProvider;
         private DispatcherTimer? _telemetryTimer;
+        private bool _hasCompletedInitialScan;
         private bool _isDisposed;
 
         public Action? OpenConsoleWindowRequested { get; set; }
@@ -837,12 +838,28 @@ namespace ScrcpyDex.App.ViewModels
 
             if (!string.IsNullOrWhiteSpace(settings.Paths.ScrcpyPath))
             {
-                ScrcpyPath = settings.Paths.ScrcpyPath;
+                if (ScrcpyPathResolver.IsValidCustomScrcpyPath(settings.Paths.ScrcpyPath))
+                {
+                    ScrcpyPath = settings.Paths.ScrcpyPath;
+                }
+                else
+                {
+                    ScrcpyPath = null;
+                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Ignored invalid custom scrcpy path in settings: {settings.Paths.ScrcpyPath}", ProcessLogLevel.Warning));
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(settings.Paths.AdbPath))
             {
-                AdbPath = settings.Paths.AdbPath;
+                if (ScrcpyPathResolver.IsValidCustomAdbPath(settings.Paths.AdbPath))
+                {
+                    AdbPath = settings.Paths.AdbPath;
+                }
+                else
+                {
+                    AdbPath = null;
+                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Ignored invalid custom adb path in settings: {settings.Paths.AdbPath}", ProcessLogLevel.Warning));
+                }
             }
         }
 
@@ -1337,6 +1354,7 @@ namespace ScrcpyDex.App.ViewModels
 
             if (ConnectionState == SessionState.Idle && string.IsNullOrWhiteSpace(StatusWarning))
             {
+                _hasCompletedInitialScan = true;
                 SessionStatusText = string.Format(LocalizationManager.Instance.GetString("Status_FoundDevices"), DeviceList.Count);
             }
 
@@ -1465,6 +1483,7 @@ namespace ScrcpyDex.App.ViewModels
                 var devices = await _adbService.GetConnectedDevicesAsync().ConfigureAwait(false);
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
+                    _hasCompletedInitialScan = true;
                     UpdateDevicesList(devices);
                     SessionStatusText = devices.Count > 0
                         ? string.Format(LocalizationManager.Instance.GetString("Status_FoundDevices"), devices.Count)
@@ -1672,7 +1691,9 @@ namespace ScrcpyDex.App.ViewModels
         public Task BrowseScrcpyPathAsync() =>
             BrowseExecutablePathAsync(
                 title: "Select scrcpy Executable",
-                windowsPatterns: new[] { "*.exe" },
+                windowsPatterns: new[] { "scrcpy.exe" },
+                validateBinary: path => ScrcpyPathResolver.TryValidateScrcpyExecutable(path, out _),
+                invalidStatusKey: "Status_InvalidScrcpyExecutable",
                 applyPath: path =>
                 {
                     ScrcpyPath = path;
@@ -1683,14 +1704,21 @@ namespace ScrcpyDex.App.ViewModels
         public Task BrowseAdbPathAsync() =>
             BrowseExecutablePathAsync(
                 title: "Select adb Executable",
-                windowsPatterns: new[] { "adb.exe", "*.exe" },
+                windowsPatterns: new[] { "adb.exe" },
+                validateBinary: path => ScrcpyPathResolver.TryValidateAdbExecutable(path),
+                invalidStatusKey: "Status_InvalidAdbExecutable",
                 applyPath: path =>
                 {
                     AdbPath = path;
                     LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Custom adb path set to: {path}", false));
                 });
 
-        private async Task BrowseExecutablePathAsync(string title, string[] windowsPatterns, Action<string> applyPath)
+        private async Task BrowseExecutablePathAsync(
+            string title,
+            string[] windowsPatterns,
+            Func<string, bool> validateBinary,
+            string invalidStatusKey,
+            Action<string> applyPath)
         {
             var storageProvider = GetStorageProvider();
             if (storageProvider == null)
@@ -1722,6 +1750,18 @@ namespace ScrcpyDex.App.ViewModels
                     var localPath = files[0].TryGetLocalPath();
                     if (!string.IsNullOrEmpty(localPath))
                     {
+                        bool isValid = await Task.Run(() => validateBinary(localPath)).ConfigureAwait(false);
+                        if (!isValid)
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                string msg = LocalizationManager.Instance.GetString(invalidStatusKey);
+                                SessionStatusText = msg;
+                                LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"{msg} ({localPath})", ProcessLogLevel.Error));
+                            });
+                            return;
+                        }
+
                         await Dispatcher.UIThread.InvokeAsync(async () =>
                         {
                             applyPath(localPath);
@@ -1872,6 +1912,35 @@ namespace ScrcpyDex.App.ViewModels
             OnPropertyChanged(nameof(HardwareModelDisplay));
             OnPropertyChanged(nameof(ScrcpyPathDisplay));
             OnPropertyChanged(nameof(AdbPathDisplay));
+
+            if (!IsScrcpyDetected)
+            {
+                StatusWarning = LocalizationManager.Instance.GetString("Status_ScrcpyNotDetected");
+            }
+            else if (!IsAdbDetected)
+            {
+                StatusWarning = LocalizationManager.Instance.GetString("Status_AdbNotDetected");
+            }
+
+            if (ConnectionState == SessionState.Idle)
+            {
+                if (!string.IsNullOrWhiteSpace(StatusWarning))
+                {
+                    SessionStatusText = StatusWarning;
+                }
+                else if (DeviceList.Count > 0)
+                {
+                    SessionStatusText = string.Format(LocalizationManager.Instance.GetString("Status_FoundDevices"), DeviceList.Count);
+                }
+                else if (_hasCompletedInitialScan)
+                {
+                    SessionStatusText = LocalizationManager.Instance.GetString("Status_NoDevicesDetected");
+                }
+                else
+                {
+                    SessionStatusText = LocalizationManager.Instance.GetString("Status_IdleReady");
+                }
+            }
 
             foreach (var cat in FaqCategories)
             {

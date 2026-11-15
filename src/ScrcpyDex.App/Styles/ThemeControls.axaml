@@ -185,6 +185,56 @@
         <Setter Property="Background" Value="{StaticResource ThemeControlHoverBrush}" />
         <Setter Property="BorderBrush" Value="#484854" />
     </Style>
+
+    <!-- Borderless Header Device Selector ComboBox (Reveals box on hover, expands on click) -->
+    <Style Selector="ComboBox.dex-header-combobox">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource ThemeLabelPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Padding" Value="6,2,4,2" />
+        <Setter Property="Margin" Value="-6,0,6,0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FontFamily" Value="fonts:Inter#Inter, Inter, Segoe UI, sans-serif" />
+    </Style>
+    <Style Selector="ComboBox.dex-header-combobox /template/ Border#Background">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+    <Style Selector="ComboBox.dex-header-combobox:pointerover /template/ Border#Background">
+        <Setter Property="Background" Value="{StaticResource ThemeControlBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource ThemeControlBorderBrush}" />
+    </Style>
+    <Style Selector="ComboBox.dex-header-combobox:dropdownopen /template/ Border#Background">
+        <Setter Property="Background" Value="{StaticResource ThemeControlBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="#484854" />
+    </Style>
+    <Style Selector="ComboBox.dex-header-combobox /template/ TextBlock#PlaceholderTextBlock">
+        <Setter Property="Foreground" Value="{StaticResource ThemeLabelPrimaryBrush}" />
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="ComboBox.dex-header-combobox /template/ PathIcon#DropDownGlyph">
+        <Setter Property="Foreground" Value="#86868B" />
+    </Style>
+    <Style Selector="ComboBox.dex-header-combobox:pointerover /template/ PathIcon#DropDownGlyph">
+        <Setter Property="Foreground" Value="#F5F5F7" />
+    </Style>
+    <Style Selector="ComboBox.dex-header-combobox ComboBoxItem">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+    <Style Selector="ComboBox.dex-header-combobox TextBlock.device-serial-in-popup">
+        <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="ComboBox.dex-header-combobox ComboBoxItem TextBlock.device-serial-in-popup">
+        <Setter Property="IsVisible" Value="True" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Normal" />
+    </Style>
     <Style Selector="ComboBoxItem">
         <Setter Property="FontSize" Value="11" />
         <Setter Property="Foreground" Value="{StaticResource ThemeLabelPrimaryBrush}" />

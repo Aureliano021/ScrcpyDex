@@ -64,8 +64,9 @@
                         <Border Background="#1B1B22"
                                 BorderBrush="#33333C"
                                 BorderThickness="1"
-                                CornerRadius="14"
-                                Padding="9,5"
+                                CornerRadius="13"
+                                Height="26"
+                                Padding="10,0"
                                 VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                 <Ellipse Width="6" Height="6" Fill="{Binding StatusBadgeColor}" VerticalAlignment="Center" />
@@ -161,78 +162,65 @@
                           VerticalAlignment="Stretch"
                           Margin="0,2,0,0">
 
-                        <!-- Top: Device Title, Model Badges & Target Selector Dropdown -->
-                        <StackPanel Grid.Row="0" Spacing="12">
-                            <StackPanel Spacing="3">
-                                <Grid ColumnDefinitions="*, Auto">
-                                    <TextBlock Grid.Column="0"
-                                               Text="{Binding DeviceDisplayName}"
-                                               FontSize="20"
-                                               FontWeight="SemiBold"
-                                               Foreground="#F5F5F7"
-                                               TextTrimming="CharacterEllipsis"
-                                               VerticalAlignment="Center" />
-
-                                    <StackPanel Grid.Column="1"
-                                                Orientation="Horizontal"
-                                                Spacing="5"
-                                                VerticalAlignment="Center"
-                                                IsVisible="{Binding HasSelectedDevice}">
-                                        <Border Background="#1B1B22"
-                                                BorderBrush="#33333C"
-                                                BorderThickness="1"
-                                                CornerRadius="6"
-                                                Padding="7,3">
-                                            <TextBlock Text="{Binding DeviceModelCode}"
-                                                       FontSize="9.5"
-                                                       FontFamily="Cascadia Code, Consolas, monospace"
-                                                       Foreground="#D0D0D7" />
-                                        </Border>
-                                        <Border Background="#26170A"
-                                                BorderBrush="#FF7A00"
-                                                BorderThickness="1"
-                                                CornerRadius="6"
-                                                Padding="7,3"
-                                                IsVisible="{Binding IsMirroringMode}">
-                                            <TextBlock Text="{Binding [Ui_Mirror], Source={x:Static loc:LocalizationManager.Instance}}"
-                                                       FontSize="9"
-                                                       FontWeight="SemiBold"
-                                                       LetterSpacing="0.4"
-                                                       Foreground="#FF9A3D" />
-                                        </Border>
-                                    </StackPanel>
-                                </Grid>
-
-                                <TextBlock Text="{Binding HardwareModelDisplay}"
-                                           FontSize="11"
-                                           Foreground="#86868B"
-                                           TextTrimming="CharacterEllipsis" />
-                            </StackPanel>
-
-                            <!-- Target Device Dropdown (Expands on Click) -->
-                            <StackPanel Spacing="5">
-                                <TextBlock Text="{Binding [Ui_TargetDevice], Source={x:Static loc:LocalizationManager.Instance}}"
-                                           FontSize="9.5"
-                                           FontWeight="SemiBold"
-                                           LetterSpacing="0.8"
-                                           Foreground="#86868B" />
-                                <ComboBox Classes="dex-combobox"
+                        <!-- Top: Device Title Selector (Borderless at rest, reveals box on hover) & Model Badges -->
+                        <StackPanel Grid.Row="0" Spacing="3">
+                            <Grid ColumnDefinitions="*, Auto">
+                                <ComboBox Grid.Column="0"
+                                          Classes="dex-header-combobox"
                                           ItemsSource="{Binding DeviceList}"
                                           SelectedItem="{Binding SelectedDevice}"
-                                          HorizontalAlignment="Stretch"
-                                          Height="34"
-                                          FontSize="12"
-                                          PlaceholderText="{Binding [DeviceSelector_NoDevicesPlaceholder], Source={x:Static loc:LocalizationManager.Instance}}">
+                                          HorizontalAlignment="Left"
+                                          MaxWidth="340"
+                                          VerticalAlignment="Center"
+                                          PlaceholderText="{Binding [Device_NoDeviceConnected], Source={x:Static loc:LocalizationManager.Instance}}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate x:DataType="models:DeviceInfo">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <TextBlock Text="{Binding MarketingName}" FontWeight="SemiBold" Foreground="#F5F5F7" />
-                                                <TextBlock Text="{Binding Serial, StringFormat='({0})'}" Foreground="#86868B" />
+                                                <TextBlock Text="{Binding MarketingName}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Classes="device-serial-in-popup"
+                                                           Text="{Binding Serial, StringFormat='({0})'}"
+                                                           Foreground="#86868B"
+                                                           VerticalAlignment="Center" />
                                             </StackPanel>
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
-                            </StackPanel>
+
+                                <StackPanel Grid.Column="1"
+                                            Orientation="Horizontal"
+                                            Spacing="5"
+                                            VerticalAlignment="Center"
+                                            IsVisible="{Binding HasSelectedDevice}">
+                                    <Border Background="#1B1B22"
+                                            BorderBrush="#33333C"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Padding="7,3">
+                                        <TextBlock Text="{Binding DeviceModelCode}"
+                                                   FontSize="9.5"
+                                                   FontFamily="Cascadia Code, Consolas, monospace"
+                                                   Foreground="#D0D0D7" />
+                                    </Border>
+                                    <Border Background="#26170A"
+                                            BorderBrush="#FF7A00"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Padding="7,3"
+                                            IsVisible="{Binding IsMirroringMode}">
+                                        <TextBlock Text="{Binding [Ui_Mirror], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                   FontSize="9"
+                                                   FontWeight="SemiBold"
+                                                   LetterSpacing="0.4"
+                                                   Foreground="#FF9A3D" />
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="{Binding HardwareModelDisplay}"
+                                       FontSize="11"
+                                       Foreground="#86868B"
+                                       TextTrimming="CharacterEllipsis" />
                         </StackPanel>
 
                         <!-- Action Row: [START / STOP | SCAN] -->
