@@ -1620,7 +1620,7 @@ namespace ScrcpyDex.App.ViewModels
                     TurnScreenOff = TurnScreenOff,
                     RecordFile = recordFile,
                     ForwardShortcuts = ForwardShortcuts,
-                    AudioEnabled = !SelectedAudioCodec.Equals("Disabled", StringComparison.OrdinalIgnoreCase),
+                    AudioEnabled = LowLatencyAudio && !SelectedAudioCodec.Equals("Disabled", StringComparison.OrdinalIgnoreCase),
                     RenderDriver = renderDriver
                 };
 
