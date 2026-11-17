@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-VERSION="${1:-${SCRCPYDEX_VERSION:-2.0.0}}"
+VERSION="${1:-${SCRCPYDEX_VERSION:-2.1.0}}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 OUTPUT_DIR="${OUTPUT_DIR:-$REPO_ROOT/publish}"

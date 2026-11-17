@@ -766,6 +766,72 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
   <data name="Ui_FaqDoctor" xml:space="preserve">
     <value>FAQ &amp; DIAGNOSTIC</value>
   </data>
+  <data name="Ui_Faq" xml:space="preserve">
+    <value>FAQ</value>
+  </data>
+  <data name="Ui_WirelessConnection" xml:space="preserve">
+    <value>Connexion sans fil</value>
+  </data>
+  <data name="Ui_HowToConnectQr" xml:space="preserve">
+    <value>Comment connecter via QR Code</value>
+  </data>
+  <data name="Ui_QrHelpTitle" xml:space="preserve">
+    <value>Associer via Débogage sans fil</value>
+  </data>
+  <data name="Ui_QrHelpSteps" xml:space="preserve">
+    <value>1. Ouvrir Paramètres → Options pour les développeurs
+2. Activer Débogage sans fil
+3. Toucher Associer l'appareil avec un code QR
+4. Pointer la caméra ici</value>
+  </data>
+  <data name="Ui_RegenerateQr" xml:space="preserve">
+    <value>Nouveau QR Code</value>
+  </data>
+  <data name="Qr_WaitingForScan" xml:space="preserve">
+    <value>En attente de scan...</value>
+  </data>
+  <data name="Qr_Pairing" xml:space="preserve">
+    <value>Association en cours...</value>
+  </data>
+  <data name="Qr_Connecting" xml:space="preserve">
+    <value>Connexion en cours...</value>
+  </data>
+  <data name="Qr_Failed" xml:space="preserve">
+    <value>Échec de l'association.</value>
+  </data>
+  <data name="Action_SwitchToWifiTooltip" xml:space="preserve">
+    <value>Basculer la connexion ADB d'USB vers Wi-Fi (TCP/IP)</value>
+  </data>
+  <data name="Telemetry_WirelessConnection" xml:space="preserve">
+    <value>CONNEXION SANS FIL</value>
+  </data>
+  <data name="Status_SwitchingToWifi" xml:space="preserve">
+    <value>Basculement de la connexion ADB vers Wi-Fi...</value>
+  </data>
+  <data name="Wireless_UnplugBadge" xml:space="preserve">
+    <value>WI-FI PRÊT</value>
+  </data>
+  <data name="Wireless_UnplugTitle" xml:space="preserve">
+    <value>Débranchez le câble USB</value>
+  </data>
+  <data name="Wireless_UnplugDesc" xml:space="preserve">
+    <value>La connexion ADB sans fil ({0}) est active. Vous pouvez débrancher le câble USB — cet avis se fermera automatiquement.</value>
+  </data>
+  <data name="Wireless_RevertToUsb" xml:space="preserve">
+    <value>REVENIR AU CÂBLE USB</value>
+  </data>
+  <data name="Wireless_NonTlsBadge" xml:space="preserve">
+    <value>TCP/IP SANS TLS</value>
+  </data>
+  <data name="Wireless_NonTlsTitle" xml:space="preserve">
+    <value>Connexion sans fil non chiffrée (Sans TLS)</value>
+  </data>
+  <data name="Wireless_NonTlsDesc" xml:space="preserve">
+    <value>Cette session utilise ADB TCP/IP classique (port 5555) sans chiffrement TLS. D'autres appareils sur le même réseau local pourraient accéder à ADB. Préférez le débogage sans fil natif (TLS) sur les réseaux partagés.</value>
+  </data>
+  <data name="Ui_Close" xml:space="preserve">
+    <value>FERMER</value>
+  </data>
   <data name="Ui_DisplayEncoder" xml:space="preserve">
     <value>AFFICHAGE ET ENCODEUR</value>
   </data>

@@ -765,6 +765,72 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
   <data name="Ui_FaqDoctor" xml:space="preserve">
     <value>常见问题与诊断</value>
   </data>
+  <data name="Ui_Faq" xml:space="preserve">
+    <value>FAQ</value>
+  </data>
+  <data name="Ui_WirelessConnection" xml:space="preserve">
+    <value>无线连接</value>
+  </data>
+  <data name="Ui_HowToConnectQr" xml:space="preserve">
+    <value>如何通过二维码连接</value>
+  </data>
+  <data name="Ui_QrHelpTitle" xml:space="preserve">
+    <value>通过无线调试配对</value>
+  </data>
+  <data name="Ui_QrHelpSteps" xml:space="preserve">
+    <value>1. 打开 设置 → 开发者选项
+2. 开启 无线调试
+3. 点击 使用二维码配对设备
+4. 将手机摄像头对准此处</value>
+  </data>
+  <data name="Ui_RegenerateQr" xml:space="preserve">
+    <value>刷新二维码</value>
+  </data>
+  <data name="Qr_WaitingForScan" xml:space="preserve">
+    <value>等待扫码...</value>
+  </data>
+  <data name="Qr_Pairing" xml:space="preserve">
+    <value>正在配对设备...</value>
+  </data>
+  <data name="Qr_Connecting" xml:space="preserve">
+    <value>正在连接...</value>
+  </data>
+  <data name="Qr_Failed" xml:space="preserve">
+    <value>配对失败，请重试。</value>
+  </data>
+  <data name="Action_SwitchToWifiTooltip" xml:space="preserve">
+    <value>将 ADB 连接从 USB 切换为 Wi-Fi (TCP/IP)</value>
+  </data>
+  <data name="Telemetry_WirelessConnection" xml:space="preserve">
+    <value>无线连接</value>
+  </data>
+  <data name="Status_SwitchingToWifi" xml:space="preserve">
+    <value>正在将 ADB 连接切换至 Wi-Fi...</value>
+  </data>
+  <data name="Wireless_UnplugBadge" xml:space="preserve">
+    <value>无线就绪</value>
+  </data>
+  <data name="Wireless_UnplugTitle" xml:space="preserve">
+    <value>请拔下 USB 数据线</value>
+  </data>
+  <data name="Wireless_UnplugDesc" xml:space="preserve">
+    <value>无线 ADB 连接 ({0}) 已激活。现在可以安全拔下 USB 数据线——此提示将自动关闭。</value>
+  </data>
+  <data name="Wireless_RevertToUsb" xml:space="preserve">
+    <value>恢复为有线连接 (USB)</value>
+  </data>
+  <data name="Wireless_NonTlsBadge" xml:space="preserve">
+    <value>无 TLS 的 TCP/IP</value>
+  </data>
+  <data name="Wireless_NonTlsTitle" xml:space="preserve">
+    <value>未加密的无线连接（无 TLS）</value>
+  </data>
+  <data name="Wireless_NonTlsDesc" xml:space="preserve">
+    <value>当前使用传统 ADB TCP/IP（5555 端口），未启用 TLS 加密。同一局域网内的其他设备可能尝试访问 ADB。建议在公共网络中优先使用原生无线调试（TLS）。</value>
+  </data>
+  <data name="Ui_Close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
   <data name="Ui_DisplayEncoder" xml:space="preserve">
     <value>显示与编码器</value>
   </data>

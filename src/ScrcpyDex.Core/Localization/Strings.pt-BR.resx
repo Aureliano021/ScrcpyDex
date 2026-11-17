@@ -766,6 +766,72 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
   <data name="Ui_FaqDoctor" xml:space="preserve">
     <value>FAQ &amp; DIAGNÓSTICO</value>
   </data>
+  <data name="Ui_Faq" xml:space="preserve">
+    <value>FAQ</value>
+  </data>
+  <data name="Ui_WirelessConnection" xml:space="preserve">
+    <value>Conexão sem fio</value>
+  </data>
+  <data name="Ui_HowToConnectQr" xml:space="preserve">
+    <value>Como conectar via QR Code</value>
+  </data>
+  <data name="Ui_QrHelpTitle" xml:space="preserve">
+    <value>Parear via Depuração sem fio</value>
+  </data>
+  <data name="Ui_QrHelpSteps" xml:space="preserve">
+    <value>1. Abra Config. → Opções do desenvolvedor
+2. Ative Depuração sem fio
+3. Toque em Parear dispositivo com QR Code
+4. Aponte a câmera do celular aqui</value>
+  </data>
+  <data name="Ui_RegenerateQr" xml:space="preserve">
+    <value>Novo QR Code</value>
+  </data>
+  <data name="Qr_WaitingForScan" xml:space="preserve">
+    <value>Aguardando leitura...</value>
+  </data>
+  <data name="Qr_Pairing" xml:space="preserve">
+    <value>Pareando aparelho...</value>
+  </data>
+  <data name="Qr_Connecting" xml:space="preserve">
+    <value>Conectando...</value>
+  </data>
+  <data name="Qr_Failed" xml:space="preserve">
+    <value>Falha ao parear. Tente novamente.</value>
+  </data>
+  <data name="Action_SwitchToWifiTooltip" xml:space="preserve">
+    <value>Alternar conexão ADB de USB para Wi-Fi (TCP/IP)</value>
+  </data>
+  <data name="Telemetry_WirelessConnection" xml:space="preserve">
+    <value>CONEXÃO SEM FIO</value>
+  </data>
+  <data name="Status_SwitchingToWifi" xml:space="preserve">
+    <value>Alternando conexão ADB para Wi-Fi...</value>
+  </data>
+  <data name="Wireless_UnplugBadge" xml:space="preserve">
+    <value>WI-FI PRONTO</value>
+  </data>
+  <data name="Wireless_UnplugTitle" xml:space="preserve">
+    <value>Desplugue o cabo USB</value>
+  </data>
+  <data name="Wireless_UnplugDesc" xml:space="preserve">
+    <value>A conexão ADB sem fio ({0}) está ativa. Você já pode desconectar o cabo USB — este aviso fechará automaticamente.</value>
+  </data>
+  <data name="Wireless_RevertToUsb" xml:space="preserve">
+    <value>VOLTAR PARA CONEXÃO COM FIO</value>
+  </data>
+  <data name="Wireless_NonTlsBadge" xml:space="preserve">
+    <value>TCP/IP SEM TLS</value>
+  </data>
+  <data name="Wireless_NonTlsTitle" xml:space="preserve">
+    <value>Conexão sem fio sem criptografia (Sem TLS)</value>
+  </data>
+  <data name="Wireless_NonTlsDesc" xml:space="preserve">
+    <value>Esta conexão usa ADB TCP/IP legado (porta 5555) sem criptografia TLS. Outros dispositivos na mesma rede local podem tentar acessar o ADB enquanto estiver ativo. Prefira a Depuração sem fio nativa (TLS) em redes compartilhadas.</value>
+  </data>
+  <data name="Ui_Close" xml:space="preserve">
+    <value>FECHAR</value>
+  </data>
   <data name="Ui_DisplayEncoder" xml:space="preserve">
     <value>TELA E CODIFICADOR</value>
   </data>

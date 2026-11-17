@@ -766,6 +766,72 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
   <data name="Ui_FaqDoctor" xml:space="preserve">
     <value>FAQ Y DIAGNÓSTICO</value>
   </data>
+  <data name="Ui_Faq" xml:space="preserve">
+    <value>FAQ</value>
+  </data>
+  <data name="Ui_WirelessConnection" xml:space="preserve">
+    <value>Conexión inalámbrica</value>
+  </data>
+  <data name="Ui_HowToConnectQr" xml:space="preserve">
+    <value>Cómo conectar vía código QR</value>
+  </data>
+  <data name="Ui_QrHelpTitle" xml:space="preserve">
+    <value>Emparejar vía Depuración inalámbrica</value>
+  </data>
+  <data name="Ui_QrHelpSteps" xml:space="preserve">
+    <value>1. Abre Ajustes → Opciones de desarrollador
+2. Activa Depuración inalámbrica
+3. Toca Emparejar dispositivo con código QR
+4. Apunta la cámara del teléfono aquí</value>
+  </data>
+  <data name="Ui_RegenerateQr" xml:space="preserve">
+    <value>Nuevo código QR</value>
+  </data>
+  <data name="Qr_WaitingForScan" xml:space="preserve">
+    <value>Esperando escaneo...</value>
+  </data>
+  <data name="Qr_Pairing" xml:space="preserve">
+    <value>Emparejando dispositivo...</value>
+  </data>
+  <data name="Qr_Connecting" xml:space="preserve">
+    <value>Conectando...</value>
+  </data>
+  <data name="Qr_Failed" xml:space="preserve">
+    <value>Error al emparejar. Reintenta.</value>
+  </data>
+  <data name="Action_SwitchToWifiTooltip" xml:space="preserve">
+    <value>Cambiar conexión ADB de USB a Wi-Fi (TCP/IP)</value>
+  </data>
+  <data name="Telemetry_WirelessConnection" xml:space="preserve">
+    <value>CONEXIÓN INALÁMBRICA</value>
+  </data>
+  <data name="Status_SwitchingToWifi" xml:space="preserve">
+    <value>Cambiando conexión ADB a Wi-Fi...</value>
+  </data>
+  <data name="Wireless_UnplugBadge" xml:space="preserve">
+    <value>WI-FI LISTO</value>
+  </data>
+  <data name="Wireless_UnplugTitle" xml:space="preserve">
+    <value>Desconecta el cable USB</value>
+  </data>
+  <data name="Wireless_UnplugDesc" xml:space="preserve">
+    <value>La conexión ADB inalámbrica ({0}) está activa. Ya puedes desconectar el cable USB; este aviso se cerrará automáticamente.</value>
+  </data>
+  <data name="Wireless_RevertToUsb" xml:space="preserve">
+    <value>VOLVER A CONEXIÓN POR CABLE</value>
+  </data>
+  <data name="Wireless_NonTlsBadge" xml:space="preserve">
+    <value>TCP/IP SIN TLS</value>
+  </data>
+  <data name="Wireless_NonTlsTitle" xml:space="preserve">
+    <value>Conexión inalámbrica sin cifrado (Sin TLS)</value>
+  </data>
+  <data name="Wireless_NonTlsDesc" xml:space="preserve">
+    <value>Esta sesión usa ADB TCP/IP heredado (puerto 5555) sin cifrado TLS. Otros dispositivos en la misma red local podrían acceder a ADB mientras esté activo. Usa Depuración inalámbrica nativa (TLS) en redes compartidas.</value>
+  </data>
+  <data name="Ui_Close" xml:space="preserve">
+    <value>CERRAR</value>
+  </data>
   <data name="Ui_DisplayEncoder" xml:space="preserve">
     <value>PANTALLA Y CODIFICADOR</value>
   </data>

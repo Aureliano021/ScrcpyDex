@@ -766,6 +766,72 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
   <data name="Ui_FaqDoctor" xml:space="preserve">
     <value>FAQ &amp; DIAGNOSE</value>
   </data>
+  <data name="Ui_Faq" xml:space="preserve">
+    <value>FAQ</value>
+  </data>
+  <data name="Ui_WirelessConnection" xml:space="preserve">
+    <value>Drahtlose Verbindung</value>
+  </data>
+  <data name="Ui_HowToConnectQr" xml:space="preserve">
+    <value>Verbindung per QR-Code</value>
+  </data>
+  <data name="Ui_QrHelpTitle" xml:space="preserve">
+    <value>Über WLAN-Debugging koppeln</value>
+  </data>
+  <data name="Ui_QrHelpSteps" xml:space="preserve">
+    <value>1. Einstellungen → Entwickleroptionen öffnen
+2. WLAN-Debugging aktivieren
+3. Auf Gerät mit QR-Code koppeln tippen
+4. Kamera auf diesen Code richten</value>
+  </data>
+  <data name="Ui_RegenerateQr" xml:space="preserve">
+    <value>Neuer QR-Code</value>
+  </data>
+  <data name="Qr_WaitingForScan" xml:space="preserve">
+    <value>Warte auf Scan...</value>
+  </data>
+  <data name="Qr_Pairing" xml:space="preserve">
+    <value>Gerät wird gekoppelt...</value>
+  </data>
+  <data name="Qr_Connecting" xml:space="preserve">
+    <value>Verbinde...</value>
+  </data>
+  <data name="Qr_Failed" xml:space="preserve">
+    <value>Kopplung fehlgeschlagen.</value>
+  </data>
+  <data name="Action_SwitchToWifiTooltip" xml:space="preserve">
+    <value>ADB-Verbindung von USB auf WLAN (TCP/IP) wechseln</value>
+  </data>
+  <data name="Telemetry_WirelessConnection" xml:space="preserve">
+    <value>WLAN-VERBINDUNG</value>
+  </data>
+  <data name="Status_SwitchingToWifi" xml:space="preserve">
+    <value>Wechsle ADB-Verbindung zu WLAN...</value>
+  </data>
+  <data name="Wireless_UnplugBadge" xml:space="preserve">
+    <value>WLAN BEREIT</value>
+  </data>
+  <data name="Wireless_UnplugTitle" xml:space="preserve">
+    <value>USB-Kabel abziehen</value>
+  </data>
+  <data name="Wireless_UnplugDesc" xml:space="preserve">
+    <value>Die drahtlose ADB-Verbindung ({0}) ist aktiv. Du kannst das USB-Kabel jetzt abziehen — dieser Hinweis schließt sich automatisch.</value>
+  </data>
+  <data name="Wireless_RevertToUsb" xml:space="preserve">
+    <value>ZURÜCK ZU KABEL (USB)</value>
+  </data>
+  <data name="Wireless_NonTlsBadge" xml:space="preserve">
+    <value>TCP/IP OHNE TLS</value>
+  </data>
+  <data name="Wireless_NonTlsTitle" xml:space="preserve">
+    <value>Unverschlüsselte WLAN-Verbindung (Ohne TLS)</value>
+  </data>
+  <data name="Wireless_NonTlsDesc" xml:space="preserve">
+    <value>Diese Sitzung nutzt klassisches ADB TCP/IP (Port 5555) ohne TLS-Verschlüsselung. Geräte im selben lokalen Netzwerk könnten auf ADB zugreifen. Nutze in geteilten Netzen natives WLAN-Debugging (TLS).</value>
+  </data>
+  <data name="Ui_Close" xml:space="preserve">
+    <value>SCHLIESSEN</value>
+  </data>
   <data name="Ui_DisplayEncoder" xml:space="preserve">
     <value>ANZEIGE &amp; ENCODER</value>
   </data>

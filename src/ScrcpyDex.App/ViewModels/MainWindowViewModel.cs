@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -53,11 +54,18 @@ namespace ScrcpyDex.App.ViewModels
         private readonly IAdbService _adbService;
         private readonly ISessionStateMachine _stateMachine;
         private readonly IScrcpyExecutionService _executionService;
+        private readonly IWirelessPairingService _wirelessPairingService;
         private readonly AtomicJsonConfigRepository<ScrcpyDeXSettings> _configRepo;
         private readonly AdbDeviceTracker _deviceTracker;
         private readonly SemaphoreSlim _sessionLock = new SemaphoreSlim(1, 1);
         private IStorageProvider? _storageProvider;
         private DispatcherTimer? _telemetryTimer;
+        private CancellationTokenSource? _pairingCts;
+        private readonly ConcurrentDictionary<string, string> _hardwareSerialCache = new(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, byte> _disconnectedDuplicates = new(StringComparer.OrdinalIgnoreCase);
+        private string? _pendingUnplugUsbSerial;
+        private string? _pendingUnplugWirelessSerial;
+        private bool _pendingUnplugUsedLegacyTcpIp;
         private bool _hasCompletedInitialScan;
         private bool _isDisposed;
 
@@ -68,10 +76,12 @@ namespace ScrcpyDex.App.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsMainDeviceViewVisible))]
         [NotifyPropertyChangedFor(nameof(IsCriticalErrorOverlayVisible))]
+        [NotifyPropertyChangedFor(nameof(IsNonTlsWarningVisible))]
         private bool _isSettingsOpen;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsCriticalErrorOverlayVisible))]
+        [NotifyPropertyChangedFor(nameof(IsNonTlsWarningVisible))]
         private bool _isCriticalErrorDismissed;
 
         [ObservableProperty]
@@ -79,7 +89,35 @@ namespace ScrcpyDex.App.ViewModels
         [NotifyPropertyChangedFor(nameof(IsCriticalErrorOverlayVisible))]
         [NotifyPropertyChangedFor(nameof(CriticalErrorTitle))]
         [NotifyPropertyChangedFor(nameof(CriticalErrorDescription))]
+        [NotifyPropertyChangedFor(nameof(IsNonTlsWarningVisible))]
         private string? _lastSessionError;
+
+        [ObservableProperty]
+        private Bitmap? _pairingQrBitmap;
+
+        [ObservableProperty]
+        private string _wirelessPairingStatusText = LocalizationManager.Instance.GetString("Qr_WaitingForScan");
+
+        [ObservableProperty]
+        private bool _isQrHelpOpen;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanSwitchToWireless))]
+        [NotifyCanExecuteChangedFor(nameof(SwitchToWirelessCommand))]
+        private bool _isSwitchingToWireless;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(UnplugUsbPromptDescription))]
+        [NotifyPropertyChangedFor(nameof(IsNonTlsWarningVisible))]
+        private bool _isUnplugUsbPromptVisible;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(UnplugUsbPromptDescription))]
+        private string _unplugUsbTargetSerial = string.Empty;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsNonTlsWarningVisible))]
+        private bool _isNonTlsWarningDismissed;
 
         #endregion
 
@@ -106,11 +144,19 @@ namespace ScrcpyDex.App.ViewModels
         [NotifyPropertyChangedFor(nameof(IsMirroringMode))]
         [NotifyPropertyChangedFor(nameof(StartSessionButtonText))]
         [NotifyPropertyChangedFor(nameof(DeviceFrameFallbackText))]
+        [NotifyPropertyChangedFor(nameof(ShowWifiTransitionButton))]
+        [NotifyPropertyChangedFor(nameof(CanSwitchToWireless))]
+        [NotifyPropertyChangedFor(nameof(RescanButtonWidth))]
+        [NotifyPropertyChangedFor(nameof(IsWirelessConnection))]
+        [NotifyPropertyChangedFor(nameof(IsQrPairingVisible))]
+        [NotifyPropertyChangedFor(nameof(IsNonTlsWarningVisible))]
         [NotifyCanExecuteChangedFor(nameof(StartSessionCommand))]
+        [NotifyCanExecuteChangedFor(nameof(SwitchToWirelessCommand))]
         private DeviceInfo? _selectedDevice;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasDeviceImage))]
+        [NotifyPropertyChangedFor(nameof(IsQrPairingVisible))]
         private Bitmap? _deviceImage;
 
         [ObservableProperty]
@@ -241,6 +287,7 @@ namespace ScrcpyDex.App.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsMainDeviceViewVisible))]
         [NotifyPropertyChangedFor(nameof(IsCriticalErrorOverlayVisible))]
+        [NotifyPropertyChangedFor(nameof(IsNonTlsWarningVisible))]
         private bool _isFaqOpen;
 
         [ObservableProperty]
@@ -659,17 +706,42 @@ namespace ScrcpyDex.App.ViewModels
 
         public bool HasDeviceImage => DeviceImage != null;
 
+        public bool IsQrPairingVisible => !HasSelectedDevice && !HasDeviceImage;
+
+        public bool ShowWifiTransitionButton => HasSelectedDevice && SelectedDevice!.IsUsb;
+
+        public bool CanSwitchToWireless => ShowWifiTransitionButton && !IsSwitchingToWireless;
+
+        public double RescanButtonWidth => ShowWifiTransitionButton ? 51.0 : 108.0;
+
+        public bool IsWirelessConnection => HasSelectedDevice && SelectedDevice!.IsWireless;
+
+        public string UnplugUsbPromptDescription => string.Format(
+            LocalizationManager.Instance.GetString("Wireless_UnplugDesc"),
+            UnplugUsbTargetSerial);
+
+        public bool IsNonTlsWarningVisible =>
+            HasSelectedDevice &&
+            SelectedDevice!.IsLegacyTcpIp &&
+            !IsUnplugUsbPromptVisible &&
+            !IsNonTlsWarningDismissed &&
+            !IsCriticalErrorOverlayVisible &&
+            !IsSettingsOpen &&
+            !IsFaqOpen;
+
         #endregion
 
         public MainWindowViewModel(
             IAdbService? adbService = null,
             ISessionStateMachine? stateMachine = null,
             IScrcpyExecutionService? executionService = null,
-            AtomicJsonConfigRepository<ScrcpyDeXSettings>? configRepo = null)
+            AtomicJsonConfigRepository<ScrcpyDeXSettings>? configRepo = null,
+            IWirelessPairingService? wirelessPairingService = null)
         {
             _adbService = adbService ?? new AdbService();
             _stateMachine = stateMachine ?? new SessionStateMachine();
             _executionService = executionService ?? new ScrcpyExecutionService(PlatformLifetimeManager.Default, (AdbService)_adbService);
+            _wirelessPairingService = wirelessPairingService ?? new WirelessPairingService(_adbService);
 
             string configDir = DefaultPlatformPaths.Instance.GetConfigDirectory();
             Directory.CreateDirectory(configDir);
@@ -688,9 +760,11 @@ namespace ScrcpyDex.App.ViewModels
             _executionService.ProcessExited += OnExecutionProcessExited;
             _executionService.ErrorOccurred += OnExecutionErrorOccurred;
             _executionService.LogReceived += OnExecutionLogReceived;
+            _wirelessPairingService.StateChanged += OnWirelessPairingStateChanged;
 
             InitializeConfigurationAndDiscovery();
             StartTelemetryTimer();
+            StartOrRefreshWirelessPairing();
         }
 
         public void SetStorageProvider(IStorageProvider storageProvider)
@@ -1006,6 +1080,15 @@ namespace ScrcpyDex.App.ViewModels
         partial void OnSelectedDeviceChanged(DeviceInfo? value)
         {
             UpdateDeviceImage(value);
+            if (value != null && value.IsConnected)
+            {
+                IsQrHelpOpen = false;
+                StopWirelessPairing();
+            }
+            else if (!_isDisposed)
+            {
+                StartOrRefreshWirelessPairing();
+            }
             _ = Task.Run(async () =>
             {
                 await UpdateDeviceTelemetryAsync().ConfigureAwait(false);
@@ -1328,8 +1411,20 @@ namespace ScrcpyDex.App.ViewModels
         private void UpdateDevicesList(IReadOnlyList<DeviceInfo> devices)
         {
             var previousSerial = SelectedDevice?.Serial;
+            var rawDevices = devices?.ToList() ?? new List<DeviceInfo>();
 
-            if (devices == null || devices.Count == 0)
+            // Auto-close "Unplug USB cable" prompt as soon as the USB cable is disconnected
+            if (IsUnplugUsbPromptVisible &&
+                !string.IsNullOrWhiteSpace(_pendingUnplugUsbSerial) &&
+                !rawDevices.Any(d => d.IsUsb && string.Equals(d.Serial, _pendingUnplugUsbSerial, StringComparison.OrdinalIgnoreCase)))
+            {
+                IsUnplugUsbPromptVisible = false;
+                _pendingUnplugUsbSerial = null;
+                _pendingUnplugWirelessSerial = null;
+                _pendingUnplugUsedLegacyTcpIp = false;
+            }
+
+            if (rawDevices.Count == 0)
             {
                 DeviceList.Clear();
                 SelectedDevice = null;
@@ -1345,16 +1440,63 @@ namespace ScrcpyDex.App.ViewModels
                 return;
             }
 
+            // Populate cached hardware serials & TLS status for IP:port devices
+            foreach (var d in rawDevices)
+            {
+                if (string.IsNullOrWhiteSpace(d.HardwareSerial) &&
+                    _hardwareSerialCache.TryGetValue(d.Serial, out string? cachedHw))
+                {
+                    d.HardwareSerial = cachedHw;
+                }
+                if (!string.IsNullOrWhiteSpace(d.HardwareSerial))
+                {
+                    _hardwareSerialCache[d.Serial] = d.HardwareSerial;
+                }
+                if (string.Equals(d.Serial, _pendingUnplugWirelessSerial, StringComparison.OrdinalIgnoreCase) &&
+                    !_pendingUnplugUsedLegacyTcpIp)
+                {
+                    d.IsTlsWireless = true;
+                }
+            }
+
+            // Trigger async hardware serial resolution for any unknown IP:port target so we can deduplicate it
+            var unresolvedWireless = rawDevices
+                .Where(d => d.IsConnected && d.IsWireless && string.IsNullOrWhiteSpace(d.HardwareSerial))
+                .Select(d => d.Serial)
+                .ToList();
+            if (unresolvedWireless.Count > 0)
+            {
+                _ = Task.Run(async () =>
+                {
+                    bool resolvedAny = false;
+                    foreach (string s in unresolvedWireless)
+                    {
+                        string? hw = await _adbService.GetHardwareSerialAsync(s).ConfigureAwait(false);
+                        if (!string.IsNullOrWhiteSpace(hw))
+                        {
+                            _hardwareSerialCache[s] = hw;
+                            resolvedAny = true;
+                        }
+                    }
+                    if (resolvedAny)
+                    {
+                        await RefreshDevicesAsync().ConfigureAwait(false);
+                    }
+                });
+            }
+
+            var filteredDevices = DeduplicateDevices(rawDevices);
+
             // Update DeviceList in place to prevent clearing ComboBox selection to null
             for (int i = DeviceList.Count - 1; i >= 0; i--)
             {
-                if (!devices.Any(d => d.Serial == DeviceList[i].Serial))
+                if (!filteredDevices.Any(d => d.Serial == DeviceList[i].Serial))
                 {
                     DeviceList.RemoveAt(i);
                 }
             }
 
-            foreach (var d in devices)
+            foreach (var d in filteredDevices)
             {
                 var existing = DeviceList.FirstOrDefault(x => x.Serial == d.Serial);
                 if (existing == null)
@@ -1369,6 +1511,15 @@ namespace ScrcpyDex.App.ViewModels
                     existing.AndroidVersion = d.AndroidVersion;
                     existing.OneUiVersion = d.OneUiVersion;
                     existing.DeXDisplayId = d.DeXDisplayId;
+                    existing.Transport = d.Transport;
+                    if (!string.IsNullOrWhiteSpace(d.HardwareSerial))
+                    {
+                        existing.HardwareSerial = d.HardwareSerial;
+                    }
+                    if (d.IsTlsWireless)
+                    {
+                        existing.IsTlsWireless = true;
+                    }
                 }
             }
 
@@ -1378,6 +1529,13 @@ namespace ScrcpyDex.App.ViewModels
 
             SelectedDevice = matched ?? DeviceList.FirstOrDefault();
             UpdateDeviceImage(SelectedDevice);
+            OnPropertyChanged(nameof(ShowWifiTransitionButton));
+            OnPropertyChanged(nameof(CanSwitchToWireless));
+            OnPropertyChanged(nameof(RescanButtonWidth));
+            OnPropertyChanged(nameof(IsWirelessConnection));
+            OnPropertyChanged(nameof(IsQrPairingVisible));
+            OnPropertyChanged(nameof(IsNonTlsWarningVisible));
+            SwitchToWirelessCommand.NotifyCanExecuteChanged();
 
             if (ConnectionState == SessionState.Idle && string.IsNullOrWhiteSpace(StatusWarning))
             {
@@ -1390,6 +1548,88 @@ namespace ScrcpyDex.App.ViewModels
                 await EnrichUnknownDevicesAsync().ConfigureAwait(false);
                 await UpdateDeviceTelemetryAsync().ConfigureAwait(false);
             });
+        }
+
+        private List<DeviceInfo> DeduplicateDevices(List<DeviceInfo> rawDevices)
+        {
+            var result = new List<DeviceInfo>();
+            var grouped = rawDevices.GroupBy(d =>
+                !string.IsNullOrWhiteSpace(d.HardwareSerial) ? d.HardwareSerial : d.Serial,
+                StringComparer.OrdinalIgnoreCase);
+
+            foreach (var group in grouped)
+            {
+                var items = group.ToList();
+                var usb = items.FirstOrDefault(d => d.IsUsb && d.IsConnected) ?? items.FirstOrDefault(d => d.IsUsb);
+                var tlsWireless = items.FirstOrDefault(d => d.IsWireless && d.IsTlsWireless && d.IsConnected)
+                                  ?? items.FirstOrDefault(d => d.IsWireless && d.IsTlsWireless);
+                var legacyTcpIp = items.Where(d => d.IsLegacyTcpIp).ToList();
+
+                // Rule 1: Whenever a native TLS connection exists, disable any legacy non-TLS TCP/IP connection
+                if (tlsWireless != null && legacyTcpIp.Count > 0)
+                {
+                    foreach (var legacy in legacyTcpIp)
+                    {
+                        if (_disconnectedDuplicates.TryAdd(legacy.Serial, 1))
+                        {
+                            string legacySerial = legacy.Serial;
+                            string? usbSerial = usb?.Serial;
+                            _ = Task.Run(async () =>
+                            {
+                                await _adbService.DisableTcpIpModeAsync(null, legacySerial).ConfigureAwait(false);
+                                _disconnectedDuplicates.TryRemove(legacySerial, out _);
+                            });
+                        }
+                    }
+                }
+
+                // Rule 2: If waiting for user to unplug USB after initiating Wi-Fi transition, keep the target wireless entry active
+                if (IsUnplugUsbPromptVisible &&
+                    usb != null &&
+                    string.Equals(usb.Serial, _pendingUnplugUsbSerial, StringComparison.OrdinalIgnoreCase))
+                {
+                    var targetWireless = (!string.IsNullOrWhiteSpace(_pendingUnplugWirelessSerial)
+                        ? items.FirstOrDefault(d => string.Equals(d.Serial, _pendingUnplugWirelessSerial, StringComparison.OrdinalIgnoreCase))
+                        : null) ?? tlsWireless ?? legacyTcpIp.FirstOrDefault();
+
+                    if (targetWireless != null)
+                    {
+                        result.Add(targetWireless);
+                        continue;
+                    }
+                }
+
+                // Rule 3: When USB is connected in normal state, prefer USB and suppress/disconnect duplicate wireless targets
+                if (usb != null)
+                {
+                    result.Add(usb);
+                    foreach (var legacy in legacyTcpIp)
+                    {
+                        if (_disconnectedDuplicates.TryAdd(legacy.Serial, 1))
+                        {
+                            string legacySerial = legacy.Serial;
+                            _ = Task.Run(async () =>
+                            {
+                                await _adbService.DisconnectWirelessDeviceAsync(legacySerial).ConfigureAwait(false);
+                                _disconnectedDuplicates.TryRemove(legacySerial, out _);
+                            });
+                        }
+                    }
+                    continue;
+                }
+
+                // Rule 4: Wireless only — prefer TLS wireless over legacy TCP/IP
+                if (tlsWireless != null)
+                {
+                    result.Add(tlsWireless);
+                }
+                else
+                {
+                    result.AddRange(items);
+                }
+            }
+
+            return result;
         }
 
         private async Task EnrichUnknownDevicesAsync()
@@ -1496,6 +1736,224 @@ namespace ScrcpyDex.App.ViewModels
                     LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Failed to copy CLI command: {ex.Message}", true));
                 });
             }
+        }
+
+        [RelayCommand]
+        public void RegenerateQrCode()
+        {
+            StartOrRefreshWirelessPairing();
+        }
+
+        [RelayCommand]
+        public void ToggleQrHelp()
+        {
+            IsQrHelpOpen = !IsQrHelpOpen;
+        }
+
+        [RelayCommand]
+        public async Task RevertToWiredAsync()
+        {
+            string? usbSerial = _pendingUnplugUsbSerial;
+            string? wirelessSerial = _pendingUnplugWirelessSerial;
+            bool usedLegacyTcpIp = _pendingUnplugUsedLegacyTcpIp;
+
+            IsUnplugUsbPromptVisible = false;
+            _pendingUnplugUsbSerial = null;
+            _pendingUnplugWirelessSerial = null;
+            _pendingUnplugUsedLegacyTcpIp = false;
+
+            if (usedLegacyTcpIp && (!string.IsNullOrWhiteSpace(usbSerial) || !string.IsNullOrWhiteSpace(wirelessSerial)))
+            {
+                await _adbService.DisableTcpIpModeAsync(usbSerial, wirelessSerial).ConfigureAwait(false);
+            }
+
+            await RefreshDevicesAsync().ConfigureAwait(false);
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                if (!string.IsNullOrWhiteSpace(usbSerial))
+                {
+                    var usbTarget = DeviceList.FirstOrDefault(d => d.IsUsb && string.Equals(d.Serial, usbSerial, StringComparison.OrdinalIgnoreCase));
+                    if (usbTarget != null)
+                    {
+                        SelectedDevice = usbTarget;
+                        UpdateDeviceImage(usbTarget);
+                    }
+                }
+                LogEntries.Push(new ProcessLogEntry(DateTime.Now, "Reverted ADB connection back to wired USB.", false));
+            });
+        }
+
+        [RelayCommand]
+        public void DismissNonTlsWarning()
+        {
+            IsNonTlsWarningDismissed = true;
+        }
+
+        [RelayCommand(CanExecute = nameof(CanSwitchToWireless))]
+        public async Task SwitchToWirelessAsync()
+        {
+            var device = SelectedDevice;
+            if (device == null || !device.IsUsb)
+            {
+                return;
+            }
+
+            string usbSerial = device.Serial;
+            IsSwitchingToWireless = true;
+            StopWirelessPairing();
+            SessionStatusText = LocalizationManager.Instance.GetString("Status_SwitchingToWifi");
+            LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Switching ADB connection for {usbSerial} from USB to Wi-Fi (preferring native TLS)...", false));
+
+            try
+            {
+                var result = await _adbService.SwitchToTcpIpAsync(usbSerial, 5555).ConfigureAwait(false);
+                if (result.Succeeded)
+                {
+                    if (!string.IsNullOrWhiteSpace(result.TargetSerial))
+                    {
+                        _hardwareSerialCache[result.TargetSerial] = usbSerial;
+                    }
+
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        _pendingUnplugUsbSerial = usbSerial;
+                        _pendingUnplugWirelessSerial = result.TargetSerial;
+                        _pendingUnplugUsedLegacyTcpIp = !result.IsTls;
+                        UnplugUsbTargetSerial = result.TargetSerial ?? string.Empty;
+                        IsNonTlsWarningDismissed = false;
+                        IsUnplugUsbPromptVisible = true;
+                    });
+
+                    var devices = await _adbService.GetConnectedDevicesAsync().ConfigureAwait(false);
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        UpdateDevicesList(devices);
+                        if (!string.IsNullOrWhiteSpace(result.TargetSerial))
+                        {
+                            var wirelessTarget = DeviceList.FirstOrDefault(d => d.Serial.Equals(result.TargetSerial, StringComparison.OrdinalIgnoreCase));
+                            if (wirelessTarget != null)
+                            {
+                                wirelessTarget.IsTlsWireless = result.IsTls;
+                                SelectedDevice = wirelessTarget;
+                                UpdateDeviceImage(wirelessTarget);
+                            }
+                        }
+                        SessionStatusText = result.Message;
+                        LogEntries.Push(new ProcessLogEntry(DateTime.Now, result.Message, false));
+                    });
+                }
+                else
+                {
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        LastSessionError = result.Message;
+                        IsCriticalErrorDismissed = false;
+                        SessionStatusText = result.Message;
+                        LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Wi-Fi transition failed: {result.Message}", true));
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    LastSessionError = ex.Message;
+                    IsCriticalErrorDismissed = false;
+                    SessionStatusText = ex.Message;
+                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Wi-Fi transition error: {ex.Message}", true));
+                });
+            }
+            finally
+            {
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    IsSwitchingToWireless = false;
+                    if (!HasSelectedDevice && !_isDisposed)
+                    {
+                        StartOrRefreshWirelessPairing();
+                    }
+                });
+            }
+        }
+
+        private void StartOrRefreshWirelessPairing()
+        {
+            if (_isDisposed || HasSelectedDevice || IsSwitchingToWireless)
+            {
+                return;
+            }
+
+            StopWirelessPairing();
+
+            var cts = new CancellationTokenSource();
+            _pairingCts = cts;
+
+            var session = _wirelessPairingService.CreateSession();
+            try
+            {
+                PairingQrBitmap = QrCodeBitmapRenderer.Render(session.QrPayload, pixelsPerModule: 4, quietZoneModules: 2);
+            }
+            catch (Exception ex)
+            {
+                LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"QR generation error: {ex.Message}", true));
+            }
+
+            WirelessPairingStatusText = LocalizationManager.Instance.GetString("Qr_WaitingForScan");
+
+            _ = Task.Run(async () =>
+            {
+                await _wirelessPairingService.StartPairingAsync(session, cts.Token).ConfigureAwait(false);
+            }, cts.Token);
+        }
+
+        private void StopWirelessPairing()
+        {
+            var cts = Interlocked.Exchange(ref _pairingCts, null);
+            if (cts != null)
+            {
+                try { cts.Cancel(); } catch { }
+                try { cts.Dispose(); } catch { }
+            }
+        }
+
+        private void OnWirelessPairingStateChanged(object? sender, WirelessPairingStateChangedEventArgs e)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                WirelessPairingStatusText = e.State switch
+                {
+                    WirelessPairingState.WaitingForScan => LocalizationManager.Instance.GetString("Qr_WaitingForScan"),
+                    WirelessPairingState.Pairing => LocalizationManager.Instance.GetString("Qr_Pairing"),
+                    WirelessPairingState.Connecting => LocalizationManager.Instance.GetString("Qr_Connecting"),
+                    WirelessPairingState.Failed => LocalizationManager.Instance.GetString("Qr_Failed"),
+                    _ => WirelessPairingStatusText
+                };
+
+                if (!string.IsNullOrWhiteSpace(e.Message))
+                {
+                    LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Wireless pairing: {e.Message}", e.State == WirelessPairingState.Failed));
+                }
+
+                if (e.State == WirelessPairingState.Paired)
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        await RefreshDevicesAsync().ConfigureAwait(false);
+                        if (!string.IsNullOrWhiteSpace(e.TargetSerial))
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                var target = DeviceList.FirstOrDefault(d => d.Serial.Equals(e.TargetSerial, StringComparison.OrdinalIgnoreCase));
+                                if (target != null)
+                                {
+                                    SelectedDevice = target;
+                                    UpdateDeviceImage(target);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
         }
 
         [RelayCommand]
@@ -2224,12 +2682,14 @@ namespace ScrcpyDex.App.ViewModels
             _isDisposed = true;
 
             _telemetryTimer?.Stop();
+            StopWirelessPairing();
             _stateMachine.StateChanged -= OnStateMachineStateChanged;
             _executionService.StreamingStarted -= OnExecutionStreamingStarted;
             _executionService.ProcessExited -= OnExecutionProcessExited;
             _executionService.ErrorOccurred -= OnExecutionErrorOccurred;
             _executionService.LogReceived -= OnExecutionLogReceived;
             _deviceTracker.DevicesChanged -= OnDeviceTrackerDevicesChanged;
+            _wirelessPairingService.StateChanged -= OnWirelessPairingStateChanged;
 
             _ = _deviceTracker.DisposeAsync();
             _executionService.Dispose();

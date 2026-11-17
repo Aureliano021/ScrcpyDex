@@ -12,9 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,6 +44,15 @@ namespace ScrcpyDex.Services
         Task<bool> SetDisplayDpiAsync(string serial, int displayId, int dpi, CancellationToken ct = default);
         Task StopDeXSessionAsync(string? serial = null, CancellationToken ct = default);
         Task<AdbExecutionResult> RunCommandAsync(string arguments, CancellationToken ct = default);
+        Task<string?> GetDeviceLanIpAddressAsync(string serial, CancellationToken ct = default);
+        Task<string?> GetHardwareSerialAsync(string serial, CancellationToken ct = default);
+        Task<int?> GetWirelessTlsPortAsync(string usbSerial, CancellationToken ct = default);
+        Task DisableTcpIpModeAsync(string? usbSerial, string? tcpIpSerial = null, CancellationToken ct = default);
+        Task<WirelessTransitionResult> SwitchToTcpIpAsync(string usbSerial, int port = 5555, CancellationToken ct = default);
+        Task<bool> PairWirelessDeviceAsync(string host, int port, string pairingCode, CancellationToken ct = default);
+        Task<bool> ConnectWirelessDeviceAsync(string host, int port, CancellationToken ct = default);
+        Task<bool> DisconnectWirelessDeviceAsync(string targetSerial, CancellationToken ct = default);
+        Task<IReadOnlyList<MdnsAdbServiceEndpoint>> GetMdnsServicesAsync(CancellationToken ct = default);
         void ResetResilienceState();
     }
 
@@ -51,6 +64,7 @@ namespace ScrcpyDex.Services
         private string _adbPath;
         private readonly IProcessLifetimeManager _jobTracker;
         private readonly AdbResilienceService _resilience;
+        private readonly ConcurrentDictionary<string, byte> _knownTlsEndpoints = new(StringComparer.OrdinalIgnoreCase);
         private Process? _activatorProcess;
         private NonBlockingProcessStream? _activatorStream;
 
@@ -201,23 +215,34 @@ namespace ScrcpyDex.Services
         public async Task<DeviceInfo> QueryDeviceInfoAsync(string serial, CancellationToken ct = default)
         {
             var info = new DeviceInfo { Serial = serial, State = "device" };
+            if (_knownTlsEndpoints.ContainsKey(serial))
+            {
+                info.IsTlsWireless = true;
+            }
 
             // Query ro properties and DeX display ID concurrently without blocking
             var modelTask = RunCommandAsync($"-s {serial} shell getprop ro.product.model", ct);
             var mfgTask = RunCommandAsync($"-s {serial} shell getprop ro.product.manufacturer", ct);
             var releaseTask = RunCommandAsync($"-s {serial} shell getprop ro.build.version.release", ct);
             var oneUiTask = RunCommandAsync($"-s {serial} shell getprop ro.build.version.oneui", ct);
+            var hwSerialTask = string.IsNullOrWhiteSpace(info.HardwareSerial)
+                ? RunCommandAsync($"-s {serial} shell getprop ro.serialno", ct)
+                : Task.FromResult(new AdbExecutionResult(0, info.HardwareSerial, string.Empty));
             var dexDisplayTask = FindDeXDisplayIdAsync(serial, ct);
 
             try
             {
-                await Task.WhenAll(modelTask, mfgTask, releaseTask, oneUiTask, dexDisplayTask).ConfigureAwait(false);
+                await Task.WhenAll(modelTask, mfgTask, releaseTask, oneUiTask, hwSerialTask, dexDisplayTask).ConfigureAwait(false);
 
                 var modelRes = await modelTask.ConfigureAwait(false);
                 var mfgRes = await mfgTask.ConfigureAwait(false);
                 var relRes = await releaseTask.ConfigureAwait(false);
                 var oneUiRes = await oneUiTask.ConfigureAwait(false);
+                var hwSerialRes = await hwSerialTask.ConfigureAwait(false);
                 var dexDisplayId = await dexDisplayTask.ConfigureAwait(false);
+
+                if (hwSerialRes.Succeeded && !string.IsNullOrWhiteSpace(hwSerialRes.Output))
+                    info.HardwareSerial = hwSerialRes.Output.Trim();
 
                 if (modelRes.Succeeded && !string.IsNullOrWhiteSpace(modelRes.Output))
                     info.Model = modelRes.Output.Trim();
@@ -531,6 +556,471 @@ namespace ScrcpyDex.Services
         public Task<AdbExecutionResult> RunCommandAsync(string arguments, CancellationToken ct = default)
         {
             return _resilience.ExecuteWithRetryAsync(arguments, maxRetries: 2, ct: ct);
+        }
+
+        #endregion
+
+        #region Wireless ADB & TCP/IP Transition
+
+        public async Task<string?> GetDeviceLanIpAddressAsync(string serial, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(serial))
+            {
+                return null;
+            }
+
+            var routeResult = await _resilience.ExecuteWithRetryAsync(
+                $"-s {serial} shell ip route",
+                maxRetries: 1,
+                timeout: TimeSpan.FromSeconds(4),
+                ct: ct).ConfigureAwait(false);
+
+            if (routeResult.Succeeded && !string.IsNullOrWhiteSpace(routeResult.Output))
+            {
+                string? ip = ParseDeviceIpFromIpRoute(routeResult.Output);
+                if (!string.IsNullOrWhiteSpace(ip))
+                {
+                    return ip;
+                }
+            }
+
+            var addrResult = await _resilience.ExecuteWithRetryAsync(
+                $"-s {serial} shell ip -4 addr show wlan0",
+                maxRetries: 1,
+                timeout: TimeSpan.FromSeconds(4),
+                ct: ct).ConfigureAwait(false);
+
+            if (addrResult.Succeeded && !string.IsNullOrWhiteSpace(addrResult.Output))
+            {
+                string? ip = ParseDeviceIpFromIpAddr(addrResult.Output);
+                if (!string.IsNullOrWhiteSpace(ip))
+                {
+                    return ip;
+                }
+            }
+
+            return null;
+        }
+
+        public async Task<string?> GetHardwareSerialAsync(string serial, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(serial)) return null;
+
+            string extracted = DeviceTransportHelper.ExtractHardwareSerial(serial);
+            if (!string.IsNullOrWhiteSpace(extracted)) return extracted;
+
+            var res = await _resilience.ExecuteDirectAsync(
+                $"-s {serial.Trim()} shell getprop ro.serialno",
+                TimeSpan.FromSeconds(3),
+                ct).ConfigureAwait(false);
+
+            return res.Succeeded && !string.IsNullOrWhiteSpace(res.Output)
+                ? res.Output.Trim()
+                : null;
+        }
+
+        public async Task<int?> GetWirelessTlsPortAsync(string usbSerial, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(usbSerial)) return null;
+
+            var enabledRes = await _resilience.ExecuteDirectAsync(
+                $"-s {usbSerial} shell settings get global adb_wifi_enabled",
+                TimeSpan.FromSeconds(4),
+                ct).ConfigureAwait(false);
+
+            bool isEnabled = enabledRes.Succeeded && enabledRes.Output.Trim() == "1";
+            if (!isEnabled)
+            {
+                var putRes = await _resilience.ExecuteDirectAsync(
+                    $"-s {usbSerial} shell settings put global adb_wifi_enabled 1",
+                    TimeSpan.FromSeconds(4),
+                    ct).ConfigureAwait(false);
+
+                if (!putRes.Succeeded)
+                {
+                    return null;
+                }
+            }
+
+            // Poll dumpsys adb briefly until tls_port appears
+            for (int attempt = 0; attempt < 4; attempt++)
+            {
+                if (attempt > 0 || !isEnabled)
+                {
+                    await Task.Delay(attempt == 0 ? 600 : 500, ct).ConfigureAwait(false);
+                }
+
+                var dumpRes = await _resilience.ExecuteDirectAsync(
+                    $"-s {usbSerial} shell dumpsys adb",
+                    TimeSpan.FromSeconds(5),
+                    ct).ConfigureAwait(false);
+
+                if (dumpRes.Succeeded && !string.IsNullOrWhiteSpace(dumpRes.Output))
+                {
+                    int? port = ParseTlsPortFromDumpsysAdb(dumpRes.Output);
+                    if (port.HasValue)
+                    {
+                        return port;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public async Task DisableTcpIpModeAsync(string? usbSerial, string? tcpIpSerial = null, CancellationToken ct = default)
+        {
+            if (!string.IsNullOrWhiteSpace(tcpIpSerial))
+            {
+                await DisconnectWirelessDeviceAsync(tcpIpSerial, ct).ConfigureAwait(false);
+            }
+
+            if (!string.IsNullOrWhiteSpace(usbSerial))
+            {
+                await _resilience.ExecuteDirectAsync(
+                    $"-s {usbSerial.Trim()} usb",
+                    TimeSpan.FromSeconds(5),
+                    ct).ConfigureAwait(false);
+            }
+        }
+
+        public async Task<WirelessTransitionResult> SwitchToTcpIpAsync(string usbSerial, int port = 5555, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(usbSerial))
+            {
+                return new WirelessTransitionResult(false, null, null, port, "No USB device serial specified.");
+            }
+
+            if (port is < 1 or > 65535)
+            {
+                return new WirelessTransitionResult(false, null, null, port, $"Invalid TCP/IP port: {port}.");
+            }
+
+            _resilience.ResetCircuitBreaker();
+
+            // Step 1: Reuse an existing native TLS (_adb-tls-connect._tcp) target for the same hardware serial if present
+            var currentDevices = await GetConnectedDevicesAsync(ct).ConfigureAwait(false);
+            var existingTls = currentDevices.FirstOrDefault(d =>
+                d.IsConnected &&
+                d.IsWireless &&
+                d.IsTlsWireless &&
+                string.Equals(d.HardwareSerial, usbSerial, StringComparison.OrdinalIgnoreCase));
+
+            if (existingTls != null)
+            {
+                var strayTcpIp = currentDevices.FirstOrDefault(d =>
+                    d.IsLegacyTcpIp &&
+                    string.Equals(d.HardwareSerial, usbSerial, StringComparison.OrdinalIgnoreCase));
+                if (strayTcpIp != null)
+                {
+                    await DisableTcpIpModeAsync(null, strayTcpIp.Serial, ct).ConfigureAwait(false);
+                }
+
+                return new WirelessTransitionResult(
+                    true,
+                    existingTls.Serial,
+                    null,
+                    0,
+                    $"Connected wirelessly via native TLS ({existingTls.Serial}).",
+                    IsTls: true);
+            }
+
+            string? ip = await GetDeviceLanIpAddressAsync(usbSerial, ct).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(ip))
+            {
+                return new WirelessTransitionResult(
+                    false,
+                    null,
+                    null,
+                    port,
+                    "Could not determine device Wi-Fi IP address. Ensure the phone is connected to the same Wi-Fi network.");
+            }
+
+            // Step 2: Prefer native Android Wireless Debugging TLS port (works even when mDNS is blocked)
+            int? tlsPort = await GetWirelessTlsPortAsync(usbSerial, ct).ConfigureAwait(false);
+            if (tlsPort.HasValue && tlsPort.Value is >= 1 and <= 65535)
+            {
+                string tlsTarget = $"{ip}:{tlsPort.Value}";
+                var tlsConnectResult = await _resilience.ExecuteDirectAsync(
+                    $"connect {tlsTarget}",
+                    TimeSpan.FromSeconds(6),
+                    ct).ConfigureAwait(false);
+
+                string tlsOut = string.IsNullOrWhiteSpace(tlsConnectResult.Output) ? tlsConnectResult.Error : tlsConnectResult.Output;
+                if (tlsConnectResult.Succeeded && IsAdbConnectSuccess(tlsOut))
+                {
+                    _knownTlsEndpoints[tlsTarget] = 1;
+                    _resilience.ResetCircuitBreaker();
+
+                    var strayTcpIp = currentDevices.FirstOrDefault(d =>
+                        d.IsLegacyTcpIp &&
+                        string.Equals(d.HardwareSerial, usbSerial, StringComparison.OrdinalIgnoreCase));
+                    if (strayTcpIp != null)
+                    {
+                        await DisableTcpIpModeAsync(null, strayTcpIp.Serial, ct).ConfigureAwait(false);
+                    }
+
+                    return new WirelessTransitionResult(
+                        true,
+                        tlsTarget,
+                        ip,
+                        tlsPort.Value,
+                        $"Connected wirelessly via TLS to {tlsTarget}.",
+                        IsTls: true);
+                }
+            }
+
+            // Step 3: Fallback to legacy non-TLS TCP/IP mode (port 5555)
+            var tcpipResult = await _resilience.ExecuteDirectAsync(
+                $"-s {usbSerial} tcpip {port}",
+                TimeSpan.FromSeconds(8),
+                ct).ConfigureAwait(false);
+
+            if (!tcpipResult.Succeeded)
+            {
+                string detail = string.IsNullOrWhiteSpace(tcpipResult.Error) ? tcpipResult.Output : tcpipResult.Error;
+                return new WirelessTransitionResult(
+                    false,
+                    null,
+                    ip,
+                    port,
+                    $"Failed to enable ADB TCP/IP mode on port {port}: {detail}".Trim());
+            }
+
+            string targetSerial = $"{ip}:{port}";
+
+            // adbd restarts in TCP/IP mode; retry connect briefly while the listening socket comes up
+            string lastOutput = string.Empty;
+            for (int attempt = 0; attempt < 4; attempt++)
+            {
+                int delayMs = attempt == 0 ? 1500 : 1000;
+                await Task.Delay(delayMs, ct).ConfigureAwait(false);
+
+                var connectResult = await _resilience.ExecuteDirectAsync(
+                    $"connect {targetSerial}",
+                    TimeSpan.FromSeconds(6),
+                    ct).ConfigureAwait(false);
+
+                lastOutput = string.IsNullOrWhiteSpace(connectResult.Output) ? connectResult.Error : connectResult.Output;
+                if (connectResult.Succeeded && IsAdbConnectSuccess(lastOutput))
+                {
+                    _resilience.ResetCircuitBreaker();
+                    return new WirelessTransitionResult(
+                        true,
+                        targetSerial,
+                        ip,
+                        port,
+                        $"Connected wirelessly (unencrypted TCP/IP) to {targetSerial}.",
+                        IsTls: false);
+                }
+            }
+
+            return new WirelessTransitionResult(
+                false,
+                targetSerial,
+                ip,
+                port,
+                string.IsNullOrWhiteSpace(lastOutput)
+                    ? $"Timed out connecting to {targetSerial}."
+                    : lastOutput.Trim());
+        }
+
+        public async Task<bool> PairWirelessDeviceAsync(string host, int port, string pairingCode, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(host) || port is < 1 or > 65535 || string.IsNullOrWhiteSpace(pairingCode))
+            {
+                return false;
+            }
+
+            var result = await _resilience.ExecuteDirectAsync(
+                $"pair {host.Trim()}:{port} {pairingCode.Trim()}",
+                TimeSpan.FromSeconds(12),
+                ct).ConfigureAwait(false);
+
+            string combined = $"{result.Output}\n{result.Error}";
+            return result.Succeeded && IsAdbPairSuccess(combined);
+        }
+
+        public async Task<bool> ConnectWirelessDeviceAsync(string host, int port, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(host) || port is < 1 or > 65535)
+            {
+                return false;
+            }
+
+            var result = await _resilience.ExecuteDirectAsync(
+                $"connect {host.Trim()}:{port}",
+                TimeSpan.FromSeconds(6),
+                ct).ConfigureAwait(false);
+
+            string combined = $"{result.Output}\n{result.Error}";
+            bool ok = result.Succeeded && IsAdbConnectSuccess(combined);
+            if (ok && port != 5555)
+            {
+                _knownTlsEndpoints[$"{host.Trim()}:{port}"] = 1;
+            }
+            return ok;
+        }
+
+        public async Task<bool> DisconnectWirelessDeviceAsync(string targetSerial, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(targetSerial))
+            {
+                return false;
+            }
+
+            var result = await _resilience.ExecuteDirectAsync(
+                $"disconnect {targetSerial.Trim()}",
+                TimeSpan.FromSeconds(4),
+                ct).ConfigureAwait(false);
+
+            return result.Succeeded;
+        }
+
+        public async Task<IReadOnlyList<MdnsAdbServiceEndpoint>> GetMdnsServicesAsync(CancellationToken ct = default)
+        {
+            var result = await _resilience.ExecuteDirectAsync(
+                "mdns services",
+                TimeSpan.FromSeconds(3),
+                ct).ConfigureAwait(false);
+
+            if (!result.Succeeded || string.IsNullOrWhiteSpace(result.Output))
+            {
+                return Array.Empty<MdnsAdbServiceEndpoint>();
+            }
+
+            return ParseMdnsServicesOutput(result.Output);
+        }
+
+        public static string? ParseDeviceIpFromIpRoute(string output)
+        {
+            if (string.IsNullOrWhiteSpace(output)) return null;
+
+            // Prefer wlan0 route when present, then any non-loopback src IPv4
+            string? fallbackIp = null;
+            var lines = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string line in lines)
+            {
+                var match = Regex.Match(line, @"\bsrc\s+(\d{1,3}(?:\.\d{1,3}){3})\b");
+                if (!match.Success) continue;
+
+                string candidate = match.Groups[1].Value;
+                if (!IsValidLanIpv4(candidate)) continue;
+
+                if (line.Contains("wlan", StringComparison.OrdinalIgnoreCase))
+                {
+                    return candidate;
+                }
+                fallbackIp ??= candidate;
+            }
+
+            return fallbackIp;
+        }
+
+        public static string? ParseDeviceIpFromIpAddr(string output)
+        {
+            if (string.IsNullOrWhiteSpace(output)) return null;
+
+            foreach (Match match in Regex.Matches(output, @"\binet\s+(\d{1,3}(?:\.\d{1,3}){3})(?:/\d+)?\b"))
+            {
+                string candidate = match.Groups[1].Value;
+                if (IsValidLanIpv4(candidate))
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
+        }
+
+        public static int? ParseTlsPortFromDumpsysAdb(string output)
+        {
+            if (string.IsNullOrWhiteSpace(output)) return null;
+
+            var match = Regex.Match(
+                output,
+                @"adb_wifi=\s*\{[\s\S]*?\btls_port\s*=\s*(\d{1,5})\b",
+                RegexOptions.IgnoreCase);
+
+            if (match.Success && int.TryParse(match.Groups[1].Value, out int port) && port is >= 1 and <= 65535)
+            {
+                return port;
+            }
+
+            return null;
+        }
+
+        public static IReadOnlyList<MdnsAdbServiceEndpoint> ParseMdnsServicesOutput(string output)
+        {
+            var endpoints = new List<MdnsAdbServiceEndpoint>();
+            if (string.IsNullOrWhiteSpace(output)) return endpoints;
+
+            var lines = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string line in lines)
+            {
+                string trimmed = line.Trim();
+                if (trimmed.StartsWith("List of", StringComparison.OrdinalIgnoreCase)) continue;
+
+                var match = Regex.Match(
+                    trimmed,
+                    @"^(?<name>\S+)\s+(?<type>_(?:adb-tls-pairing|adb-tls-connect)\._tcp)\s+(?<ip>\d{1,3}(?:\.\d{1,3}){3}):(?<port>\d{1,5})$",
+                    RegexOptions.IgnoreCase);
+
+                if (match.Success &&
+                    IPAddress.TryParse(match.Groups["ip"].Value, out var ip) &&
+                    ip.AddressFamily == AddressFamily.InterNetwork &&
+                    int.TryParse(match.Groups["port"].Value, out int port) &&
+                    port is >= 1 and <= 65535)
+                {
+                    endpoints.Add(new MdnsAdbServiceEndpoint(
+                        match.Groups["name"].Value,
+                        match.Groups["type"].Value,
+                        ip.ToString(),
+                        port));
+                }
+            }
+
+            return endpoints;
+        }
+
+        public static bool IsAdbConnectSuccess(string output)
+        {
+            if (string.IsNullOrWhiteSpace(output)) return false;
+
+            if (output.Contains("cannot connect", StringComparison.OrdinalIgnoreCase) ||
+                output.Contains("failed to connect", StringComparison.OrdinalIgnoreCase) ||
+                output.Contains("unable to connect", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            return output.Contains("connected to", StringComparison.OrdinalIgnoreCase) ||
+                   output.Contains("already connected to", StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool IsAdbPairSuccess(string output)
+        {
+            if (string.IsNullOrWhiteSpace(output)) return false;
+
+            if (output.Contains("failed", StringComparison.OrdinalIgnoreCase) ||
+                output.Contains("error", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            return output.Contains("successfully paired", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsValidLanIpv4(string candidate)
+        {
+            if (!IPAddress.TryParse(candidate, out var ip) || ip.AddressFamily != AddressFamily.InterNetwork)
+            {
+                return false;
+            }
+
+            byte[] bytes = ip.GetAddressBytes();
+            if (bytes[0] == 127 || bytes[0] == 0) return false;
+            return true;
         }
 
         #endregion

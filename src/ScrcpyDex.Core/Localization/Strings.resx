@@ -766,6 +766,72 @@ sudo apt install va-driver-all i965-va-driver intel-media-va-driver vainfo mesa-
   <data name="Ui_FaqDoctor" xml:space="preserve">
     <value>FAQ &amp; DOCTOR</value>
   </data>
+  <data name="Ui_Faq" xml:space="preserve">
+    <value>FAQ</value>
+  </data>
+  <data name="Ui_WirelessConnection" xml:space="preserve">
+    <value>Wireless Connection</value>
+  </data>
+  <data name="Ui_HowToConnectQr" xml:space="preserve">
+    <value>How to connect via QR Code</value>
+  </data>
+  <data name="Ui_QrHelpTitle" xml:space="preserve">
+    <value>Pair via Wireless Debugging</value>
+  </data>
+  <data name="Ui_QrHelpSteps" xml:space="preserve">
+    <value>1. Open Settings → Developer options
+2. Enable Wireless debugging
+3. Tap Pair device with QR code
+4. Point the phone camera here</value>
+  </data>
+  <data name="Ui_RegenerateQr" xml:space="preserve">
+    <value>New QR Code</value>
+  </data>
+  <data name="Qr_WaitingForScan" xml:space="preserve">
+    <value>Waiting for scan...</value>
+  </data>
+  <data name="Qr_Pairing" xml:space="preserve">
+    <value>Pairing device...</value>
+  </data>
+  <data name="Qr_Connecting" xml:space="preserve">
+    <value>Connecting...</value>
+  </data>
+  <data name="Qr_Failed" xml:space="preserve">
+    <value>Pairing failed. Retry.</value>
+  </data>
+  <data name="Action_SwitchToWifiTooltip" xml:space="preserve">
+    <value>Switch ADB connection from USB to Wi-Fi (TCP/IP)</value>
+  </data>
+  <data name="Telemetry_WirelessConnection" xml:space="preserve">
+    <value>WIRELESS CONNECTION</value>
+  </data>
+  <data name="Status_SwitchingToWifi" xml:space="preserve">
+    <value>Switching ADB connection to Wi-Fi...</value>
+  </data>
+  <data name="Wireless_UnplugBadge" xml:space="preserve">
+    <value>WIRELESS READY</value>
+  </data>
+  <data name="Wireless_UnplugTitle" xml:space="preserve">
+    <value>Unplug the USB cable</value>
+  </data>
+  <data name="Wireless_UnplugDesc" xml:space="preserve">
+    <value>Wireless ADB connection ({0}) is active. You can safely unplug the USB cable now — this notice will close automatically.</value>
+  </data>
+  <data name="Wireless_RevertToUsb" xml:space="preserve">
+    <value>REVERT TO WIRED (USB)</value>
+  </data>
+  <data name="Wireless_NonTlsBadge" xml:space="preserve">
+    <value>UNENCRYPTED TCP/IP</value>
+  </data>
+  <data name="Wireless_NonTlsTitle" xml:space="preserve">
+    <value>Unencrypted wireless connection (No TLS)</value>
+  </data>
+  <data name="Wireless_NonTlsDesc" xml:space="preserve">
+    <value>This session is using legacy ADB TCP/IP (port 5555) without TLS encryption. Devices on the same local network could potentially access ADB while active. Prefer native Wireless Debugging (TLS) on shared networks.</value>
+  </data>
+  <data name="Ui_Close" xml:space="preserve">
+    <value>CLOSE</value>
+  </data>
   <data name="Ui_DisplayEncoder" xml:space="preserve">
     <value>DISPLAY &amp; ENCODER</value>
   </data>

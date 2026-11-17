@@ -197,7 +197,8 @@ namespace ScrcpyDex.Core.Adb
                             rawModel = parts[2];
                         }
 
-                        list.Add(new DeviceInfo(serial, rawModel, state));
+                        var transport = DeviceTransportHelper.ClassifyTransport(serial, line);
+                        list.Add(new DeviceInfo(serial, rawModel, state, transport: transport));
                     }
                 }
             }

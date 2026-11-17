@@ -41,7 +41,7 @@
             <!-- ========================================================================= -->
             <Border Grid.Row="0"
                     Background="Transparent"
-                    Padding="22,16,20,10"
+                    Padding="22,16,22,10"
                     PointerPressed="OnTitleBarPointerPressed">
                 <Grid ColumnDefinitions="*, Auto" VerticalAlignment="Center">
                     <!-- Brand Micro-Label & Live Session Subtitle -->
@@ -59,15 +59,16 @@
                                    Foreground="#777780" />
                     </StackPanel>
 
-                    <!-- Status Pill + Settings + Minimize + Close -->
+                    <!-- Status Pill + Settings/Back + Minimize + Close -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                        <!-- Status Pill -->
+                        <!-- Status Pill (Visible on Main Device view only; hidden on Settings/FAQ) -->
                         <Border Background="#1B1B22"
                                 BorderBrush="#33333C"
                                 BorderThickness="1"
                                 CornerRadius="13"
                                 Height="26"
                                 Padding="10,0"
+                                IsVisible="{Binding IsMainDeviceViewVisible}"
                                 VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                 <Ellipse Width="6" Height="6" Fill="{Binding StatusBadgeColor}" VerticalAlignment="Center" />
@@ -80,13 +81,44 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- Settings Toggle Button -->
-                        <Button Classes="circle-icon"
+                        <!-- Settings Toggle Button (Visible on Main Device view only) -->
+                        <Button Classes="circle-icon top-header-swap"
+                                IsVisible="{Binding IsMainDeviceViewVisible}"
                                 Command="{Binding ToggleSettingsCommand}"
                                 ToolTip.Tip="{Binding [Window_Tooltip_Settings], Source={x:Static loc:LocalizationManager.Instance}}">
                             <PathIcon Data="{StaticResource Icon_Gear}"
                                       Width="12" Height="12"
                                       Foreground="#D0D0D7" />
+                        </Button>
+
+                        <!-- Back Button (Replaces Gear in top-right bar on Settings view) -->
+                        <Button Classes="pill-button top-header-swap"
+                                IsVisible="{Binding IsSettingsOpen}"
+                                Command="{Binding CloseSettingsCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                <PathIcon Data="{StaticResource Icon_Back}" Width="10" Height="10" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding [Ui_Back], Source={x:Static loc:LocalizationManager.Instance}}"
+                                           FontSize="9.5"
+                                           FontWeight="SemiBold"
+                                           LetterSpacing="0.5"
+                                           Foreground="#D0D0D7"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Settings Back Button (Replaces Gear in top-right bar on FAQ view) -->
+                        <Button Classes="pill-button top-header-swap"
+                                IsVisible="{Binding IsFaqOpen}"
+                                Command="{Binding OpenSettingsCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                <PathIcon Data="{StaticResource Icon_Back}" Width="10" Height="10" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding [Ui_Settings], Source={x:Static loc:LocalizationManager.Instance}}"
+                                           FontSize="9.5"
+                                           FontWeight="SemiBold"
+                                           LetterSpacing="0.5"
+                                           Foreground="#D0D0D7"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
                         </Button>
 
                         <!-- Minimize Window Button -->
@@ -132,7 +164,7 @@
                                RenderOptions.BitmapInterpolationMode="HighQuality"
                                IsVisible="{Binding HasDeviceImage}" />
 
-                        <!-- Minimal Recessed Stage Frame Fallback (when no device PNG is loaded) -->
+                        <!-- Minimal Recessed Stage Frame Fallback (QR Pairing when offline; Monitor icon when device has no PNG) -->
                         <Border Width="168"
                                 Background="#121217"
                                 BorderBrush="#2B2B33"
@@ -141,9 +173,16 @@
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Stretch"
                                 IsVisible="{Binding HasDeviceImage, Converter={StaticResource InverseBooleanConverter}}">
-                            <Grid RowDefinitions="Auto, *, Auto" Margin="12">
-                                <Ellipse Grid.Row="0" Width="5" Height="5" Fill="#2B2B33" HorizontalAlignment="Center" Margin="0,2,0,0" />
-                                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                            <Grid RowDefinitions="Auto, *, Auto" Margin="10,10,10,10">
+                                <!-- Top Speaker/Camera Dot -->
+                                <Ellipse Grid.Row="0" Width="5" Height="5" Fill="#2B2B33" HorizontalAlignment="Center" Margin="0,1,0,0" />
+
+                                <!-- Case A: Device Connected without PNG Asset -->
+                                <StackPanel Grid.Row="1"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Spacing="6"
+                                            IsVisible="{Binding HasSelectedDevice}">
                                     <PathIcon Data="{StaticResource Icon_Display}" Width="22" Height="22" Foreground="#FF7A00" />
                                     <TextBlock Text="{Binding DeviceFrameFallbackText}"
                                                FontSize="13"
@@ -152,6 +191,98 @@
                                                Foreground="#D0D0D7"
                                                HorizontalAlignment="Center" />
                                 </StackPanel>
+
+                                <!-- Case B: No Device Connected -> Wireless ADB QR Code Pairing -->
+                                <Grid Grid.Row="1"
+                                      IsVisible="{Binding IsQrPairingVisible}"
+                                      VerticalAlignment="Center">
+                                    <StackPanel Spacing="6"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                IsVisible="{Binding !IsQrHelpOpen}">
+                                        <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                                            <PathIcon Data="{StaticResource Icon_Wifi}" Width="10" Height="10" Foreground="#FF7A00" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding [Ui_WirelessConnection], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                       FontSize="10"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="#F5F5F7"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+
+                                        <Border Background="#FFFFFF"
+                                                CornerRadius="10"
+                                                Padding="5"
+                                                HorizontalAlignment="Center">
+                                            <Image Source="{Binding PairingQrBitmap}"
+                                                   Width="112"
+                                                   Height="112"
+                                                   RenderOptions.BitmapInterpolationMode="None" />
+                                        </Border>
+
+                                        <TextBlock Text="{Binding WirelessPairingStatusText}"
+                                                   FontSize="9"
+                                                   Foreground="#FF9A3D"
+                                                   HorizontalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" />
+
+                                        <Button Command="{Binding ToggleQrHelpCommand}"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Padding="4,1"
+                                                HorizontalAlignment="Center"
+                                                Cursor="Hand">
+                                            <TextBlock Text="{Binding [Ui_HowToConnectQr], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                       FontSize="8.5"
+                                                       Foreground="#D0D0D7"
+                                                       TextDecorations="Underline"
+                                                       TextAlignment="Center"
+                                                       TextWrapping="Wrap" />
+                                        </Button>
+                                    </StackPanel>
+
+                                    <!-- Inline QR Instructions Help Card -->
+                                    <Border Background="#16161C"
+                                            BorderBrush="#2B2B33"
+                                            BorderThickness="1"
+                                            CornerRadius="10"
+                                            Padding="10"
+                                            IsVisible="{Binding IsQrHelpOpen}"
+                                            VerticalAlignment="Center">
+                                        <StackPanel Spacing="7">
+                                            <TextBlock Text="{Binding [Ui_QrHelpTitle], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                       FontSize="10"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="#FF9A3D"
+                                                       TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding [Ui_QrHelpSteps], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                       FontSize="9"
+                                                       Foreground="#D0D0D7"
+                                                       TextWrapping="Wrap"
+                                                       LineHeight="13" />
+                                            <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Stretch" Margin="0,2,0,0">
+                                                <Button Classes="pill-button"
+                                                        Command="{Binding RegenerateQrCodeCommand}"
+                                                        Height="22"
+                                                        Padding="7,0">
+                                                    <TextBlock Text="{Binding [Ui_RegenerateQr], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                               FontSize="8.5"
+                                                               Foreground="#D0D0D7" />
+                                                </Button>
+                                                <Button Classes="pill-button"
+                                                        Command="{Binding ToggleQrHelpCommand}"
+                                                        Height="22"
+                                                        Padding="7,0">
+                                                    <TextBlock Text="{Binding [Ui_Back], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                               FontSize="8.5"
+                                                               Foreground="#F5F5F7" />
+                                                </Button>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+
+                                <!-- Bottom Home Bar -->
                                 <Border Grid.Row="2" Width="36" Height="3" CornerRadius="1.5" Background="#2B2B33" HorizontalAlignment="Center" />
                             </Grid>
                         </Border>
@@ -265,34 +396,51 @@
                                 </StackPanel>
                             </Button>
 
-                            <!-- Scan Devices Button -->
-                            <Button Grid.Column="2"
-                                    Classes="btn-secondary"
-                                    Command="{Binding RefreshDevicesCommand}"
-                                    HorizontalAlignment="Stretch"
-                                    Height="44"
-                                    ToolTip.Tip="{Binding [DeviceSelector_RescanTooltip], Source={x:Static loc:LocalizationManager.Instance}}">
-                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <PathIcon Data="{StaticResource Icon_Refresh}" Width="12" Height="12" Foreground="#D0D0D7" />
-                                    <TextBlock Text="{Binding [Action_Rescan], Source={x:Static loc:LocalizationManager.Instance}}"
-                                               FontSize="11.5"
-                                               FontWeight="SemiBold"
-                                               LetterSpacing="0.3"
-                                               Foreground="#D0D0D7" />
-                                </StackPanel>
-                            </Button>
+                            <!-- Scan Devices Button + Animated USB-to-Wi-Fi Button (108px total slot) -->
+                            <Grid Grid.Column="2" Width="108" Height="44">
+                                <Button Classes="btn-secondary rescan-morph"
+                                        Command="{Binding RefreshDevicesCommand}"
+                                        Width="{Binding RescanButtonWidth}"
+                                        Padding="0"
+                                        HorizontalAlignment="Left"
+                                        Height="44"
+                                        ToolTip.Tip="{Binding [DeviceSelector_RescanTooltip], Source={x:Static loc:LocalizationManager.Instance}}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <PathIcon Data="{StaticResource Icon_Refresh}" Width="12" Height="12" Foreground="#D0D0D7" />
+                                        <TextBlock Text="{Binding [Action_Rescan], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                   FontSize="11.5"
+                                                   FontWeight="SemiBold"
+                                                   LetterSpacing="0.3"
+                                                   Foreground="#D0D0D7"
+                                                   IsVisible="{Binding !ShowWifiTransitionButton}" />
+                                    </StackPanel>
+                                </Button>
+
+                                <Button Classes="btn-secondary wifi-swap-btn"
+                                        Command="{Binding SwitchToWirelessCommand}"
+                                        IsVisible="{Binding ShowWifiTransitionButton}"
+                                        IsEnabled="{Binding CanSwitchToWireless}"
+                                        Width="51"
+                                        Padding="0"
+                                        HorizontalAlignment="Right"
+                                        Height="44"
+                                        ToolTip.Tip="{Binding [Action_SwitchToWifiTooltip], Source={x:Static loc:LocalizationManager.Instance}}">
+                                    <PathIcon Data="{StaticResource Icon_Wifi}" Width="16" Height="16" Foreground="#FF9A3D" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Button>
+                            </Grid>
                         </Grid>
 
-                        <!-- Single Subtle Telemetry Card (#16161C, Border #2B2B33, Radius 14 — AudioEspacial INPUT LEVELS Card Pattern) -->
+                        <!-- Single Subtle Telemetry Card (#16161C, Border #2B2B33, Radius 14 — Oscillates Orange on Wireless) -->
                         <Border Grid.Row="3"
                                 Background="#16161C"
                                 BorderBrush="#2B2B33"
                                 BorderThickness="1"
                                 CornerRadius="14"
-                                Padding="16,13">
+                                Padding="16,13"
+                                Classes.wireless-telemetry="{Binding IsWirelessConnection}">
                             <StackPanel Spacing="10">
-                                <!-- Card Header: TELEMETRY on Left, Active Mode on Right -->
-                                <Grid ColumnDefinitions="*, Auto">
+                                <!-- Card Header: TELEMETRY on Left, Wireless Indicator in Center, Active Mode on Right -->
+                                <Grid ColumnDefinitions="Auto, *, Auto">
                                     <TextBlock Grid.Column="0"
                                                Text="{Binding [Telemetry_Header], Source={x:Static loc:LocalizationManager.Instance}}"
                                                FontSize="9.5"
@@ -300,7 +448,29 @@
                                                LetterSpacing="0.8"
                                                Foreground="#86868B"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="1"
+
+                                    <Border Grid.Column="1"
+                                            Classes.wireless-telemetry="{Binding IsWirelessConnection}"
+                                            Background="#1B1B22"
+                                            BorderBrush="#33333C"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Padding="7,2"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            IsVisible="{Binding IsWirelessConnection}">
+                                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                            <PathIcon Data="{StaticResource Icon_Wifi}" Width="9" Height="9" Foreground="#FF9A3D" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding [Telemetry_WirelessConnection], Source={x:Static loc:LocalizationManager.Instance}}"
+                                                       FontSize="8.5"
+                                                       FontWeight="SemiBold"
+                                                       LetterSpacing="0.5"
+                                                       Foreground="#D0D0D7"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <TextBlock Grid.Column="2"
                                                Text="{Binding ModeIndicatorText}"
                                                FontSize="9"
                                                FontWeight="SemiBold"
@@ -379,23 +549,15 @@
                       RowDefinitions="Auto, *"
                       RowSpacing="8">
 
-                    <!-- Settings Sub-Header: Back + Title on Left; Console & FAQ Triggers on Right -->
+                    <!-- Settings Sub-Header: Title on Left; Console & FAQ Triggers on Right -->
                     <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                            <Button Classes="pill-button"
-                                    Command="{Binding CloseSettingsCommand}">
-                                <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                    <PathIcon Data="{StaticResource Icon_Back}" Width="10" Height="10" Foreground="#D0D0D7" />
-                                    <TextBlock Text="{Binding [Ui_Back], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" FontWeight="SemiBold" LetterSpacing="0.5" Foreground="#D0D0D7" />
-                                </StackPanel>
-                            </Button>
-                            <TextBlock Text="{Binding [Ui_Configuration], Source={x:Static loc:LocalizationManager.Instance}}"
-                                       FontSize="10"
-                                       FontWeight="SemiBold"
-                                       LetterSpacing="0.8"
-                                       Foreground="#D0D0D7"
-                                       VerticalAlignment="Center" />
-                        </StackPanel>
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding [Ui_Configuration], Source={x:Static loc:LocalizationManager.Instance}}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   LetterSpacing="0.8"
+                                   Foreground="#D0D0D7"
+                                   VerticalAlignment="Center" />
 
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                             <!-- Dedicated Console Window Trigger -->
@@ -403,26 +565,29 @@
                                     Command="{Binding OpenConsoleWindowCommand}"
                                     ToolTip.Tip="{Binding [Ui_ConsoleTooltip], Source={x:Static loc:LocalizationManager.Instance}}">
                                 <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                    <PathIcon Data="{StaticResource Icon_Terminal}" Width="10" Height="10" Foreground="#FF7A00" />
+                                    <PathIcon Data="{StaticResource Icon_Terminal}" Width="11" Height="11" Foreground="#D0D0D7" VerticalAlignment="Center" />
                                     <TextBlock Text="{Binding [Ui_Console], Source={x:Static loc:LocalizationManager.Instance}}"
                                                FontSize="9.5"
                                                FontWeight="SemiBold"
                                                LetterSpacing="0.4"
-                                               Foreground="#F5F5F7" />
+                                               Foreground="#D0D0D7"
+                                               VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
 
-                            <!-- FAQ & Diagnostics Sub-Screen Trigger -->
+                            <!-- FAQ & Diagnostics Sub-Screen Trigger (MinWidth=58 aligns with Minimize + Close above) -->
                             <Button Classes="pill-button"
+                                    MinWidth="58"
                                     Command="{Binding OpenFaqFromSettingsCommand}"
                                     ToolTip.Tip="{Binding [Faq_Title], Source={x:Static loc:LocalizationManager.Instance}}">
                                 <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                    <PathIcon Data="{StaticResource Icon_Help}" Width="10" Height="10" Foreground="#D0D0D7" />
-                                    <TextBlock Text="{Binding [Ui_FaqDoctor], Source={x:Static loc:LocalizationManager.Instance}}"
+                                    <PathIcon Data="{StaticResource Icon_Help}" Width="11" Height="11" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding [Ui_Faq], Source={x:Static loc:LocalizationManager.Instance}}"
                                                FontSize="9.5"
                                                FontWeight="SemiBold"
                                                LetterSpacing="0.4"
-                                               Foreground="#D0D0D7" />
+                                               Foreground="#D0D0D7"
+                                               VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                         </StackPanel>
@@ -432,7 +597,8 @@
                     <ScrollViewer Grid.Row="1"
                                   HorizontalScrollBarVisibility="Disabled"
                                   VerticalScrollBarVisibility="Auto"
-                                  Padding="0,0,6,2">
+                                  AllowAutoHide="True"
+                                  Padding="0,0,0,2">
                         <StackPanel Spacing="10">
 
                             <!-- CARD 1: DISPLAY & HARDWARE ENCODER -->
@@ -653,28 +819,20 @@
 
                     <!-- Sub-Header -->
                     <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                            <Button Classes="pill-button"
-                                    Command="{Binding OpenSettingsCommand}">
-                                <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                    <PathIcon Data="{StaticResource Icon_Back}" Width="10" Height="10" Foreground="#D0D0D7" />
-                                    <TextBlock Text="{Binding [Ui_Settings], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" FontWeight="SemiBold" LetterSpacing="0.5" Foreground="#D0D0D7" />
-                                </StackPanel>
-                            </Button>
-                            <TextBlock Text="{Binding [Ui_FaqDiagnostics], Source={x:Static loc:LocalizationManager.Instance}}"
-                                       FontSize="10"
-                                       FontWeight="SemiBold"
-                                       LetterSpacing="0.8"
-                                       Foreground="#86868B"
-                                       VerticalAlignment="Center" />
-                        </StackPanel>
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding [Ui_FaqDiagnostics], Source={x:Static loc:LocalizationManager.Instance}}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   LetterSpacing="0.8"
+                                   Foreground="#D0D0D7"
+                                   VerticalAlignment="Center" />
 
                         <Button Grid.Column="2"
                                 Classes="pill-button"
                                 Command="{Binding RunDoctorCommand}">
                             <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                <PathIcon Data="{StaticResource Icon_Refresh}" Width="10" Height="10" Foreground="#FF7A00" />
-                                <TextBlock Text="{Binding [Ui_CheckEnv], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" FontWeight="SemiBold" Foreground="#F5F5F7" />
+                                <PathIcon Data="{StaticResource Icon_Refresh}" Width="11" Height="11" Foreground="#D0D0D7" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding [Ui_CheckEnv], Source={x:Static loc:LocalizationManager.Instance}}" FontSize="9.5" FontWeight="SemiBold" Foreground="#D0D0D7" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -728,7 +886,8 @@
                     <ScrollViewer Grid.Row="3"
                                   HorizontalScrollBarVisibility="Disabled"
                                   VerticalScrollBarVisibility="Auto"
-                                  Padding="0,0,6,2">
+                                  AllowAutoHide="True"
+                                  Padding="0,0,0,2">
                         <ItemsControl ItemsSource="{Binding FilteredFaqItems}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="appModels:FaqItem">
@@ -819,6 +978,131 @@
                 </Grid>
 
             </Grid>
+
+            <!-- ========================================================================= -->
+            <!-- 3A. UNPLUG USB CABLE PROMPT OVERLAY (Auto-closes when USB disconnects)    -->
+            <!-- ========================================================================= -->
+            <Border Grid.Row="0"
+                    Grid.RowSpan="2"
+                    ZIndex="195"
+                    Background="#E60C0C10"
+                    CornerRadius="14"
+                    Padding="24"
+                    IsVisible="{Binding IsUnplugUsbPromptVisible}"
+                    PointerPressed="OnTitleBarPointerPressed">
+                <Border Background="#16161C"
+                        BorderBrush="#FF7A00"
+                        BorderThickness="1"
+                        CornerRadius="14"
+                        Padding="20,18"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center">
+                    <StackPanel Spacing="12">
+                        <Border Background="#26170A"
+                                BorderBrush="#FF7A00"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="8,3"
+                                HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                <PathIcon Data="{StaticResource Icon_Wifi}" Width="10" Height="10" Foreground="#FF9A3D" />
+                                <TextBlock Text="{Binding [Wireless_UnplugBadge], Source={x:Static loc:LocalizationManager.Instance}}"
+                                           FontSize="8.5"
+                                           FontWeight="SemiBold"
+                                           LetterSpacing="0.8"
+                                           Foreground="#FF9A3D" />
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="{Binding [Wireless_UnplugTitle], Source={x:Static loc:LocalizationManager.Instance}}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="#F5F5F7"
+                                       TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding UnplugUsbPromptDescription}"
+                                       FontSize="11.5"
+                                       Foreground="#A0A0A8"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <!-- Only button while waiting: Revert back to wired USB connection -->
+                        <Button Classes="btn-secondary"
+                                Command="{Binding RevertToWiredCommand}"
+                                Height="34"
+                                Padding="14,0"
+                                HorizontalAlignment="Left"
+                                Margin="0,4,0,0">
+                            <TextBlock Text="{Binding [Wireless_RevertToUsb], Source={x:Static loc:LocalizationManager.Instance}}"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Foreground="#D0D0D7" />
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Border>
+
+            <!-- ========================================================================= -->
+            <!-- 3B. NON-TLS TCP/IP SECURITY WARNING OVERLAY                               -->
+            <!-- ========================================================================= -->
+            <Border Grid.Row="0"
+                    Grid.RowSpan="2"
+                    ZIndex="190"
+                    Background="#E60C0C10"
+                    CornerRadius="14"
+                    Padding="24"
+                    IsVisible="{Binding IsNonTlsWarningVisible}"
+                    PointerPressed="OnTitleBarPointerPressed">
+                <Border Background="#16161C"
+                        BorderBrush="#FFAA00"
+                        BorderThickness="1"
+                        CornerRadius="14"
+                        Padding="20,18"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center">
+                    <StackPanel Spacing="12">
+                        <Border Background="#261E0A"
+                                BorderBrush="#FFAA00"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="8,3"
+                                HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                <PathIcon Data="{StaticResource Icon_Alert}" Width="10" Height="10" Foreground="#FFAA00" />
+                                <TextBlock Text="{Binding [Wireless_NonTlsBadge], Source={x:Static loc:LocalizationManager.Instance}}"
+                                           FontSize="8.5"
+                                           FontWeight="SemiBold"
+                                           LetterSpacing="0.8"
+                                           Foreground="#FFAA00" />
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="{Binding [Wireless_NonTlsTitle], Source={x:Static loc:LocalizationManager.Instance}}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="#F5F5F7"
+                                       TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding [Wireless_NonTlsDesc], Source={x:Static loc:LocalizationManager.Instance}}"
+                                       FontSize="11.5"
+                                       Foreground="#A0A0A8"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <Button Classes="btn-secondary"
+                                Command="{Binding DismissNonTlsWarningCommand}"
+                                Height="34"
+                                Padding="14,0"
+                                HorizontalAlignment="Left"
+                                Margin="0,4,0,0">
+                            <TextBlock Text="{Binding [Ui_Close], Source={x:Static loc:LocalizationManager.Instance}}"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Foreground="#D0D0D7" />
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Border>
 
             <!-- ========================================================================= -->
             <!-- 3. FULL-WINDOW CRITICAL ERROR OVERLAY (Dark Translucent Backdrop)         -->
