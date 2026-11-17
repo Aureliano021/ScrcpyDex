@@ -165,6 +165,7 @@ namespace ScrcpyDex.App.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CanStart))]
         [NotifyPropertyChangedFor(nameof(CanStop))]
+        [NotifyPropertyChangedFor(nameof(IsStarting))]
         [NotifyPropertyChangedFor(nameof(IsStreaming))]
         [NotifyPropertyChangedFor(nameof(StatusBadgeColor))]
         [NotifyPropertyChangedFor(nameof(StatusPillText))]
@@ -547,6 +548,10 @@ namespace ScrcpyDex.App.ViewModels
                                ConnectionState == SessionState.DeviceConnecting ||
                                ConnectionState == SessionState.ServerDeploying ||
                                ConnectionState == SessionState.DisplayNegotiating;
+
+        public bool IsStarting => ConnectionState == SessionState.DeviceConnecting ||
+                                  ConnectionState == SessionState.ServerDeploying ||
+                                  ConnectionState == SessionState.DisplayNegotiating;
 
         public bool IsStreaming => ConnectionState == SessionState.StreamingActive;
 

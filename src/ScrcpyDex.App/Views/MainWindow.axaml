@@ -378,12 +378,28 @@
                                 </StackPanel>
                             </Button>
 
-                            <!-- Stop Session Button -->
+                            <!-- Starting Session Indicator (3 oscillating dots until scrcpy opens; clickable to cancel) -->
+                            <Button Grid.Column="0"
+                                    Classes="btn-secondary"
+                                    BorderBrush="#FF7A00"
+                                    Command="{Binding StopSessionCommand}"
+                                    IsEnabled="{Binding CanStop}"
+                                    IsVisible="{Binding IsStarting}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="44">
+                                <StackPanel Orientation="Horizontal" Spacing="7" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Ellipse Classes="loading-dot-1" Width="6" Height="6" Fill="#FF7A00" />
+                                    <Ellipse Classes="loading-dot-2" Width="6" Height="6" Fill="#FF7A00" />
+                                    <Ellipse Classes="loading-dot-3" Width="6" Height="6" Fill="#FF7A00" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Stop Session Button (Active once scrcpy is streaming) -->
                             <Button Grid.Column="0"
                                     Classes="btn-destructive"
                                     Command="{Binding StopSessionCommand}"
                                     IsEnabled="{Binding CanStop}"
-                                    IsVisible="{Binding CanStop}"
+                                    IsVisible="{Binding IsStreaming}"
                                     HorizontalAlignment="Stretch"
                                     Height="44">
                                 <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">

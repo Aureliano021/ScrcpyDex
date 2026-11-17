@@ -171,6 +171,38 @@
         </Style.Animations>
     </Style>
 
+    <!-- Sequential 3-Dot Wave Animation while Session is Starting -->
+    <Style Selector="Ellipse.loading-dot-1">
+        <Style.Animations>
+            <Animation Duration="0:0:1.05" IterationCount="INFINITE" Delay="0:0:0">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.25" /></KeyFrame>
+                <KeyFrame Cue="35%"><Setter Property="Opacity" Value="1" /></KeyFrame>
+                <KeyFrame Cue="70%"><Setter Property="Opacity" Value="0.25" /></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.25" /></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Ellipse.loading-dot-2">
+        <Style.Animations>
+            <Animation Duration="0:0:1.05" IterationCount="INFINITE" Delay="0:0:0.22">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.25" /></KeyFrame>
+                <KeyFrame Cue="35%"><Setter Property="Opacity" Value="1" /></KeyFrame>
+                <KeyFrame Cue="70%"><Setter Property="Opacity" Value="0.25" /></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.25" /></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+    <Style Selector="Ellipse.loading-dot-3">
+        <Style.Animations>
+            <Animation Duration="0:0:1.05" IterationCount="INFINITE" Delay="0:0:0.44">
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.25" /></KeyFrame>
+                <KeyFrame Cue="35%"><Setter Property="Opacity" Value="1" /></KeyFrame>
+                <KeyFrame Cue="70%"><Setter Property="Opacity" Value="0.25" /></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.25" /></KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+
     <!-- Subtle Raised Card (#16161C, Border #2B2B33, Radius 14) -->
     <Style Selector="Border.glass-card">
         <Setter Property="CornerRadius" Value="14" />
