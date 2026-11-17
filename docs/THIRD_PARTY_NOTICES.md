@@ -15,7 +15,6 @@ This project incorporates dependencies, build tools, or interfaces with external
 | **`System.Text.Json`** | Microsoft Corporation | [MIT](https://opensource.org/licenses/MIT) | **Compiled Dependency:** High-performance JSON serialization. Bundled into `ScrcpyDex.App` and `ScrcpyDex.Cli`. |
 | **Microsoft .NET 8 Runtime** | Microsoft Corporation | [MIT](https://github.com/dotnet/runtime/blob/main/LICENSE.TXT) | **Embedded Runtime:** Single-file host distribution bundle. |
 | **Android Robot Asset** | Google LLC | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) | **Modified Asset:** Icon artwork based on Android Robot, created and shared by Google. |
-| **Device Preview Renders** | Samsung / Third-Party Product Renders | Informational / Identification | **Asset:** Device preview images in src/ScrcpyDex.App/Assets/Devices/ used for identification only. Trademarks belong to their respective owners. |
 
 ---
 
