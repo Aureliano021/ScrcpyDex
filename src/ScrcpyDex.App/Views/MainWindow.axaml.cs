@@ -14,6 +14,7 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using ScrcpyDex.App.ViewModels;
 
 namespace ScrcpyDex.App.Views
@@ -30,6 +31,12 @@ namespace ScrcpyDex.App.Views
         public MainWindow()
         {
             InitializeComponent();
+
+            if (!OperatingSystem.IsWindows())
+            {
+                TransparencyLevelHint = new[] { WindowTransparencyLevel.Transparent };
+                OuterShellBorder.Background = new SolidColorBrush(Color.Parse("#E00E0E12"));
+            }
         }
 
         private void OnTitleBarPointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)

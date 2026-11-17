@@ -27,8 +27,9 @@
         <KeyBinding Gesture="Escape" Command="{Binding CloseSettingsCommand}" />
     </Window.KeyBindings>
 
-    <!-- Outer Translucent Charcoal Shell (#660E0E12, 14px Radius, #33333C Border — AudioEspacial Architecture) -->
-    <Border Background="#660E0E12"
+    <!-- Outer Translucent Charcoal Shell (#660E0E12 on Windows AcrylicBlur, #E00E0E12 fallback on Linux) -->
+    <Border x:Name="OuterShellBorder"
+            Background="{StaticResource ThemeWindowBackgroundBrush}"
             BorderBrush="#33333C"
             BorderThickness="1"
             CornerRadius="14"
@@ -49,7 +50,7 @@
                                    FontSize="10.5"
                                    FontWeight="SemiBold"
                                    LetterSpacing="0.8"
-                                   Foreground="#86868B" />
+                                   Foreground="#FF7A00" />
                         <TextBlock Text="{Binding SessionStatusText}"
                                    FontSize="9.5"
                                    MaxWidth="390"
@@ -219,7 +220,7 @@
 
                             <TextBlock Text="{Binding HardwareModelDisplay}"
                                        FontSize="11"
-                                       Foreground="#86868B"
+                                       Foreground="#FF9A3D"
                                        TextTrimming="CharacterEllipsis" />
                         </StackPanel>
 
@@ -392,7 +393,7 @@
                                        FontSize="10"
                                        FontWeight="SemiBold"
                                        LetterSpacing="0.8"
-                                       Foreground="#86868B"
+                                       Foreground="#D0D0D7"
                                        VerticalAlignment="Center" />
                         </StackPanel>
 

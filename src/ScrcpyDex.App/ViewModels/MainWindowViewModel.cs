@@ -74,6 +74,13 @@ namespace ScrcpyDex.App.ViewModels
         [NotifyPropertyChangedFor(nameof(IsCriticalErrorOverlayVisible))]
         private bool _isCriticalErrorDismissed;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasCriticalErrorCondition))]
+        [NotifyPropertyChangedFor(nameof(IsCriticalErrorOverlayVisible))]
+        [NotifyPropertyChangedFor(nameof(CriticalErrorTitle))]
+        [NotifyPropertyChangedFor(nameof(CriticalErrorDescription))]
+        private string? _lastSessionError;
+
         #endregion
 
         #region Observable Properties - Device & Session State
@@ -502,7 +509,8 @@ namespace ScrcpyDex.App.ViewModels
             !IsScrcpyDetected ||
             !IsAdbDetected ||
             HasDoctorErrors ||
-            ConnectionState == SessionState.Error;
+            ConnectionState == SessionState.Error ||
+            !string.IsNullOrWhiteSpace(LastSessionError);
 
         public bool IsCriticalErrorOverlayVisible =>
             HasCriticalErrorCondition &&
@@ -517,7 +525,8 @@ namespace ScrcpyDex.App.ViewModels
                 if (!IsScrcpyDetected) return LocalizationManager.Instance.GetString("Error_ScrcpyNotFoundTitle");
                 if (!IsAdbDetected) return LocalizationManager.Instance.GetString("Error_AdbNotFoundTitle");
                 if (HasDoctorErrors) return LocalizationManager.Instance.GetString("Error_EnvironmentTitle");
-                if (ConnectionState == SessionState.Error) return LocalizationManager.Instance.GetString("Error_SessionExecutionTitle");
+                if (ConnectionState == SessionState.Error || !string.IsNullOrWhiteSpace(LastSessionError))
+                    return LocalizationManager.Instance.GetString("Error_SessionExecutionTitle");
                 return LocalizationManager.Instance.GetString("Error_GenericTitle");
             }
         }
@@ -544,6 +553,10 @@ namespace ScrcpyDex.App.ViewModels
                     {
                         return string.Join("\n", errLines);
                     }
+                }
+                if (!string.IsNullOrWhiteSpace(LastSessionError))
+                {
+                    return LastSessionError;
                 }
                 if (!string.IsNullOrWhiteSpace(StatusWarning))
                 {
@@ -1233,6 +1246,12 @@ namespace ScrcpyDex.App.ViewModels
                 if (e.CurrentState == SessionState.Error)
                 {
                     IsCriticalErrorDismissed = false;
+                    if (string.IsNullOrWhiteSpace(LastSessionError))
+                    {
+                        LastSessionError = !string.IsNullOrWhiteSpace(e.Message)
+                            ? e.Message
+                            : GetDefaultStateMessage(SessionState.Error);
+                    }
                 }
                 ConnectionState = e.CurrentState;
                 SessionStatusText = $"{e.CurrentState}: {e.Message ?? GetDefaultStateMessage(e.CurrentState)}";
@@ -1274,12 +1293,20 @@ namespace ScrcpyDex.App.ViewModels
         {
             Dispatcher.UIThread.Post(() =>
             {
-                if (error.Contains("D3D11CreateDevice", StringComparison.OrdinalIgnoreCase) ||
-                    error.Contains("glBlendFuncSeparate", StringComparison.OrdinalIgnoreCase) ||
-                    error.Contains("Could not create renderer", StringComparison.OrdinalIgnoreCase))
+                bool isRendererError = error.Contains("D3D11CreateDevice", StringComparison.OrdinalIgnoreCase) ||
+                                       error.Contains("glBlendFuncSeparate", StringComparison.OrdinalIgnoreCase) ||
+                                       error.Contains("Could not create renderer", StringComparison.OrdinalIgnoreCase);
+                if (isRendererError)
                 {
-                    StatusWarning = LocalizationManager.Instance.GetString("Status_RendererUnsupported");
+                    string rendererMsg = LocalizationManager.Instance.GetString("Status_RendererUnsupported");
+                    StatusWarning = rendererMsg;
+                    LastSessionError = rendererMsg;
                 }
+                else
+                {
+                    LastSessionError = error;
+                }
+                IsCriticalErrorDismissed = false;
                 LogEntries.Push(new ProcessLogEntry(DateTime.Now, $"Execution error: {error}", true));
             });
             _ = _stateMachine.FireAsync(SessionTrigger.ErrorOccurred, error);
@@ -1518,6 +1545,16 @@ namespace ScrcpyDex.App.ViewModels
 
             try
             {
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    LastSessionError = null;
+                    IsCriticalErrorDismissed = false;
+                    if (IsScrcpyDetected && IsAdbDetected)
+                    {
+                        StatusWarning = null;
+                    }
+                });
+
                 await SaveCurrentSettingsAsync().ConfigureAwait(false);
 
                 if (_stateMachine.CurrentState == SessionState.Error || _stateMachine.CurrentState == SessionState.Teardown)
@@ -1998,7 +2035,12 @@ namespace ScrcpyDex.App.ViewModels
         [RelayCommand]
         public async Task RevalidateEnvironmentAsync()
         {
+            LastSessionError = null;
             IsCriticalErrorDismissed = false;
+            if (IsScrcpyDetected && IsAdbDetected)
+            {
+                StatusWarning = null;
+            }
             if (_stateMachine.CurrentState == SessionState.Error)
             {
                 await _stateMachine.FireAsync(SessionTrigger.Reset, "User revalidated after error").ConfigureAwait(false);
@@ -2010,7 +2052,12 @@ namespace ScrcpyDex.App.ViewModels
         [RelayCommand]
         public async Task DismissCriticalErrorAsync()
         {
+            LastSessionError = null;
             IsCriticalErrorDismissed = true;
+            if (IsScrcpyDetected && IsAdbDetected)
+            {
+                StatusWarning = null;
+            }
             if (_stateMachine.CurrentState == SessionState.Error)
             {
                 await _stateMachine.FireAsync(SessionTrigger.Reset, "User dismissed session error").ConfigureAwait(false);

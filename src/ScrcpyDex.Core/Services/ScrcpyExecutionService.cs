@@ -703,10 +703,12 @@ namespace ScrcpyDex.Services
         {
             if (string.IsNullOrWhiteSpace(text)) return false;
 
-            // Benign ADB push progress, warnings, and info lines on stderr are not errors
+            // Benign ADB push progress, warnings, info lines, and recoverable scrcpy fallbacks are not fatal
             if (text.Contains("file pushed", StringComparison.OrdinalIgnoreCase) ||
                 text.Contains("WARN:", StringComparison.OrdinalIgnoreCase) ||
-                text.Contains("INFO:", StringComparison.OrdinalIgnoreCase))
+                text.Contains("INFO:", StringComparison.OrdinalIgnoreCase) ||
+                text.Contains("Could not create VA-API device", StringComparison.OrdinalIgnoreCase) ||
+                text.Contains("Could not push UHID_INPUT message", StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
