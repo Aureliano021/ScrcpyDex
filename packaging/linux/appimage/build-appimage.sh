@@ -127,6 +127,11 @@ else
 fi
 
 # 7. Generate AppImage
+# Normalize permissions (mktemp -d creates 0700 and .NET publish marks .dll files 0744)
+find "$APPDIR" -type f -name "*.dll" -exec chmod 644 {} +
+chmod -R a+rX "$APPDIR"
+chmod 755 "$APPDIR" "$APPDIR/AppRun"
+
 OUTPUT_APPIMAGE="$OUTPUT_DIR/ScrcpyDeX-${VERSION}-x86_64.AppImage"
 echo "[ScrcpyDeX AppImage] Packaging: $OUTPUT_APPIMAGE"
 
