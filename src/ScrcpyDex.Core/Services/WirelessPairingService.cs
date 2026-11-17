@@ -116,12 +116,30 @@ namespace ScrcpyDex.Services
 
                 RaiseState(WirelessPairingState.Connecting, null, $"Paired! Connecting to {pairingEndpoint.IpAddress}...");
 
+                // Check first if ADB already auto-connected the TLS mDNS endpoint after pairing
+                var initialDevices = await _adbService.GetConnectedDevicesAsync(linkedCts.Token).ConfigureAwait(false);
+                var existingMdnsDevice = initialDevices.FirstOrDefault(d => d.IsConnected && d.IsWireless && d.IsTlsWireless);
+                if (existingMdnsDevice != null)
+                {
+                    RaiseState(WirelessPairingState.Paired, existingMdnsDevice.Serial, $"Connected wirelessly to {existingMdnsDevice.Serial}.");
+                    return new WirelessTransitionResult(true, existingMdnsDevice.Serial, pairingEndpoint.IpAddress, 0, "Connected wirelessly via ADB mDNS.", IsTls: true);
+                }
+
                 // After pairing, connect to _adb-tls-connect._tcp on the same IP
                 var connectEndpoint = await WaitForConnectEndpointAsync(
                     pairingEndpoint.IpAddress,
                     discoveredConnectEndpoints,
                     TimeSpan.FromSeconds(10),
                     linkedCts.Token).ConfigureAwait(false);
+
+                // Re-check auto-connect before opening a separate IP:port connection
+                var postWaitDevices = await _adbService.GetConnectedDevicesAsync(linkedCts.Token).ConfigureAwait(false);
+                var postWaitMdnsDevice = postWaitDevices.FirstOrDefault(d => d.IsConnected && d.IsWireless && d.IsTlsWireless);
+                if (postWaitMdnsDevice != null)
+                {
+                    RaiseState(WirelessPairingState.Paired, postWaitMdnsDevice.Serial, $"Connected wirelessly to {postWaitMdnsDevice.Serial}.");
+                    return new WirelessTransitionResult(true, postWaitMdnsDevice.Serial, pairingEndpoint.IpAddress, 0, "Connected wirelessly via ADB mDNS.", IsTls: true);
+                }
 
                 if (connectEndpoint != null)
                 {
@@ -134,7 +152,7 @@ namespace ScrcpyDex.Services
                     if (connected)
                     {
                         RaiseState(WirelessPairingState.Paired, targetSerial, $"Connected wirelessly to {targetSerial}.");
-                        return new WirelessTransitionResult(true, targetSerial, connectEndpoint.IpAddress, connectEndpoint.Port, "Connected wirelessly.");
+                        return new WirelessTransitionResult(true, targetSerial, connectEndpoint.IpAddress, connectEndpoint.Port, "Connected wirelessly.", IsTls: true);
                     }
                 }
 
@@ -144,7 +162,7 @@ namespace ScrcpyDex.Services
                 if (wirelessDevice != null)
                 {
                     RaiseState(WirelessPairingState.Paired, wirelessDevice.Serial, $"Connected wirelessly to {wirelessDevice.Serial}.");
-                    return new WirelessTransitionResult(true, wirelessDevice.Serial, pairingEndpoint.IpAddress, 0, "Connected wirelessly via ADB mDNS.");
+                    return new WirelessTransitionResult(true, wirelessDevice.Serial, pairingEndpoint.IpAddress, 0, "Connected wirelessly via ADB mDNS.", IsTls: wirelessDevice.IsTlsWireless);
                 }
 
                 RaiseState(WirelessPairingState.Failed, null, "Paired, but could not establish wireless ADB connection.");

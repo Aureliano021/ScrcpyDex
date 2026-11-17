@@ -1746,7 +1746,7 @@ namespace ScrcpyDex.App.ViewModels
         [RelayCommand]
         public void RegenerateQrCode()
         {
-            StartOrRefreshWirelessPairing();
+            StartOrRefreshWirelessPairing(forceRestart: true);
         }
 
         [RelayCommand]
@@ -1881,9 +1881,14 @@ namespace ScrcpyDex.App.ViewModels
             }
         }
 
-        private void StartOrRefreshWirelessPairing()
+        private void StartOrRefreshWirelessPairing(bool forceRestart = false)
         {
             if (_isDisposed || HasSelectedDevice || IsSwitchingToWireless)
+            {
+                return;
+            }
+
+            if (!forceRestart && _pairingCts != null && !_pairingCts.IsCancellationRequested)
             {
                 return;
             }
@@ -1907,7 +1912,17 @@ namespace ScrcpyDex.App.ViewModels
 
             _ = Task.Run(async () =>
             {
-                await _wirelessPairingService.StartPairingAsync(session, cts.Token).ConfigureAwait(false);
+                try
+                {
+                    await _wirelessPairingService.StartPairingAsync(session, cts.Token).ConfigureAwait(false);
+                }
+                finally
+                {
+                    if (ReferenceEquals(Interlocked.CompareExchange(ref _pairingCts, null, cts), cts))
+                    {
+                        try { cts.Dispose(); } catch { }
+                    }
+                }
             }, cts.Token);
         }
 
