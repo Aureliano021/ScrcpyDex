@@ -1901,7 +1901,7 @@ namespace ScrcpyDex.App.ViewModels
             var session = _wirelessPairingService.CreateSession();
             try
             {
-                PairingQrBitmap = QrCodeBitmapRenderer.Render(session.QrPayload, pixelsPerModule: 4, quietZoneModules: 2);
+                PairingQrBitmap = QrCodeBitmapRenderer.Render(session.QrPayload, pixelsPerModule: 5, quietZoneModules: 2);
             }
             catch (Exception ex)
             {

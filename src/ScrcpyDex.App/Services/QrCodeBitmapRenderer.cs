@@ -55,9 +55,9 @@ namespace ScrcpyDex.App.Services
                     int idx = rowOffset + px * 4;
                     if (isDark)
                     {
-                        buffer[idx] = 0x12;     // B
-                        buffer[idx + 1] = 0x0E; // G
-                        buffer[idx + 2] = 0x0E; // R
+                        buffer[idx] = 0x00;     // B
+                        buffer[idx + 1] = 0x00; // G
+                        buffer[idx + 2] = 0x00; // R
                         buffer[idx + 3] = 0xFF; // A
                     }
                     else

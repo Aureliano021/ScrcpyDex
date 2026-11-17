@@ -57,11 +57,11 @@ namespace ScrcpyDex.Services
         /// </summary>
         public WirelessPairingSessionInfo CreateSession()
         {
-            byte[] idBytes = RandomNumberGenerator.GetBytes(4);
+            byte[] idBytes = RandomNumberGenerator.GetBytes(2);
             string suffix = Convert.ToHexString(idBytes).ToLowerInvariant();
-            string serviceName = $"scrcpydex-{suffix}";
+            string serviceName = $"dex-{suffix}";
 
-            var pwdChars = new char[10];
+            var pwdChars = new char[6];
             for (int i = 0; i < pwdChars.Length; i++)
             {
                 pwdChars[i] = PasswordAlphabet[RandomNumberGenerator.GetInt32(PasswordAlphabet.Length)];

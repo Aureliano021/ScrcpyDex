@@ -173,7 +173,7 @@
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Stretch"
                                 IsVisible="{Binding HasDeviceImage, Converter={StaticResource InverseBooleanConverter}}">
-                            <Grid RowDefinitions="Auto, *, Auto" Margin="10,10,10,10">
+                            <Grid RowDefinitions="Auto, *, Auto" Margin="8,8,8,8">
                                 <!-- Top Speaker/Camera Dot -->
                                 <Ellipse Grid.Row="0" Width="5" Height="5" Fill="#2B2B33" HorizontalAlignment="Center" Margin="0,1,0,0" />
 
@@ -196,7 +196,7 @@
                                 <Grid Grid.Row="1"
                                       IsVisible="{Binding IsQrPairingVisible}"
                                       VerticalAlignment="Center">
-                                    <StackPanel Spacing="6"
+                                    <StackPanel Spacing="5"
                                                 HorizontalAlignment="Center"
                                                 VerticalAlignment="Center"
                                                 IsVisible="{Binding !IsQrHelpOpen}">
@@ -210,12 +210,12 @@
                                         </StackPanel>
 
                                         <Border Background="#FFFFFF"
-                                                CornerRadius="10"
-                                                Padding="5"
+                                                CornerRadius="9"
+                                                Padding="4"
                                                 HorizontalAlignment="Center">
                                             <Image Source="{Binding PairingQrBitmap}"
-                                                   Width="112"
-                                                   Height="112"
+                                                   Width="136"
+                                                   Height="136"
                                                    RenderOptions.BitmapInterpolationMode="None" />
                                         </Border>
 

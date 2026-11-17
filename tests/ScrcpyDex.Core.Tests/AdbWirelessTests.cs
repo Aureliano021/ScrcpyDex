@@ -146,9 +146,10 @@ namespace ScrcpyDex.Core.Tests
             var service = new WirelessPairingService(new FakeAdbService());
             var session = service.CreateSession();
 
-            Assert.StartsWith("scrcpydex-", session.ServiceName);
-            Assert.Equal(10, session.Password.Length);
+            Assert.StartsWith("dex-", session.ServiceName);
+            Assert.Equal(6, session.Password.Length);
             Assert.Equal($"WIFI:T:ADB;S:{session.ServiceName};P:{session.Password};;", session.QrPayload);
+            Assert.Equal(25, QrCodeMatrixGenerator.Generate(session.QrPayload).GetLength(0));
         }
 
         [Fact]
