@@ -2,8 +2,8 @@
 Version=1.0
 Type=Application
 Name=ScrcpyDeX
-Comment=Open-Source Client for Samsung DeX via USB
-Exec=/usr/local/bin/start-dex.sh
+Comment=Open-Source Client for Samsung DeX over USB or Wi-Fi
+Exec=/usr/bin/scrcpydex
 Icon=scrcpydex
 Terminal=false
 Categories=Utility;HardwareSettings;

@@ -36,12 +36,12 @@ mkdir -p "$APPDIR/usr/share/applications"
 mkdir -p "$APPDIR/usr/share/icons/hicolor/256x256/apps"
 mkdir -p "$OUTPUT_DIR"
 
-# 2. Stage Server JAR & Shell Scripts
+# 2. Stage Server JAR
 SERVER_JAR=""
-if [ -f "$REPO_ROOT/server/scrcpydex-server.jar" ]; then
-    SERVER_JAR="$REPO_ROOT/server/scrcpydex-server.jar"
-elif [ -f "$REPO_ROOT/publish/scrcpydex-server.jar" ]; then
-    SERVER_JAR="$REPO_ROOT/publish/scrcpydex-server.jar"
+if [ -f "$BASE_DIR/server/scrcpydex-server.jar" ]; then
+    SERVER_JAR="$BASE_DIR/server/scrcpydex-server.jar"
+elif [ -f "$BASE_DIR/publish/scrcpydex-server.jar" ]; then
+    SERVER_JAR="$BASE_DIR/publish/scrcpydex-server.jar"
 fi
 
 if [ -n "$SERVER_JAR" ] && [ -f "$SERVER_JAR" ]; then
@@ -52,16 +52,6 @@ else
     exit 1
 fi
 
-if [ -f "$REPO_ROOT/packaging/linux/start-dex.sh" ]; then
-    cp "$REPO_ROOT/packaging/linux/start-dex.sh" "$APPDIR/usr/share/scrcpydex/start-dex.sh"
-    chmod 755 "$APPDIR/usr/share/scrcpydex/start-dex.sh"
-fi
-
-if [ -f "$REPO_ROOT/packaging/linux/stop-dex.sh" ]; then
-    cp "$REPO_ROOT/packaging/linux/stop-dex.sh" "$APPDIR/usr/share/scrcpydex/stop-dex.sh"
-    chmod 755 "$APPDIR/usr/share/scrcpydex/stop-dex.sh"
-fi
-
 # 3. Stage Binaries
 APP_CSPROJ="$BASE_DIR/src/ScrcpyDex.App/ScrcpyDex.App.csproj"
 if [ -f "$APP_CSPROJ" ] && command -v dotnet >/dev/null 2>&1; then
@@ -69,60 +59,52 @@ if [ -f "$APP_CSPROJ" ] && command -v dotnet >/dev/null 2>&1; then
     dotnet publish "$APP_CSPROJ" -c Release -r linux-x64 --self-contained true -o "$APPDIR/usr/lib/scrcpydex/app"
     cat << 'EOF' > "$APPDIR/usr/bin/scrcpydex"
 #!/bin/sh
-exec "$APPDIR/usr/lib/scrcpydex/app/ScrcpyDex.App" "$@"
+HERE="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+exec "${APPDIR:-$HERE}/usr/lib/scrcpydex/app/ScrcpyDex.App" "$@"
 EOF
     chmod 755 "$APPDIR/usr/bin/scrcpydex"
 else
-    echo "[ScrcpyDeX AppImage] Staging launcher script for /usr/bin/scrcpydex..."
-    cat << 'EOF' > "$APPDIR/usr/bin/scrcpydex"
-#!/usr/bin/env bash
-set -e
-exec "$APPDIR/usr/share/scrcpydex/start-dex.sh" "$@"
-EOF
-    chmod 755 "$APPDIR/usr/bin/scrcpydex"
+    echo "[ERROR] ScrcpyDex.App.csproj or .NET SDK (dotnet) not found." >&2
+    exit 1
 fi
 
 CLI_CSPROJ="$BASE_DIR/src/ScrcpyDex.Cli/ScrcpyDex.Cli.csproj"
 if [ -f "$CLI_CSPROJ" ] && command -v dotnet >/dev/null 2>&1; then
     echo "[ScrcpyDeX AppImage] Publishing ScrcpyDex.Cli (self-contained linux-x64)..."
     dotnet publish "$CLI_CSPROJ" -c Release -r linux-x64 --self-contained true -o "$APPDIR/usr/lib/scrcpydex/cli"
-    CLI_BIN="$(find "$APPDIR/usr/lib/scrcpydex/cli" -maxdepth 1 -type f -executable -not -name "*.so" | head -n 1)"
-    CLI_NAME="$(basename "${CLI_BIN:-scrcpy-dex}")"
+    if [ -x "$APPDIR/usr/lib/scrcpydex/cli/scrcpy-dex" ]; then
+        CLI_NAME="scrcpy-dex"
+    else
+        CLI_BIN="$(find "$APPDIR/usr/lib/scrcpydex/cli" -maxdepth 1 -type f -executable -not -name "*.so" -not -name "*.dll" -not -name "createdump" | head -n 1)"
+        if [ -z "$CLI_BIN" ]; then
+            echo "[ERROR] Compiled CLI executable not found in $APPDIR/usr/lib/scrcpydex/cli." >&2
+            exit 1
+        fi
+        CLI_NAME="$(basename "$CLI_BIN")"
+    fi
     cat << EOF > "$APPDIR/usr/bin/scrcpydex-cli"
 #!/bin/sh
-exec "\$APPDIR/usr/lib/scrcpydex/cli/$CLI_NAME" "\$@"
+HERE="\$(CDPATH= cd -- "\$(dirname -- "\$0")/.." && pwd)"
+exec "\${APPDIR:-\$HERE}/usr/lib/scrcpydex/cli/$CLI_NAME" "\$@"
 EOF
     chmod 755 "$APPDIR/usr/bin/scrcpydex-cli"
     ln -sf "scrcpydex-cli" "$APPDIR/usr/bin/scrcpy-dex"
 else
-    echo "[ScrcpyDeX AppImage] Staging CLI wrapper for /usr/bin/scrcpydex-cli..."
-    cat << 'EOF' > "$APPDIR/usr/bin/scrcpydex-cli"
-#!/usr/bin/env bash
-set -e
-case "${1:-}" in
-    stop|disconnect|kill)
-        shift
-        exec "$APPDIR/usr/share/scrcpydex/stop-dex.sh" "$@"
-        ;;
-    *)
-        exec "$APPDIR/usr/share/scrcpydex/start-dex.sh" "$@"
-        ;;
-esac
-EOF
-    chmod 755 "$APPDIR/usr/bin/scrcpydex-cli"
+    echo "[ERROR] ScrcpyDex.Cli.csproj or .NET SDK (dotnet) not found." >&2
+    exit 1
 fi
 
 # 4. Stage Desktop File and Icons
-if [ -f "$REPO_ROOT/packaging/linux/scrcpydex.desktop" ]; then
-    sed 's|^Exec=.*|Exec=scrcpydex|' "$REPO_ROOT/packaging/linux/scrcpydex.desktop" > "$APPDIR/scrcpydex.desktop"
+if [ -f "$BASE_DIR/packaging/linux/scrcpydex.desktop" ]; then
+    sed 's|^Exec=.*|Exec=scrcpydex|' "$BASE_DIR/packaging/linux/scrcpydex.desktop" > "$APPDIR/scrcpydex.desktop"
     cp "$APPDIR/scrcpydex.desktop" "$APPDIR/usr/share/applications/scrcpydex.desktop"
     chmod 644 "$APPDIR/scrcpydex.desktop" "$APPDIR/usr/share/applications/scrcpydex.desktop"
 fi
 
-if [ -f "$REPO_ROOT/assets/app_icon.png" ]; then
-    cp "$REPO_ROOT/assets/app_icon.png" "$APPDIR/scrcpydex.png"
-    cp "$REPO_ROOT/assets/app_icon.png" "$APPDIR/.DirIcon"
-    cp "$REPO_ROOT/assets/app_icon.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/scrcpydex.png"
+if [ -f "$BASE_DIR/assets/app_icon.png" ]; then
+    cp "$BASE_DIR/assets/app_icon.png" "$APPDIR/scrcpydex.png"
+    cp "$BASE_DIR/assets/app_icon.png" "$APPDIR/.DirIcon"
+    cp "$BASE_DIR/assets/app_icon.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/scrcpydex.png"
     chmod 644 "$APPDIR/scrcpydex.png" "$APPDIR/.DirIcon" "$APPDIR/usr/share/icons/hicolor/256x256/apps/scrcpydex.png"
 fi
 

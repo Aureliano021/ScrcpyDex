@@ -70,7 +70,8 @@
       "properties": {
         "mouseDriver": { "type": "string", "enum": ["uhid", "sdk", "aoa", "disabled"] },
         "releaseKey": { "type": "string", "enum": ["LeftAlt", "WindowsKey", "RightCtrl"] },
-        "forwardGamepad": { "type": "boolean" }
+        "forwardGamepad": { "type": "boolean" },
+        "forwardShortcuts": { "type": "boolean" }
       },
       "required": ["mouseDriver", "releaseKey"]
     },
@@ -80,6 +81,13 @@
         "turnScreenOff": { "type": "boolean" },
         "stayAwake": { "type": "boolean" },
         "autoConnect": { "type": "boolean" }
+      }
+    },
+    "paths": {
+      "type": "object",
+      "properties": {
+        "scrcpyPath": { "type": ["string", "null"] },
+        "adbPath": { "type": ["string", "null"] }
       }
     },
     "ui": {

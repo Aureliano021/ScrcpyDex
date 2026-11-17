@@ -6,9 +6,9 @@ Architecture: amd64
 Depends: libc6 (>= 2.34), libgl1, udev, adb, libx11-6, libice6, libsm6, libfontconfig1
 Recommends: va-driver-all | intel-media-va-driver | mesa-va-drivers
 Maintainer: ScrcpyDeX Contributors <contributors@scrcpydex.local>
-Homepage: https://github.com/scrcpy-dex/scrcpy-dex
-Description: Open-source client for Samsung DeX on PC via USB
- ScrcpyDeX enables Samsung DeX desktop mode over a direct USB cable
- connection using scrcpy display streaming and Samsung framework activation.
+Homepage: https://github.com/Aureliano021/ScrcpyDex
+Description: Open-source client for Samsung DeX on PC via USB or Wi-Fi
+ ScrcpyDeX enables Samsung DeX desktop mode over USB or Wi-Fi (ADB wireless
+ pairing) using scrcpy display streaming and Samsung framework activation.
  Features low-latency display forwarding, native UHID mouse integration,
- and automated session teardown.
+ dual-mode screen mirroring fallback, and automated session teardown.

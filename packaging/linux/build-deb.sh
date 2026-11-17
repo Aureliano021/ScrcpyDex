@@ -47,12 +47,12 @@ mkdir -p "$PKG_DIR/usr/share/applications"
 mkdir -p "$PKG_DIR/usr/share/icons/hicolor/256x256/apps"
 mkdir -p "$OUTPUT_DIR"
 
-# 2. Stage Server JAR and Helper Scripts
+# 2. Stage Server JAR
 SERVER_JAR=""
-if [ -f "$REPO_ROOT/server/scrcpydex-server.jar" ]; then
-    SERVER_JAR="$REPO_ROOT/server/scrcpydex-server.jar"
-elif [ -f "$REPO_ROOT/publish/scrcpydex-server.jar" ]; then
-    SERVER_JAR="$REPO_ROOT/publish/scrcpydex-server.jar"
+if [ -f "$BASE_DIR/server/scrcpydex-server.jar" ]; then
+    SERVER_JAR="$BASE_DIR/server/scrcpydex-server.jar"
+elif [ -f "$BASE_DIR/publish/scrcpydex-server.jar" ]; then
+    SERVER_JAR="$BASE_DIR/publish/scrcpydex-server.jar"
 fi
 
 if [ -n "$SERVER_JAR" ] && [ -f "$SERVER_JAR" ]; then
@@ -62,16 +62,6 @@ if [ -n "$SERVER_JAR" ] && [ -f "$SERVER_JAR" ]; then
 else
     echo "[ERROR] scrcpydex-server.jar not found." >&2
     exit 1
-fi
-
-if [ -f "$REPO_ROOT/packaging/linux/start-dex.sh" ]; then
-    safe_cp "$REPO_ROOT/packaging/linux/start-dex.sh" "$PKG_DIR/usr/share/scrcpydex/start-dex.sh"
-    chmod 755 "$PKG_DIR/usr/share/scrcpydex/start-dex.sh"
-fi
-
-if [ -f "$REPO_ROOT/packaging/linux/stop-dex.sh" ]; then
-    safe_cp "$REPO_ROOT/packaging/linux/stop-dex.sh" "$PKG_DIR/usr/share/scrcpydex/stop-dex.sh"
-    chmod 755 "$PKG_DIR/usr/share/scrcpydex/stop-dex.sh"
 fi
 
 # 3. Compile or Stage /usr/bin/scrcpydex (GUI App)
@@ -95,13 +85,8 @@ exec /usr/lib/scrcpydex/app/ScrcpyDex.App "$@"
 EOF
     chmod 755 "$PKG_DIR/usr/bin/scrcpydex"
 else
-    echo "[ScrcpyDeX Debian Packaging] Staging launcher script for /usr/bin/scrcpydex..."
-    cat << 'EOF' > "$PKG_DIR/usr/bin/scrcpydex"
-#!/usr/bin/env bash
-set -e
-exec /usr/share/scrcpydex/start-dex.sh "$@"
-EOF
-    chmod 755 "$PKG_DIR/usr/bin/scrcpydex"
+    echo "[ERROR] Neither pre-compiled ScrcpyDex.App nor .NET SDK (dotnet) found." >&2
+    exit 1
 fi
 
 # 4. Compile or Stage /usr/bin/scrcpydex-cli (CLI Utility)
@@ -120,8 +105,16 @@ EOF
 elif [ -f "$CLI_CSPROJ" ] && command -v dotnet >/dev/null 2>&1; then
     echo "[ScrcpyDeX Debian Packaging] Compiling ScrcpyDex.Cli (self-contained linux-x64)..."
     dotnet publish "$CLI_CSPROJ" -c Release -r linux-x64 --self-contained true -o "$PKG_DIR/usr/lib/scrcpydex/cli"
-    CLI_BIN="$(find "$PKG_DIR/usr/lib/scrcpydex/cli" -maxdepth 1 -type f -executable -not -name "*.so" | head -n 1)"
-    CLI_NAME="$(basename "${CLI_BIN:-scrcpy-dex}")"
+    if [ -x "$PKG_DIR/usr/lib/scrcpydex/cli/scrcpy-dex" ]; then
+        CLI_NAME="scrcpy-dex"
+    else
+        CLI_BIN="$(find "$PKG_DIR/usr/lib/scrcpydex/cli" -maxdepth 1 -type f -executable -not -name "*.so" -not -name "*.dll" -not -name "createdump" | head -n 1)"
+        if [ -z "$CLI_BIN" ]; then
+            echo "[ERROR] Compiled CLI executable not found in $PKG_DIR/usr/lib/scrcpydex/cli." >&2
+            exit 1
+        fi
+        CLI_NAME="$(basename "$CLI_BIN")"
+    fi
     cat << EOF > "$PKG_DIR/usr/bin/scrcpydex-cli"
 #!/bin/sh
 exec /usr/lib/scrcpydex/cli/$CLI_NAME "\$@"
@@ -129,38 +122,25 @@ EOF
     chmod 755 "$PKG_DIR/usr/bin/scrcpydex-cli"
     ln -sf "scrcpydex-cli" "$PKG_DIR/usr/bin/scrcpy-dex"
 else
-    echo "[ScrcpyDeX Debian Packaging] Staging CLI wrapper for /usr/bin/scrcpydex-cli..."
-    cat << 'EOF' > "$PKG_DIR/usr/bin/scrcpydex-cli"
-#!/usr/bin/env bash
-set -e
-case "${1:-}" in
-    stop|disconnect|kill)
-        shift
-        exec /usr/share/scrcpydex/stop-dex.sh "$@"
-        ;;
-    *)
-        exec /usr/share/scrcpydex/start-dex.sh "$@"
-        ;;
-esac
-EOF
-    chmod 755 "$PKG_DIR/usr/bin/scrcpydex-cli"
+    echo "[ERROR] Neither pre-compiled ScrcpyDex.Cli nor .NET SDK (dotnet) found." >&2
+    exit 1
 fi
 
 # 5. Stage Udev Rules
-if [ -f "$REPO_ROOT/packaging/linux/51-android.rules" ]; then
-    safe_cp "$REPO_ROOT/packaging/linux/51-android.rules" "$PKG_DIR/lib/udev/rules.d/69-scrcpydex.rules"
+if [ -f "$BASE_DIR/packaging/linux/51-android.rules" ]; then
+    safe_cp "$BASE_DIR/packaging/linux/51-android.rules" "$PKG_DIR/lib/udev/rules.d/69-scrcpydex.rules"
     chmod 644 "$PKG_DIR/lib/udev/rules.d/69-scrcpydex.rules"
 fi
 
 # 6. Stage Desktop Launcher
-if [ -f "$REPO_ROOT/packaging/linux/scrcpydex.desktop" ]; then
-    sed 's|^Exec=.*|Exec=/usr/bin/scrcpydex|' "$REPO_ROOT/packaging/linux/scrcpydex.desktop" > "$PKG_DIR/usr/share/applications/scrcpydex.desktop"
+if [ -f "$BASE_DIR/packaging/linux/scrcpydex.desktop" ]; then
+    sed 's|^Exec=.*|Exec=/usr/bin/scrcpydex|' "$BASE_DIR/packaging/linux/scrcpydex.desktop" > "$PKG_DIR/usr/share/applications/scrcpydex.desktop"
     chmod 644 "$PKG_DIR/usr/share/applications/scrcpydex.desktop"
 fi
 
 # 7. Stage Application Icon
-if [ -f "$REPO_ROOT/assets/app_icon.png" ]; then
-    safe_cp "$REPO_ROOT/assets/app_icon.png" "$PKG_DIR/usr/share/icons/hicolor/256x256/apps/scrcpydex.png"
+if [ -f "$BASE_DIR/assets/app_icon.png" ]; then
+    safe_cp "$BASE_DIR/assets/app_icon.png" "$PKG_DIR/usr/share/icons/hicolor/256x256/apps/scrcpydex.png"
     chmod 644 "$PKG_DIR/usr/share/icons/hicolor/256x256/apps/scrcpydex.png"
 fi
 

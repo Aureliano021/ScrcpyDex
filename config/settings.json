@@ -1,12 +1,13 @@
 {
-  "version": "2.0",
+  "version": "2.1.0",
+  "language": "en",
   "display": {
     "resolution": "1920x1080 (FHD)",
     "width": 1920,
     "height": 1080,
     "dpi": 160,
     "fps": 30,
-    "bitrate": 8000000,
+    "bitrate": 24000000,
     "codec": "h264",
     "windowMode": "normal",
     "renderDriver": "auto"

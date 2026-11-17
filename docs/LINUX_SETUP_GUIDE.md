@@ -1,25 +1,27 @@
 # Linux Setup & Installation Guide for ScrcpyDeX
 
-**Document Version:** 1.0.0  
+**Document Version:** 2.1.0  
 **Target Distributions:** Ubuntu 24.04 LTS (`noble`), Ubuntu 22.04 LTS (`jammy`), Linux Mint 22.x (`Zena`), Linux Mint 21.x  
-**Tested Baseline:** Linux Mint 22.3 (64-bit, Kernel 7.0.0-38-generic, base Ubuntu 24.04 LTS, X11) with Samsung Galaxy S23 (SM-S911B, One UI 8.5 / Android 16)  
+**Tested Baseline:** Ubuntu / Linux Mint (x86_64) with Samsung Galaxy S23  
 
 ---
 
 ## Overview
 
-This guide provides step-by-step instructions for configuring and running **ScrcpyDeX** on Linux desktop distributions. ScrcpyDeX enables rootless, hardware-accelerated Samsung DeX desktop mode over a standard USB cable using upstream `scrcpy` video streaming and Linux kernel `/dev/uhid` input injection.
+This guide provides step-by-step instructions for configuring and running **ScrcpyDeX** on Linux desktop distributions. ScrcpyDeX enables rootless, hardware-accelerated Samsung DeX desktop mode over a standard **USB cable** or **Wi-Fi** (Android 11+ Wireless Debugging QR Code pairing or one-click USB-to-Wi-Fi transition) using upstream `scrcpy` video streaming and Linux kernel `/dev/uhid` input injection.
+
+Non-DeX Android devices automatically fall back to standard **Screen Mirroring** (primary Display `0`).
 
 ```mermaid
 flowchart LR
     subgraph HostLinux ["Linux Host (Ubuntu / Linux Mint)"]
-        CLIENT["ScrcpyDeX Client\n(CLI: scrcpydex / GUI: ScrcpyDex.App)"]
+        CLIENT["ScrcpyDeX Client\n(CLI: scrcpy-dex / GUI: ScrcpyDex.App)"]
         SCRCPY["Official scrcpy (>= 2.4)\nHardware VA-API Video Decoder"]
         VAAPI["VA-API Driver\n(i965 / iHD / radeonsi)"]
         CLIENT --> SCRCPY --> VAAPI
     end
 
-    subgraph USBTransport ["USB Connection (ADB Transport)"]
+    subgraph ADBTransport ["USB or Wi-Fi Connection (ADB Transport)"]
         ADB["ADB Host Server (TCP 5037)\n/etc/udev/rules.d/51-android.rules"]
     end
 
@@ -30,7 +32,7 @@ flowchart LR
         SERVER --> SYSTEM_SERVER --> UHID
     end
 
-    HostLinux <--> USBTransport <--> TargetDevice
+    HostLinux <--> ADBTransport <--> TargetDevice
 ```
 
 ---
@@ -48,7 +50,7 @@ This single command automatically:
 1. Installs ADB and VA-API video decoding drivers (`mesa-va-drivers`, `intel-media-va-driver`).
 2. Configures Samsung udev rules (`/etc/udev/rules.d/51-android.rules`) and adds your user to the `plugdev` group.
 3. Downloads and configures upstream `scrcpy >= 2.4` directly if an incompatible distro package is detected.
-4. Verifies the .NET 8 runtime and tests device connectivity.
+4. Verifies the .NET 8 runtime/SDK and tests device connectivity.
 
 Once finished, launch ScrcpyDeX with:
 ```bash
@@ -61,8 +63,8 @@ Once finished, launch ScrcpyDeX with:
 
 ### 1.1 Hardware and System Requirements
 
-* **Samsung Galaxy Device:** A device with native Samsung DeX support (Galaxy S-series, Note-series, Z Fold, or Tab S-series). Verified baseline: Samsung Galaxy S23 (`SM-S911B`) running One UI 8.5 (Android 16).
-* **USB Cable:** Standard high-speed USB-C to USB-A or USB-C to USB-C data cable.
+* **Samsung Galaxy Device:** A device with native Samsung DeX support (Galaxy S-series, Note-series, Z Fold, or Tab S-series). Non-DeX Android devices automatically use Screen Mirroring.
+* **Connection:** Standard USB data cable (with **USB debugging** enabled) or local Wi-Fi network (with **Wireless debugging** enabled for QR Code pairing).
 * **Host Operating System:** Ubuntu 24.04 LTS, Ubuntu 22.04 LTS, Linux Mint 22.x, or Linux Mint 21.x (x86_64).
 * **Architecture:** 64-bit x86_64 (`linux-x64`). 32-bit x86 Linux is unsupported.
 
@@ -77,11 +79,11 @@ The standard Ubuntu 24.04 (`noble`) package repository provides `scrcpy` version
 | Native Audio Forwarding | **v2.0** | Absent | Audio forwarding fails without external helper utilities. |
 
 > [!IMPORTANT]
-> You must install **official scrcpy >= 2.4**. ScrcpyDeX validates the runtime version of `scrcpy` and will exit with an error if version 1.25 or any version prior to 2.4 is detected.
+> You must install **official scrcpy >= 2.4**. ScrcpyDeX validates the runtime version of `scrcpy` and will report an error if version 1.25 or any version prior to 2.4 is detected.
 
 ### 1.3 Installing Android Debug Bridge (ADB)
 
-Install the ADB client and fastboot packages from the official repositories:
+Install the ADB client from the official repositories:
 
 ```bash
 sudo apt update
@@ -204,7 +206,7 @@ sudo udevadm trigger
 1. On your Samsung Galaxy device:
    - Navigate to **Settings** > **About phone** > **Software information**.
    - Tap **Build number** 7 times to enable **Developer options**.
-   - Navigate to **Settings** > **Developer options** and enable **USB debugging**.
+   - Navigate to **Settings** > **Developer options** and enable **USB debugging** (and/or **Wireless debugging** for QR Code pairing).
 2. Connect your phone to your host PC via USB.
 3. Restart the ADB server and list connected devices:
    ```bash
@@ -228,7 +230,7 @@ sudo udevadm trigger
 
 ## Section 3: Hardware Video Decoding Setup (VA-API)
 
-Samsung DeX outputs a 1080p60 H.264 video stream. Hardware-accelerated video decoding offloads frame parsing to the host GPU, reducing CPU consumption from >80% to <5% on multi-core processors.
+Samsung DeX outputs a 1080p H.264/H.265 video stream. Hardware-accelerated video decoding offloads frame parsing to the host GPU, reducing CPU consumption significantly on multi-core processors.
 
 On Linux, hardware decoding is provided via the Video Acceleration API (**VA-API**).
 
@@ -266,19 +268,6 @@ Run `vainfo` to query driver capabilities:
 vainfo
 ```
 
-Example verified output on Intel hardware:
-
-```text
-vainfo: VA-API version: 1.20 (libva 2.20.0)
-vainfo: Driver version: Intel i965 driver for Intel(R) Sandybridge Desktop - 2.4.1
-vainfo: Supported profile and entrypoints:
-      VAProfileMPEG2Simple            : VAEntrypointVLD
-      VAProfileMPEG2Main              : VAEntrypointVLD
-      VAProfileH264ConstrainedBaseline: VAEntrypointVLD
-      VAProfileH264Main               : VAEntrypointVLD
-      VAProfileH264High               : VAEntrypointVLD
-```
-
 Confirm that the output lists **`VAProfileH264Main`** or **`VAProfileH264High`** with entrypoint **`VAEntrypointVLD`** (Variable Length Decoding = hardware decode).
 
 ### 3.3 Driver Selection & Environment Variables
@@ -302,79 +291,61 @@ You can persist this variable in `~/.bashrc` or `~/.profile` if needed.
 
 | GPU Architecture | H.264 (AVC) Hardware Decode | HEVC (H.265) Hardware Decode | Recommended ScrcpyDeX Setting |
 |---|---|---|---|
-| **Intel Sandy Bridge / Ivy Bridge (2011–2012)** | Supported (`VAProfileH264High`) | **Unsupported** | `--video-codec=h264` |
-| **Intel Haswell / Broadwell (2013–2015)** | Supported | Partial (8-bit hybrid on Broadwell) | `--video-codec=h264` |
-| **Intel Skylake (2015) and newer** | Supported | Supported (8-bit/10-bit) | `--video-codec=h264` or `h265` |
-| **AMD Radeon GCN 1.2 / RDNA (2015+)** | Supported | Supported | `--video-codec=h264` or `h265` |
+| **Intel Sandy Bridge / Ivy Bridge (2011–2012)** | Supported (`VAProfileH264High`) | **Unsupported** | `--codec h264` |
+| **Intel Haswell / Broadwell (2013–2015)** | Supported | Partial (8-bit hybrid on Broadwell) | `--codec h264` |
+| **Intel Skylake (2015) and newer** | Supported | Supported (8-bit/10-bit) | `--codec h264` or `h265` |
+| **AMD Radeon GCN 1.2 / RDNA (2015+)** | Supported | Supported | `--codec h264` or `h265` |
 
 > [!WARNING]
-> On older hardware lacking HEVC decoding silicon (e.g. Intel Sandy Bridge), selecting `--video-codec=h265` causes FFmpeg to fall back to software CPU decode, which can elevate CPU load to 85–95% and cause dropped frames. The default configuration in `ScrcpyDex.Core` is `--video-codec=h264`.
+> On older hardware lacking HEVC decoding silicon (e.g. Intel Sandy Bridge), selecting `--codec h265` causes FFmpeg to fall back to software CPU decode, which can elevate CPU load and cause dropped frames.
 
 ---
 
-## Section 4: Running ScrcpyDeX CLI (`scrcpydex`)
+## Section 4: Running ScrcpyDeX CLI (`scrcpy-dex`)
 
-The ScrcpyDeX CLI (`scrcpydex` / `ScrcpyDex.Cli`) provides a lightweight, scriptable command-line interface for managing DeX sessions without launching a graphical window manager or desktop shell.
+The ScrcpyDeX CLI (`scrcpy-dex` / `ScrcpyDex.Cli`) provides a lightweight, scriptable command-line interface for managing DeX and screen mirroring sessions without launching a graphical window manager. If running from source, replace `scrcpy-dex` with `./scripts/run-linux.sh --cli`.
 
 ### 4.1 System Environment Diagnostics (`doctor`)
 
-Run `scrcpydex doctor` to verify that all system dependencies, device permissions, and video acceleration drivers meet project requirements:
+Run `scrcpy-dex doctor` to verify that all system dependencies, device permissions, and video acceleration drivers meet project requirements:
 
 ```bash
-scrcpydex doctor
-```
-
-Example output:
-
-```text
-ScrcpyDeX System Diagnostic Report:
-[OK] Operating System: Linux Mint 22.3 (Linux 6.8.0-generic x86_64)
-[OK] Android Debug Bridge: /usr/bin/adb (version 1.0.41)
-[OK] scrcpy Binary: /usr/local/bin/scrcpy (version 3.1 >= 2.4.0)
-[OK] USB udev Configuration: /etc/udev/rules.d/51-android.rules present
-[OK] User Group Membership: <username> in plugdev
-[OK] Video Acceleration API: VA-API 1.20 initialized (driver: i965)
-[OK] H.264 VA-API Hardware Decode: Supported (VAProfileH264High / VAEntrypointVLD)
-[OK] Connected Devices: 1 authorized device (<DEVICE_SERIAL>)
+scrcpy-dex doctor
 ```
 
 ### 4.2 Listing Connected Devices (`devices`)
 
-Enumerate connected Android devices and inspect their status:
+Enumerate connected Android devices and inspect their status and capability tier (`SamsungDeX`, `SamsungMirrorOnly`, `GenericMirrorOnly`):
 
 ```bash
-scrcpydex devices
+scrcpy-dex devices
 ```
 
-Output format:
-```text
-Serial               Model           State        DeX Capable
-----------------------------------------------------------------
-<DEVICE_SERIAL>      SM-S911B        device       Yes (One UI 8.5)
-```
+### 4.3 Starting a Session (`start`)
 
-### 4.3 Starting a DeX Session (`start`)
-
-To deploy the server daemon, activate the loopback virtual display, and launch `scrcpy`:
+To deploy the server daemon (on `SamsungDeX` devices), activate the loopback virtual display, and launch `scrcpy`:
 
 ```bash
-scrcpydex start
+scrcpy-dex start
 ```
 
 #### Common Command-Line Flags:
 
-* `--serial <SERIAL>`: Target a specific device if multiple phones are connected.
-* `--bitrate <bps>`: Video streaming bitrate in bits per second (default: `8000000` / 8 Mbps).
-* `--max-fps <fps>`: Maximum streaming frame rate (default: `60`).
-* `--max-size <pixels>`: Maximum dimension in pixels (default: `1920`).
-* `--codec <h264|h265>`: Video compression codec (default: `h264`).
+* `-s`, `--serial <SERIAL>`: Target a specific device if multiple phones are connected.
+* `--bitrate <bps>`: Video streaming bitrate (`8M`, `16M`, `24M`, or raw bps; default: `8000000`).
+* `--fps` / `--max-fps <fps>`: Maximum streaming frame rate (default: `30`).
+* `--resolution` / `--max-size <value>`: Display resolution (e.g., `1920x1080`, `native`) or max dimension.
+* `--dpi <dpi>`: Virtual DeX display density in DPI (default: `160`).
+* `--codec <h264|h265|av1>`: Video compression codec (default: `h264`).
+* `--mouse <uhid|sdk|aoa|disabled>`: Mouse input driver (default: `uhid`).
+* `--render-driver <auto|opengl|software>`: SDL render driver override.
 * `--no-audio`: Disable audio forwarding over ADB.
 * `--fullscreen`: Launch `scrcpy` directly in fullscreen mode.
 
 Example with custom parameters:
 
 ```bash
-scrcpydex start --bitrate 12000000 --max-fps 60 --max-size 1920
+scrcpy-dex start --bitrate 24M --fps 60 --resolution 1920x1080
 ```
 
 ### 4.4 Stopping an Active Session (`stop`)
@@ -382,58 +353,67 @@ scrcpydex start --bitrate 12000000 --max-fps 60 --max-size 1920
 To terminate an active session, release the virtual display on the phone, and restore the mobile screen state:
 
 ```bash
-scrcpydex stop
+scrcpy-dex stop
 ```
 
 You can also specify a device serial if managing multiple endpoints:
 
 ```bash
-scrcpydex stop --serial <DEVICE_SERIAL>
+scrcpy-dex stop --serial <DEVICE_SERIAL>
 ```
 
 ### 4.5 Inspecting and Modifying Settings (`config`)
 
-ScrcpyDeX settings are persisted in `~/.config/scrcpydex/settings.json`:
+ScrcpyDeX settings are persisted in `~/.config/scrcpydex/settings.json` (or `$XDG_CONFIG_HOME/scrcpydex/settings.json`):
 
 ```bash
-# Print current active configuration
-scrcpydex config get
+# Print full active configuration
+scrcpy-dex config list
 
-# Set specific configuration property
-scrcpydex config set video.bitrate 8000000
-scrcpydex config set video.maxFps 60
+# Get a specific configuration property
+scrcpy-dex config get display.bitrate
+
+# Set specific configuration properties
+scrcpy-dex config set display.bitrate 24000000
+scrcpy-dex config set display.fps 60
 
 # Print file system path of configuration file
-scrcpydex config path
+scrcpy-dex config path
 ```
 
 ---
 
-## Section 5: Running ScrcpyDeX Graphical Client
+## Section 5: Running ScrcpyDeX Graphical Client (`ScrcpyDex.App`)
 
 For users who prefer a graphical desktop interface, ScrcpyDeX provides `ScrcpyDex.App`, an Avalonia UI-based cross-platform client for Linux and Windows.
 
 ### 5.1 Launching the GUI Application
 
-From the command line:
+From an extracted release or local build:
 
 ```bash
 ./ScrcpyDex.App
 ```
 
-Or execute via the desktop entry:
+Or if installed via `.deb` package:
 
 ```bash
-scrcpydex-gui
+scrcpydex
+```
+
+Or from source via the repository helper script:
+
+```bash
+./scripts/run-linux.sh
 ```
 
 ### 5.2 Desktop Application Features
 
-* **Device Selector:** Automatically detects USB hotplug events and populates authorized Samsung Galaxy devices.
-* **Connection Health Indicator:** Displays real-time device connection state and DeX readiness.
-* **Session Configuration:** Inline dropdowns to adjust video resolution, frame rate (30 / 60 FPS), bitrate (4 Mbps to 16 Mbps), and audio forwarding.
-* **Lifecycle Controls:** One-click **Start DeX Session** and **Stop DeX Session** actions.
-* **Telemetry and Logs:** Embedded console pane providing real-time log messages from `scrcpy` and `scrcpydex-server`.
+* **USB & Wi-Fi Connection:** Automatically detects USB hotplug events via ADB, displays an in-app **QR Code** for Android 11+ Wireless Debugging pairing when idle, and supports one-click USB-to-Wi-Fi transition.
+* **Dual-Mode Adaptation:** Starts Samsung DeX on supported Galaxy devices and automatically adapts to Screen Mirroring on non-DeX devices.
+* **Real-Time Telemetry:** Displays battery level, device temperature, link status, and latency.
+* **In-App Settings & Localization:** Configure resolution (including custom dimensions), DPI, FPS, bitrate, video codec (`H.264` / `H.265` / `AV1`), render driver, audio/input options, custom binary paths, and instant switching across 6 languages.
+* **Dedicated Console & FAQ Diagnostics:** Open the real-time diagnostic `Console` window or run `Check Env` inside the built-in FAQ & Diagnostics view.
 
 ---
 
@@ -441,8 +421,7 @@ scrcpydex-gui
 
 ### 6.1 X11 (Tested Baseline)
 
-* **Status:** Tested and verified on Linux Mint Cinnamon (`X.Org 1.21.1`) and Ubuntu GNOME on Xorg (`DISPLAY=:0`).
-* **Video Rendering:** `scrcpy` uses the SDL OpenGL 3.3 backend (`--render-driver=opengl`), providing stable frame pacing and low latency.
+* **Video Rendering:** `scrcpy` uses the SDL OpenGL backend (`--render-driver=opengl`), providing stable frame pacing and low latency.
 * **Mouse Integration:** Linux kernel `/dev/uhid` pointer events translate accurately across the X11 root window.
 * **Pointer Release:** Pressing **`Left Alt`** releases mouse capture back to the host window manager.
 
@@ -464,18 +443,24 @@ scrcpydex-gui
 | `adb devices` reports `no permissions` | Missing or incorrect udev rules, or user not in `plugdev` group. | Check `/etc/udev/rules.d/51-android.rules`, run `sudo usermod -aG plugdev $USER`, and reload udev rules. |
 | `adb devices` reports `unauthorized` | Host RSA fingerprint not accepted on device. | Unlock phone and accept the **"Allow USB debugging?"** prompt. |
 | `scrcpy: error: unrecognized option '--mouse=uhid'` | Obsolete distro `apt` version of `scrcpy` (1.25) is being executed. | Check `which scrcpy` and install official `scrcpy >= 2.4` from upstream. |
-| `DEX_ACTIVATED_DISPLAY_ID not found` | Loopback handshake timed out or DeX mode unavailable. | Ensure device firmware supports DeX; run `scrcpydex stop` and retry. |
+| `DEX_ACTIVATED_DISPLAY_ID not found` | Loopback handshake timed out or DeX mode unavailable. | Ensure device firmware supports DeX; run `scrcpy-dex stop` and retry. |
 | `vaInitialize failed` in logs | VA-API driver missing or misconfigured. | Run `vainfo`, install `i965-va-driver` or `intel-media-va-driver`, and verify `LIBVA_DRIVER_NAME`. |
-| Elevated CPU usage (>80%) | Fallback to software decoding. | Verify VA-API support with `vainfo`. On older GPUs, ensure `--video-codec=h264` is configured. |
+| Elevated CPU usage (>80%) | Fallback to software decoding. | Verify VA-API support with `vainfo`. On older GPUs, ensure `--codec h264` is configured. |
 | Audio does not play on host | SDL audio backend unable to connect to sound server. | Ensure PipeWire or PulseAudio is active; check `systemctl --user status pipewire`. |
 | Pointer trapped inside window | Capture lock active in `scrcpy`. | Press `Left Alt` to release pointer capture. |
 
-### Emergency Disconnect Script
+### Emergency Disconnect via CLI
 
-If a session terminates unexpectedly or the device display does not restore automatically, execute the standalone emergency reset script:
+If a session terminates unexpectedly or the device display does not restore automatically, execute:
 
 ```bash
-./packaging/linux/stop-dex.sh
+scrcpy-dex stop
 ```
 
-This script terminates remaining host `scrcpy` and server processes, sends the `disconnect` command to `com.scrcpydex.server.Server`, removes ADB port forwards, and dispatches broadcast intents (`ACTION_STOP_DESKTOP_MODE`) to restore the mobile display.
+Or when running from the source repository:
+
+```bash
+./scripts/run-linux.sh --cli stop
+```
+
+This sends the `disconnect` command to `com.scrcpydex.server.Server`, dispatches broadcast intents (`ACTION_STOP_DESKTOP_MODE`) to restore the mobile display, and cleans up ScrcpyDeX processes.
